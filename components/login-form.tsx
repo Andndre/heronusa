@@ -26,6 +26,7 @@ import z from "zod";
 import { useState } from "react";
 import { Loader } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
+import { redirect } from "next/navigation";
 
 const formSchema = z.object({
   email: z.email(),
@@ -59,6 +60,8 @@ export function LoginForm({
         type: "server",
         message: result.error.message,
       });
+    } else {
+      redirect("/dashboard");
     }
 
     setLoading(false);
