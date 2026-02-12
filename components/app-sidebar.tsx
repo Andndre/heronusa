@@ -14,6 +14,7 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar";
 import { Home, Settings, Users } from "lucide-react";
+import Image from "next/image";
 import { ReactNode } from "react";
 
 interface AppSidebarProps {
@@ -42,11 +43,14 @@ function AppSidebarContent() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
-            H
-          </div>
-          <span className="font-semibold">HeroUSA</span>
+        <div className="flex items-center justify-center gap-2 px-2 py-2">
+          <Image
+            src="/images/logo.webp"
+            alt="Heronusa Logo"
+            width={200}
+            height={63}
+            className="h-12 w-auto"
+          />
         </div>
       </SidebarHeader>
       <SidebarContent>
