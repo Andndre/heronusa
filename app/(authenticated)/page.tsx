@@ -1,14 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { signOut } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
   const router = useRouter();
 
   const onClick = async () => {
-    await signOut();
+    await authClient.signOut();
     router.push("/login");
   };
   return (

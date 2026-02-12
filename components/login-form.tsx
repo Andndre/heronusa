@@ -18,7 +18,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { signIn } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Loader } from "lucide-react";
@@ -55,7 +55,7 @@ export function LoginForm({
     setServerError(null);
 
     try {
-      const result = await signIn.email({
+      const result = await authClient.signIn.email({
         email: data.email,
         password: data.password,
       });
