@@ -13,7 +13,15 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { Home, Settings, Users } from "lucide-react";
+import {
+  CreditCard,
+  FileCheck,
+  FileText,
+  Home,
+  Package,
+  Truck,
+  Users,
+} from "lucide-react";
 import Image from "next/image";
 import { ReactNode } from "react";
 
@@ -24,19 +32,39 @@ interface AppSidebarProps {
 function AppSidebarContent() {
   const items = [
     {
-      title: "Home",
+      title: "Dashboard",
       url: "/",
       icon: Home,
     },
     {
-      title: "Users",
-      url: "/users",
+      title: "Manajemen Prospek",
+      url: "/prospek",
       icon: Users,
     },
     {
-      title: "Settings",
-      url: "/settings",
-      icon: Settings,
+      title: "SPK & Diskon",
+      url: "/spk",
+      icon: FileText,
+    },
+    {
+      title: "Pembayaran & Leasing",
+      url: "/payment",
+      icon: CreditCard,
+    },
+    {
+      title: "Surat Jalan",
+      url: "/surat-jalan",
+      icon: Truck,
+    },
+    {
+      title: "Dokumen Kendaraan",
+      url: "/dokumen-kendaraan",
+      icon: FileCheck,
+    },
+    {
+      title: "Inventori",
+      url: "/inventori",
+      icon: Package,
     },
   ];
 
