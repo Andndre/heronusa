@@ -24,8 +24,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import { useState } from "react";
-import { Loader } from "lucide-react";
+import { Loader, AlertCircle } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { redirect } from "next/navigation";
 
 const formSchema = z.object({
@@ -38,6 +39,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -49,22 +51,26 @@ export function LoginForm({
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setLoading(true);
+    setServerError(null);
 
-    const result = await signIn.email({
-      email: data.email,
-      password: data.password,
-    });
-
-    if (result.error) {
-      form.setError("password", {
-        type: "server",
-        message: result.error.message,
+    try {
+      const result = await signIn.email({
+        email: data.email,
+        password: data.password,
       });
-    } else {
-      redirect("/dashboard");
-    }
 
-    setLoading(false);
+      if (result.error) {
+        form.setError("email", result.error);
+      } else {
+        redirect("/");
+      }
+    } catch (error) {
+      setServerError(
+        error instanceof Error ? error.message : "An error occurred",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,6 +83,13 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {serverError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{serverError}</AlertDescription>
+            </Alert>
+          )}
           <form id="login-form" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>

@@ -7,9 +7,18 @@ export async function proxy(request: NextRequest) {
     headers: await headers(),
   });
 
+  const publicRoutes = ["/login", "/forgot-password", "/api/auth"];
+
+  const isLoggedIn = !!session;
+
+  // Allow public routes
+  if (publicRoutes.some((route) => new URL(request.url).pathname.startsWith(route))) {
+    return NextResponse.next();
+  }
+
   // This is the recommended approach to optimistically redirect users
   // We recommend handling auth checks in each page/route
-  if (!session) {
+  if (!isLoggedIn) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -17,5 +26,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard"],
+  matcher: [
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+  ],
 };

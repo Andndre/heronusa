@@ -11,7 +11,7 @@ export default async function LoginPage() {
   });
 
   if (session) {
-    return redirect("/dashboard");
+    return redirect("/");
   }
 
   return (
