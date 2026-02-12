@@ -1,0 +1,101 @@
+"use client";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
+import { Home, Settings, Users } from "lucide-react";
+import { ReactNode } from "react";
+
+interface AppSidebarProps {
+  children: ReactNode;
+}
+
+function AppSidebarContent() {
+  const items = [
+    {
+      title: "Home",
+      url: "/",
+      icon: Home,
+    },
+    {
+      title: "Users",
+      url: "/users",
+      icon: Users,
+    },
+    {
+      title: "Settings",
+      url: "/settings",
+      icon: Settings,
+    },
+  ];
+
+  return (
+    <Sidebar>
+      <SidebarHeader>
+        <div className="flex items-center gap-2 px-2 py-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
+            H
+          </div>
+          <span className="font-semibold">HeroUSA</span>
+        </div>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton>
+              <div className="flex size-8 items-center justify-center rounded-full bg-muted">
+                <span className="text-xs font-medium">U</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">User</span>
+                <span className="text-xs text-muted-foreground">
+                  user@example.com
+                </span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
+
+export function AppSidebar({ children }: AppSidebarProps) {
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-svh w-full">
+        <AppSidebarContent />
+        {children}
+      </div>
+    </SidebarProvider>
+  );
+}
