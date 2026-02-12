@@ -27,7 +27,7 @@ import { useState } from "react";
 import { Loader, AlertCircle } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.email(),
@@ -38,6 +38,8 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const router = useRouter();
+
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -62,7 +64,7 @@ export function LoginForm({
       if (result.error) {
         form.setError("email", result.error);
       } else {
-        redirect("/");
+        router.push("/");
       }
     } catch (error) {
       setServerError(

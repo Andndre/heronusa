@@ -2,12 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth-client";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
+  const router = useRouter();
+
   const onClick = async () => {
     await signOut();
-    redirect("/login");
+    router.push("/login");
   };
   return (
     <div>
