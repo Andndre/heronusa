@@ -13,6 +13,7 @@ import {
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -24,6 +25,7 @@ import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import { useState } from "react";
 import { Loader } from "lucide-react";
+import { signIn } from "@/lib/auth-client";
 
 const formSchema = z.object({
   email: z.email(),
@@ -46,9 +48,18 @@ export function LoginForm({
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setLoading(true);
-    console.log(data);
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const result = await signIn.email({
+      email: data.email,
+      password: data.password,
+    });
+
+    if (result.error) {
+      form.setError("password", {
+        type: "server",
+        message: result.error.message,
+      });
+    }
 
     setLoading(false);
   };
@@ -92,8 +103,12 @@ export function LoginForm({
                         type="email"
                         placeholder="m@example.com"
                         required
+                        aria-invalid={fieldState.invalid}
                         {...field}
                       />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
                     </Field>
                   )}
                 />
@@ -108,8 +123,12 @@ export function LoginForm({
                         type="password"
                         placeholder="********"
                         required
+                        aria-invalid={fieldState.invalid}
                         {...field}
                       />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
                     </Field>
                   )}
                 />
