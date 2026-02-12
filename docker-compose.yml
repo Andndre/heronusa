@@ -1,7 +1,7 @@
 # Docker Compose for MySQL Database
 # Run: docker-compose up -d
 
-version: '3.8'
+version: "3.8"
 
 services:
   mysql:
@@ -13,36 +13,42 @@ services:
       MYSQL_DATABASE: u469241017_heronusa
       MYSQL_USER: heronusa
       MYSQL_PASSWORD: dbheronusa45A
+    healthcheck:
+      # Gunakan password 'rootpassword' sesuai env di atas
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-prootpassword",
+        ]
+
     ports:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       # Optionally mount init SQL scripts
       # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    networks:
-      - heronusa-network
-
-  # Optional: phpMyAdmin for database management
-  phpmyadmin:
-    image: phpmyadmin:latest
-    container_name: heronusa-phpmyadmin
-    restart: unless-stopped
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_USER: root
-      PMA_PASSWORD: rootpassword
-      UPLOAD_LIMIT: 100M
-    ports:
-      - "8080:80"
-    depends_on:
-      - mysql
+    # healthcheck:
+    #   test:
+    #     [
+    #       "CMD",
+    #       "mysqladmin",
+    #       "ping",
+    #       "-h",
+    #       "localhost",
+    #       "-u",
+    #       "root",
+    #       "-prootpassword",
+    #     ]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+    #   start_period: 30s
     networks:
       - heronusa-network
 
