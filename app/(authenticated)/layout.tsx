@@ -13,13 +13,14 @@ export default async function AuthenticatedLayout({
     headers: await headers(),
   });
 
-  const user = {
-    name: session?.user?.name || "User",
-    email: session?.user?.email || "user@example.com",
-  };
+  const user = session?.user;
+
+  if (!user) {
+    throw new Error("User not found in session");
+  }
 
   return (
-    <AppSidebar>
+    <AppSidebar user={user}>
       <SidebarInset>
         <AppNavbar user={user} />
         <main className="flex-1 overflow-y-auto bg-background p-6">

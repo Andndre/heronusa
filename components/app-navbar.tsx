@@ -10,21 +10,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { signOut } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { User } from "better-auth";
 
 interface AppNavbarProps {
-  user: {
-    name: string;
-    email: string;
-  };
+  user: User;
 }
 
 export function AppNavbar({ user }: AppNavbarProps) {
   const router = useRouter();
 
   const handleLogout = async () => {
-    await signOut();
+    await authClient.signOut();
     router.push("/login");
   };
 
@@ -63,9 +61,7 @@ export function AppNavbar({ user }: AppNavbarProps) {
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
-              Log out
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

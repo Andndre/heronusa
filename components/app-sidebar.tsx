@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
+import { User } from "better-auth";
 import {
   CreditCard,
   FileCheck,
@@ -27,9 +28,14 @@ import { ReactNode } from "react";
 
 interface AppSidebarProps {
   children: ReactNode;
+  user: User;
 }
 
-function AppSidebarContent() {
+interface AppSidebarContentProps {
+  user: User;
+}
+
+function AppSidebarContent({ user }: AppSidebarContentProps) {
   const items = [
     {
       title: "Dashboard",
@@ -78,6 +84,7 @@ function AppSidebarContent() {
             width={200}
             height={63}
             className="h-12 w-auto"
+            loading="eager"
           />
         </div>
       </SidebarHeader>
@@ -108,9 +115,9 @@ function AppSidebarContent() {
                 <span className="text-xs font-medium">U</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">User</span>
+                <span className="text-sm font-medium">{user.name}</span>
                 <span className="text-xs text-muted-foreground">
-                  user@example.com
+                  {user.email}
                 </span>
               </div>
             </SidebarMenuButton>
@@ -121,11 +128,11 @@ function AppSidebarContent() {
   );
 }
 
-export function AppSidebar({ children }: AppSidebarProps) {
+export function AppSidebar({ children, user }: AppSidebarProps) {
   return (
     <SidebarProvider>
       <div className="flex min-h-svh w-full">
-        <AppSidebarContent />
+        <AppSidebarContent user={user} />
         {children}
       </div>
     </SidebarProvider>
