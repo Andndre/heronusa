@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,15 +18,15 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
+import { signIn } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, Loader } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
-import { useState } from "react";
-import { Loader, AlertCircle } from "lucide-react";
-import { signIn } from "@/lib/auth-client";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
-import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.email(),
