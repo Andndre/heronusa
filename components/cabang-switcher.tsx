@@ -10,18 +10,21 @@ import {
 } from "@/components/ui/select";
 import { authClient } from "@/lib/auth-client";
 import { Organization } from "@/lib/generated/prisma/browser";
+import { useRouter } from "next/navigation";
 
 interface CabangSwitcherProps {
   organizations: Organization[];
 }
 
 export function CabangSwitcher({ organizations }: CabangSwitcherProps) {
+  const router = useRouter();
   const { data: activeOrganization } = authClient.useActiveOrganization();
 
   const handleChangeCabang = async (organizationId: string) => {
     await authClient.organization.setActive({
       organizationId,
     });
+    router.refresh();
   };
 
   return (

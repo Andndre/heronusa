@@ -42,12 +42,14 @@ export async function getDropdownData() {
 }
 
 export async function getProspekData() {
-  const { currentUser, session } = await getCurrentUser();
-  // TODO: Add authorization & filter based on active Cabang
+  const { session } = await getCurrentUser();
+  const activeOrganizationId = session?.activeOrganizationId;
+
+  // TODO: Add authorization
   const prospek = await prisma.prospek.findMany({
     where: {
       deletedAt: null,
-      // Filter by user's active organization
+      cabangId: activeOrganizationId ?? undefined,
     },
     include: {
       cabang: true,
