@@ -7,8 +7,10 @@ export default async function ProspekPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Manajemen Prospek</h1>
-        <p>Kelola prospek penjualan dan aktivitas tindak lanjut</p>
+        <h1 className="text-3xl font-bold mb-1">Manajemen Prospek</h1>
+        <p className="text-gray-500">
+          Kelola prospek penjualan dan aktivitas tindak lanjut
+        </p>
       </div>
       <div>
         <DataTable columns={columns} data={data} />

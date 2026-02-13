@@ -112,21 +112,15 @@ function AppSidebarContent({ user }: AppSidebarContentProps) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton>
-              <div className="flex size-8 items-center justify-center rounded-full bg-muted">
-                <span className="text-xs font-medium">U</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">{user.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {user.email}
-                </span>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="flex items-center gap-2">
+          <div className="flex size-8 items-center justify-center rounded-full bg-muted">
+            <span className="text-xs font-medium">U</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">{user.name}</span>
+            <span className="text-xs text-muted-foreground">{user.email}</span>
+          </div>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

@@ -26,7 +26,8 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Search } from "lucide-react";
+import { PlusIcon, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -59,7 +60,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center pb-4">
+      <div className="flex items-center pb-4 gap-3">
         <InputGroup className="max-w-sm">
           <InputGroupAddon>
             <Search />
@@ -77,6 +78,9 @@ export function DataTable<TData, TValue>({
             }
           />
         </InputGroup>
+        <Button variant={"outline"}>
+          <PlusIcon /> Tambah
+        </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
