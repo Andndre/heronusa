@@ -1,9 +1,18 @@
-import { GalleryVerticalEnd } from "lucide-react";
+import { GalleryVerticalEnd, Loader } from "lucide-react";
 
 import { LoginForm } from "@/components/forms/login-form";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default async function LoginPage() {
   const session = await auth.api.getSession({
@@ -23,7 +32,17 @@ export default async function LoginPage() {
           </div>
           Dashboard
         </a>
-        <LoginForm />
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle className="text-xl">Selamat Datang Kembali</CardTitle>
+              <CardDescription>Login dengan akun Google Anda</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LoginForm />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
