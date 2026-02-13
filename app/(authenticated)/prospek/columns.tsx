@@ -10,10 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { createSortableHeader } from "@/components/table-header-sorted";
 import { StatusProspek } from "@/lib/generated/prisma/enums";
 import { Prospek } from "@/server/prospek";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -21,34 +22,26 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 export const columns: ColumnDef<Prospek>[] = [
   {
     accessorKey: "nama_konsumen",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Nama
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: createSortableHeader<Prospek>("Nama"),
   },
   {
     id: "hp1",
-    header: "Nomor HP",
+    header: createSortableHeader<Prospek>("No. HP"),
     accessorFn: (row) => `${row.hp1}${row.hp2 ? ", " + row.hp2 : ""}`,
   },
   {
+    id: "kelurahan",
     accessorFn: (row) => row.kelurahan.nama_kelurahan,
-    header: "Kelurahan",
+    header: createSortableHeader<Prospek>("Kelurahan"),
   },
   {
+    id: "model",
     accessorFn: (row) => row.model.nama_model,
-    header: "Model",
+    header: createSortableHeader<Prospek>("Model"),
   },
   {
     id: "status",
-    header: "Status",
+    header: createSortableHeader<Prospek>("Status"),
     cell: ({ row }) => {
       const status = row.original.status as StatusProspek;
       return (
@@ -60,7 +53,7 @@ export const columns: ColumnDef<Prospek>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: "Tanggal Dibuat",
+    header: createSortableHeader<Prospek>("Tanggal Dibuat"),
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       return date.toLocaleDateString();
