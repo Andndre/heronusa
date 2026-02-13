@@ -1,4 +1,4 @@
-import { GalleryVerticalEnd, Loader } from "lucide-react";
+import { GalleryVerticalEnd } from "lucide-react";
 
 import { LoginForm } from "@/components/forms/login-form";
 import { auth } from "@/lib/auth";
@@ -8,11 +8,9 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export default async function LoginPage() {
   const session = await auth.api.getSession({

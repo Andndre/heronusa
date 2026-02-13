@@ -13,12 +13,15 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { User } from "better-auth";
+import { CabangSwitcher } from "./cabang-switcher";
+import { Organization } from "@/lib/generated/prisma/browser";
 
 interface AppNavbarProps {
   user: User;
+  organizations: Organization[];
 }
 
-export function AppNavbar({ user }: AppNavbarProps) {
+export function AppNavbar({ user, organizations }: AppNavbarProps) {
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -38,17 +41,15 @@ export function AppNavbar({ user }: AppNavbarProps) {
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6">
       <SidebarTrigger />
-      <div className="flex flex-1 items-center justify-end">
+      <div className="flex flex-1 items-center justify-end gap-4">
+        <CabangSwitcher organizations={organizations} />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 rounded-full hover:bg-accent px-2 py-1 transition-colors">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                  {getInitials(user.name)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-sm font-medium">{user.name}</span>
-            </button>
+          <DropdownMenuTrigger asChild className="cursor-pointer">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                {getInitials(user.name)}
+              </AvatarFallback>
+            </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
