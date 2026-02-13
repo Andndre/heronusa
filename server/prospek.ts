@@ -66,7 +66,7 @@ export async function getProspekData() {
     ...item,
     model: {
       ...item.model,
-      harga_otr: item.model.harga_otr ? Number(item.model.harga_otr) : null,
+      harga_otr: Number(item.model.harga_otr),
     },
   }));
 
