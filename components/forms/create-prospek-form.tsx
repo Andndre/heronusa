@@ -250,7 +250,7 @@ export function CreateProspekForm({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="tipe_pembayaran">
-                    Metode Pembayaran
+                    Tipe Pembayaran
                   </FieldLabel>
                   <Combobox
                     items={["CASH", "CREDIT"]}
