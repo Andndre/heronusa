@@ -24,9 +24,21 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-  teammembers TeamMember[]
-  members     Member[]
-  invitations Invitation[]
+  teammembers       TeamMember[]
+  members           Member[]
+  invitations       Invitation[]
+  suratJalans       SuratJalan[]
+  prospeks          Prospek[]          @relation("ProspekSales")
+  spks              SPK[]              @relation("SalesSPK")
+  spvApprovedSPKs   SPK[]              @relation("SpvApproval")
+  mgrApprovedSPKs   SPK[]              @relation("ManagerApproval")
+  faktursValidated  Faktur[]           @relation("FakturValidatedBy")
+  followUps         FollowUp[]         @relation("FollowUpSales")
+  pelanggans        Pelanggan[]        @relation("PelangganSales")
+  pembayarans       Pembayaran[]       @relation("PembayaranSales")
+  dokumenKendaraans DokumenKendaraan[] @relation("DokumenUpdatedBy")
+  logPersetujuans   LogPersetujuan[]   @relation("LogPersetujuanApprover")
+  pembelianUnits    PembelianUnit[]    @relation("PembelianUnitCreatedBy")
 
   @@unique([email])
   @@map("user")
@@ -79,20 +91,26 @@ model Verification {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  @@index([identifier(length: 191)])
   @@map("verification")
 }
 
 model Organization {
-  id          String       @id
-  name        String       @db.Text
-  slug        String
-  logo        String?      @db.Text
-  createdAt   DateTime
-  metadata    String?      @db.Text
-  teams       Team[]
-  members     Member[]
-  invitations Invitation[]
+  id             String          @id
+  name           String          @db.Text
+  slug           String
+  logo           String?         @db.Text
+  createdAt      DateTime
+  metadata       String?         @db.Text
+  teams          Team[]
+  members        Member[]
+  invitations    Invitation[]
+  prospeks       Prospek[]
+  pembelianUnits PembelianUnit[]
+  fakturs        Faktur[]
+  units          Unit[]
+  pembayarans    Pembayaran[]
+  suratJalans    SuratJalan[]
+  leasingOrders  LeasingOrder[]
 
   @@unique([slug])
   @@map("organization")
@@ -107,7 +125,6 @@ model Team {
   updatedAt      DateTime?    @updatedAt
   teammembers    TeamMember[]
 
-  @@index([organizationId(length: 191)])
   @@map("team")
 }
 
@@ -121,7 +138,7 @@ model TeamMember {
 
   @@index([teamId(length: 191)])
   @@index([userId(length: 191)])
-  @@map("teamMember")
+  @@map("team_member")
 }
 
 model Member {
@@ -133,8 +150,6 @@ model Member {
   role           String       @db.Text
   createdAt      DateTime
 
-  @@index([organizationId(length: 191)])
-  @@index([userId(length: 191)])
   @@map("member")
 }
 
@@ -151,7 +166,570 @@ model Invitation {
   inviterId      String
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 
-  @@index([organizationId(length: 191)])
   @@index([email(length: 191)])
   @@map("invitation")
+}
+
+// MASTER DATA
+
+model Kabupaten {
+  id             Int         @id @default(autoincrement()) @map("id") @db.UnsignedInt
+  nama_kabupaten String
+  kecamatan      Kecamatan[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("kabupaten")
+}
+
+model Kecamatan {
+  id             Int         @id @default(autoincrement()) @map("id") @db.UnsignedInt
+  nama_kecamatan String
+  kabupatenId    Int         @map("kabupatenId") @db.UnsignedInt
+  kelurahan      Kelurahan[]
+
+  kabupaten Kabupaten @relation(fields: [kabupatenId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([kabupatenId])
+  @@map("kecamatan")
+}
+
+model Kelurahan {
+  id             Int         @id @default(autoincrement()) @map("id") @db.UnsignedInt
+  nama_kelurahan String
+  kecamatanId    Int         @map("kecamatanId") @db.UnsignedInt
+  latitude       Float?
+  longitude      Float?
+  prospek        Prospek[]
+  pelanggan      Pelanggan[]
+
+  kecamatan Kecamatan @relation(fields: [kecamatanId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  spks      SPK[]
+
+  @@index([kecamatanId])
+  @@map("kelurahan")
+}
+
+model MasterModel {
+  id               Int                   @id @default(autoincrement()) @map("id") @db.UnsignedInt
+  nama_model       String
+  kategori         String
+  subkategori      String?
+  cc               Int?
+  series           String?
+  harga_otr        Decimal?
+  prospek          Prospek[]
+  unit             Unit[]
+  pembelianDetails PembelianUnitDetail[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([kategori])
+  @@map("master_model")
+}
+
+model MasterWarna {
+  id               Int                   @id @default(autoincrement()) @map("id") @db.UnsignedInt
+  warna            String
+  prospek          Prospek[]
+  unit             Unit[]
+  pembelianDetails PembelianUnitDetail[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("master_warna")
+}
+
+model SumberProspek {
+  id               Int                @id @default(autoincrement()) @map("id") @db.UnsignedInt
+  nama_sumber      String
+  status           String             @default("ACTIVE")
+  subSumberProspek SubSumberProspek[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sumber_prospek")
+}
+
+model SubSumberProspek {
+  id              Int       @id @default(autoincrement()) @map("id") @db.UnsignedInt
+  nama_subsumber  String
+  sumberProspekId Int       @db.UnsignedInt
+  status          String    @default("ACTIVE")
+  prospek         Prospek[]
+
+  sumberProspek SumberProspek @relation(fields: [sumberProspekId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sumberProspekId])
+  @@map("sub_sumber_prospek")
+}
+
+enum StatusProspek {
+  BARU
+  FOLLOW_UP
+  DEAL
+  SPK
+  GUGUR
+}
+
+enum PaymentType {
+  CASH
+  CREDIT
+}
+
+model Prospek {
+  id                 String        @id
+  nama_konsumen      String
+  alamat_konsumen    String?
+  hp1                String
+  hp2                String?
+  kategori_prospek   String?
+  status             StatusProspek @default(BARU)
+  tipe_pembayaran    PaymentType
+  tgl_perkiraan_beli DateTime?
+  salesId            String
+  subSumberId        Int           @db.UnsignedInt
+  modelId            Int           @db.UnsignedInt
+  warnaId            Int           @db.UnsignedInt
+  kelurahanId        Int           @db.UnsignedInt
+  deletedAt          DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  cabangId  String
+  cabang    Organization     @relation(fields: [cabangId], references: [id], onDelete: Restrict)
+  sales     User             @relation("ProspekSales", fields: [salesId], references: [id], onDelete: Restrict)
+  subSumber SubSumberProspek @relation(fields: [subSumberId], references: [id], onDelete: Restrict)
+  model     MasterModel      @relation(fields: [modelId], references: [id], onDelete: Restrict)
+  warna     MasterWarna      @relation(fields: [warnaId], references: [id], onDelete: Restrict)
+  kelurahan Kelurahan        @relation(fields: [kelurahanId], references: [id], onDelete: Restrict)
+  followUps FollowUp[]
+
+  @@index([deletedAt])
+  @@index([salesId])
+  @@index([status])
+  @@index([kelurahanId])
+  @@index([subSumberId])
+  @@index([modelId])
+  @@index([warnaId])
+  @@map("prospek")
+}
+
+enum ApprovalStatus {
+  AUTO_APPROVED
+  PENDING_SPV
+  PENDING_MANAGER
+  APPROVED
+  REJECTED
+}
+
+model SPK {
+  id              String      @id
+  nomorSPK        String      @unique
+  tanggal         DateTime
+  tipe_pembayaran PaymentType
+  total_tagihan   Decimal
+  total_dibayar   Decimal     @default(0)
+
+  alamat_pengiriman       String?
+  id_kelurahan_pengiriman Int     @db.UnsignedInt
+
+  diskon_pengajuan Decimal?
+  diskon_disetujui Decimal?
+
+  spv_approval_status ApprovalStatus?
+  spv_approval_by     String?
+  spv_approval_date   DateTime?
+
+  manager_approval_status ApprovalStatus?
+  manager_approval_by     String?
+  manager_approval_date   DateTime?
+
+  pelangganId String
+  salesId     String
+  unitId      String @unique
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  kelurahanPengiriman Kelurahan        @relation(fields: [id_kelurahan_pengiriman], references: [id], onDelete: Restrict)
+  pelanggan           Pelanggan        @relation(fields: [pelangganId], references: [id], onDelete: Restrict)
+  sales               User             @relation("SalesSPK", fields: [salesId], references: [id], onDelete: Restrict)
+  spvApprovedBy       User?            @relation("SpvApproval", fields: [spv_approval_by], references: [id], onDelete: SetNull)
+  mgrApprovedBy       User?            @relation("ManagerApproval", fields: [manager_approval_by], references: [id], onDelete: SetNull)
+  unit                Unit             @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  logApprovals        LogPersetujuan[]
+  pembayaran          Pembayaran[]
+  faktur              Faktur?          @relation("FakturSPK")
+  leasingOrder        LeasingOrder?    @relation("LeasingOrderSPK")
+  fakturId            String?
+  leasingOrderId      String?
+
+  @@index([deletedAt])
+  @@index([salesId])
+  @@index([pelangganId])
+  @@index([unitId])
+  @@index([id_kelurahan_pengiriman])
+  @@map("spk")
+}
+
+model FollowUp {
+  id        String        @id
+  prospekId String
+  salesId   String
+  tanggal   DateTime
+  catatan   String?
+  createdAt DateTime      @default(now())
+  status    StatusProspek
+
+  prospek Prospek @relation(fields: [prospekId], references: [id], onDelete: Cascade)
+  sales   User    @relation("FollowUpSales", fields: [salesId], references: [id], onDelete: Restrict)
+
+  @@index([prospekId])
+  @@index([salesId])
+  @@map("follow_up")
+}
+
+model Pelanggan {
+  id            String    @id
+  nama          String
+  nik           String    @unique
+  noHp          String
+  alamatLengkap String?
+  kelurahanId   Int       @db.UnsignedInt
+  createdById   String
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  kelurahan Kelurahan @relation(fields: [kelurahanId], references: [id], onDelete: Restrict)
+  createdBy User      @relation("PelangganSales", fields: [createdById], references: [id], onDelete: Restrict)
+  spks      SPK[]
+  analitik  Analitik?
+
+  @@index([deletedAt])
+  @@index([nik])
+  @@index([kelurahanId])
+  @@index([createdById])
+  @@map("pelanggan")
+}
+
+model PembelianUnit {
+  id               String    @id
+  nomor_nota_debet String    @unique
+  tanggal_nota     DateTime
+  cabangId         String
+  total_unit       Int
+  createdById      String
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  cabang    Organization          @relation(fields: [cabangId], references: [id], onDelete: Restrict)
+  units     Unit[]
+  createdBy User                  @relation("PembelianUnitCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  details   PembelianUnitDetail[]
+
+  @@index([deletedAt])
+  @@index([cabangId])
+  @@index([createdById])
+  @@map("pembelian_unit")
+}
+
+model PembelianUnitDetail {
+  id              Int       @id @default(autoincrement()) @map("id") @db.UnsignedInt
+  pembelianUnitId String
+  modelId         Int       @db.UnsignedInt
+  warnaId         Int       @db.UnsignedInt
+  jumlah          Int
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  pembelianUnit PembelianUnit @relation(fields: [pembelianUnitId], references: [id], onDelete: Cascade)
+  model         MasterModel   @relation(fields: [modelId], references: [id], onDelete: Restrict)
+  warna         MasterWarna   @relation(fields: [warnaId], references: [id], onDelete: Restrict)
+
+  @@index([deletedAt])
+  @@index([pembelianUnitId])
+  @@index([modelId])
+  @@index([warnaId])
+  @@map("pembelian_unit_detail")
+}
+
+model LogPersetujuan {
+  id            String         @id
+  spkId         String
+  approverId    String
+  approval_role String
+  status        ApprovalStatus
+  catatan       String?
+  createdAt     DateTime       @default(now())
+
+  spk      SPK  @relation(fields: [spkId], references: [id], onDelete: Cascade)
+  approver User @relation("LogPersetujuanApprover", fields: [approverId], references: [id], onDelete: Restrict)
+
+  @@index([spkId])
+  @@index([approverId])
+  @@map("log_persetujuan")
+}
+
+model Faktur {
+  id            String    @id
+  nomorFaktur   String    @unique
+  tanggal       DateTime
+  spkId         String    @unique
+  validatedById String
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  cabangId      String
+
+  cabang      Organization @relation(fields: [cabangId], references: [id], onDelete: Restrict)
+  spk         SPK          @relation("FakturSPK", fields: [spkId], references: [id], onDelete: Cascade)
+  validatedBy User         @relation("FakturValidatedBy", fields: [validatedById], references: [id], onDelete: Restrict)
+  suratJalan  SuratJalan[] @relation("SuratJalanFaktur")
+  pembayaran  Pembayaran[] @relation("PembayaranFaktur")
+
+  @@index([deletedAt])
+  @@index([spkId])
+  @@index([validatedById])
+  @@map("faktur")
+}
+
+model Leasing {
+  id        String    @id
+  nama      String
+  kontak    String?
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  leasingOrders LeasingOrder[] @relation("LeasingOrderLeasing")
+  pembayaran    Pembayaran[]
+
+  @@index([deletedAt])
+  @@map("leasing")
+}
+
+model LeasingOrder {
+  id             String    @id
+  spkId          String    @unique
+  leasingId      String
+  nomor_po       String?
+  jumlah_piutang Decimal
+  status_cair    Boolean   @default(false)
+  tanggal_cair   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  cabangId       String
+
+  cabang       Organization @relation(fields: [cabangId], references: [id], onDelete: Restrict)
+  spk          SPK          @relation("LeasingOrderSPK", fields: [spkId], references: [id], onDelete: Cascade)
+  leasing      Leasing      @relation("LeasingOrderLeasing", fields: [leasingId], references: [id], onDelete: Restrict)
+  pembayaranId String?      @unique
+  pembayaran   Pembayaran?  @relation(fields: [pembayaranId], references: [id], onDelete: SetNull)
+
+  @@index([spkId])
+  @@index([leasingId])
+  @@index([cabangId])
+  @@index([pembayaranId])
+  @@map("leasing_order")
+}
+
+enum StatusUnit {
+  IN_TRANSIT
+  GUDANG
+  PDC
+  NRFS
+  SHOWROOM
+  BOOKED
+  SOLD
+}
+
+model Unit {
+  id              String     @id
+  nomorRangka     String     @unique
+  nomorMesin      String     @unique
+  tahun           Int
+  status          StatusUnit
+  modelId         Int        @db.UnsignedInt
+  warnaId         Int        @db.UnsignedInt
+  pembelianUnitId String
+  deletedAt       DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  cabangId        String
+
+  cabang        Organization      @relation(fields: [cabangId], references: [id], onDelete: Restrict)
+  model         MasterModel       @relation(fields: [modelId], references: [id], onDelete: Restrict)
+  warna         MasterWarna       @relation(fields: [warnaId], references: [id], onDelete: Restrict)
+  pembelianUnit PembelianUnit     @relation(fields: [pembelianUnitId], references: [id], onDelete: Restrict)
+  spk           SPK?
+  dokumen       DokumenKendaraan?
+
+  @@index([deletedAt])
+  @@index([status])
+  @@index([nomorRangka])
+  @@index([nomorMesin])
+  @@index([modelId])
+  @@index([warnaId])
+  @@index([cabangId])
+  @@map("unit")
+}
+
+enum StatusPengiriman {
+  DIPROSES
+  DIKIRIM
+  DITERIMA
+}
+
+model SuratJalan {
+  id              String           @id
+  nomorSuratJalan String           @unique
+  fakturId        String           @unique
+  isOverridden    Boolean          @default(false)
+  overrideById    String?
+  overrideReason  String?
+  status          StatusPengiriman @default(DIPROSES)
+  tanggalKirim    DateTime?
+  tanggalTerima   DateTime?
+  deletedAt       DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  cabangId        String
+
+  faktur       Faktur       @relation("SuratJalanFaktur", fields: [fakturId], references: [id], onDelete: Cascade)
+  overriddenBy User?        @relation(fields: [overrideById], references: [id], onDelete: SetNull)
+  cabang       Organization @relation(fields: [cabangId], references: [id], onDelete: Restrict)
+
+  @@index([overrideById])
+  @@index([deletedAt])
+  @@index([fakturId])
+  @@index([cabangId])
+  @@map("surat_jalan")
+}
+
+enum TipePembayaran {
+  DP
+  CICILAN
+  PELUNASAN
+  UANG_MUKA
+  ANGSURAN
+}
+
+enum MetodePembayaran {
+  CASH
+  TRANSFER
+}
+
+model Pembayaran {
+  id           String           @id
+  spkId        String
+  fakturId     String?
+  leasingId    String?
+  jumlah       Decimal
+  tipe         TipePembayaran
+  metode       MetodePembayaran
+  tanggalBayar DateTime?
+  buktiBayar   String?
+  createdById  String
+  deletedAt    DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  cabangId     String
+
+  cabang       Organization  @relation(fields: [cabangId], references: [id], onDelete: Restrict)
+  spk          SPK           @relation(fields: [spkId], references: [id], onDelete: Cascade)
+  faktur       Faktur?       @relation("PembayaranFaktur", fields: [fakturId], references: [id], onDelete: SetNull)
+  leasing      Leasing?      @relation(fields: [leasingId], references: [id], onDelete: SetNull)
+  createdBy    User          @relation("PembayaranSales", fields: [createdById], references: [id], onDelete: Restrict)
+  leasingOrder LeasingOrder?
+
+  @@index([deletedAt])
+  @@index([spkId])
+  @@index([fakturId])
+  @@index([createdById])
+  @@map("pembayaran")
+}
+
+enum StatusDokumen {
+  PENDING_FAKTUR
+  PROSES_SAMSAT
+  STNK_DITERIMA
+  STNK_DISERAHKAN
+  BPKB_DITERIMA
+  BPKB_DISERAHKAN
+}
+
+model DokumenKendaraan {
+  id                 String        @id
+  unitId             String        @unique
+  tglFakturAstra     DateTime?
+  tglPengajuanSamsat DateTime?
+  tglStnkDiterima    DateTime?
+  tglBpkbDiterima    DateTime?
+  tglSerahTerima     DateTime?
+  noPolisi           String?
+  nomorBpkb          String?
+  status             StatusDokumen @default(PENDING_FAKTUR)
+  deletedAt          DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  updatedById        String?
+
+  unit      Unit  @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  updatedBy User? @relation("DokumenUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([deletedAt])
+  @@index([unitId])
+  @@index([updatedById])
+  @@map("dokumen_kendaraan")
+}
+
+enum LoyaltyCluster {
+  LOYAL
+  POTENTIAL
+  STANDARD
+  AT_RISK
+  DORMANT
+}
+
+enum ProductSegment {
+  Matic
+  Sport
+  Cub
+  Listrik
+}
+
+model Analitik {
+  id             String         @id
+  pelangganId    String         @unique
+  rfts_recency   Int
+  rfts_frequency Int
+  rfts_tenure    Int
+  rfts_segment   ProductSegment
+  clusterLabel   LoyaltyCluster
+  deletedAt      DateTime?
+  updatedAt      DateTime       @updatedAt
+
+  pelanggan Pelanggan @relation(fields: [pelangganId], references: [id], onDelete: Cascade)
+
+  @@index([deletedAt])
+  @@index([pelangganId])
+  @@index([clusterLabel])
+  @@index([rfts_segment])
+  @@map("analitik")
 }
