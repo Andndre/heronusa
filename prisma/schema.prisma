@@ -220,10 +220,10 @@ model MasterModel {
   id               Int                   @id @default(autoincrement()) @map("id") @db.UnsignedInt
   nama_model       String
   kategori         String
-  subkategori      String?
-  cc               Int?
-  series           String?
-  harga_otr        Decimal?
+  subkategori      String
+  cc               Int
+  series           String
+  harga_otr        Decimal
   prospek          Prospek[]
   unit             Unit[]
   pembelianDetails PembelianUnitDetail[]

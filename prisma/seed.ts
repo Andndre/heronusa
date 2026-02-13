@@ -667,7 +667,7 @@ async function main() {
     await prisma.masterModel.upsert({
       where: { id: model.id },
       update: {},
-      create: model,
+      create: { ...model, cc: model.cc ?? 125 },
     });
   }
   console.log("Master Model seeded");

@@ -27,7 +27,18 @@ export async function getDropdownData() {
     }),
   ]);
 
-  return { models, warnas, subSumberProspek, kelurahans };
+  // Convert Decimal fields to numbers for client components
+  const serializedModels = models.map((model) => ({
+    ...model,
+    harga_otr: model.harga_otr ? Number(model.harga_otr) : null,
+  }));
+
+  return {
+    models: serializedModels,
+    warnas,
+    subSumberProspek,
+    kelurahans,
+  };
 }
 
 export async function getProspekData() {
@@ -49,7 +60,17 @@ export async function getProspekData() {
       createdAt: "desc",
     },
   });
-  return prospek;
+
+  // Convert Decimal fields to numbers for client components
+  const serializedProspek = prospek.map((item) => ({
+    ...item,
+    model: {
+      ...item.model,
+      harga_otr: item.model.harga_otr ? Number(item.model.harga_otr) : null,
+    },
+  }));
+
+  return serializedProspek;
 }
 
 export type Prospek = Awaited<ReturnType<typeof getProspekData>>[number];
