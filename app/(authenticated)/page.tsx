@@ -1,5 +1,6 @@
 "use client";
 
+import { CreateCabangForm } from "@/components/forms/create-cabang-form";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -15,6 +16,8 @@ export default function Dashboard() {
     <div>
       <h1>Dashboard</h1>
       <Button onClick={onClick}>Logout</Button>
+
+      <CreateCabangForm className="mt-6" />
     </div>
   );
 }

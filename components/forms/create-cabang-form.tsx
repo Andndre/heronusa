@@ -20,11 +20,11 @@ import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Loader } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z.string().min(3),
@@ -35,10 +35,7 @@ export function CreateCabangForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const router = useRouter();
-
   const [loading, setLoading] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -50,7 +47,6 @@ export function CreateCabangForm({
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setLoading(true);
-    setServerError(null);
 
     try {
       const result = await authClient.organization.create({
@@ -60,13 +56,14 @@ export function CreateCabangForm({
 
       if (result.error) {
         form.setError("name", result.error);
-      } else {
-        router.push("/");
+        toast.error(result.error.statusText);
+        return;
       }
+
+      toast.success("Cabang berhasil dibuat!");
+      form.reset();
     } catch (error) {
-      setServerError(
-        error instanceof Error ? error.message : "An error occurred",
-      );
+      toast.error(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -82,13 +79,6 @@ export function CreateCabangForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {serverError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Kesalahan</AlertTitle>
-              <AlertDescription>{serverError}</AlertDescription>
-            </Alert>
-          )}
           <form id="create-cabang-form" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
               <div className="space-y-3">

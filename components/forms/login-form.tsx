@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -21,12 +20,12 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, Loader } from "lucide-react";
+import { Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   email: z.email(),
@@ -40,7 +39,6 @@ export function LoginForm({
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -52,7 +50,6 @@ export function LoginForm({
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setLoading(true);
-    setServerError(null);
 
     try {
       const result = await authClient.signIn.email({
@@ -62,13 +59,12 @@ export function LoginForm({
 
       if (result.error) {
         form.setError("email", result.error);
+        toast.error(result.error.statusText);
       } else {
         router.push("/");
       }
     } catch (error) {
-      setServerError(
-        error instanceof Error ? error.message : "An error occurred",
-      );
+      toast.error(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -82,13 +78,6 @@ export function LoginForm({
           <CardDescription>Login dengan akun Google Anda</CardDescription>
         </CardHeader>
         <CardContent>
-          {serverError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Kesalahan</AlertTitle>
-              <AlertDescription>{serverError}</AlertDescription>
-            </Alert>
-          )}
           <form id="login-form" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>
