@@ -25,6 +25,9 @@ import {
 } from "@/components/ui/select";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { KategoriProspek, TipePembayaran } from "@/lib/generated/prisma/enums";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Calendar } from "../ui/calendar";
+import { format } from "date-fns";
 
 const formSchema = z.object({
   nama_konsumen: z.string().min(3, "Nama minimal 3 karakter"),
@@ -41,7 +44,7 @@ const formSchema = z.object({
   warnaId: z.number({ message: "Pilih warna" }),
   subSumberId: z.number({ message: "Pilih sumber prospek" }),
   kelurahanId: z.number({ message: "Pilih kelurahan" }),
-  tgl_perkiraan_beli: z.string(),
+  tgl_perkiraan_beli: z.date(),
 });
 
 export type CreateProspekFormProps = {
@@ -73,7 +76,7 @@ export function CreateProspekForm({
       modelId: undefined,
       warnaId: undefined,
       kelurahanId: undefined,
-      tgl_perkiraan_beli: "",
+      tgl_perkiraan_beli: undefined,
       subSumberId: undefined,
     },
   });
@@ -371,22 +374,57 @@ export function CreateProspekForm({
           <Controller
             name="tgl_perkiraan_beli"
             control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="tgl_perkiraan_beli">
-                  Tanggal Perkiraan Beli (Opsional)
-                </FieldLabel>
-                <Input
-                  id="tgl_perkiraan_beli"
-                  type="date"
-                  aria-invalid={fieldState.invalid}
-                  {...field}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
+            render={({ field, fieldState }) => {
+              const selectedDate = field.value
+                ? new Date(field.value)
+                : undefined;
+
+              return (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="tgl_perkiraan_beli">
+                    Tanggal Perkiraan Beli (Opsional)
+                  </FieldLabel>
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          "justify-start font-normal w-full",
+                          !field.value && "text-muted-foreground",
+                        )}
+                      >
+                        {selectedDate ? (
+                          format(selectedDate, "PPP")
+                        ) : (
+                          <span>Pilih Tanggal</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => {
+                          if (!date) {
+                            field.onChange(undefined);
+                            return;
+                          }
+                          field.onChange(date);
+                        }}
+                        defaultMonth={selectedDate}
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              );
+            }}
           />
         </div>
       </FieldGroup>

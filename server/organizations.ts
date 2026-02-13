@@ -4,11 +4,26 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { Organization } from "@/lib/generated/prisma/client";
 import { headers } from "next/headers";
+import { getCurrentUser } from "./user";
 
 export async function getOrganizations() {
-  const organizations = await auth.api.listOrganizations({
-    headers: await headers(),
+  const { session } = await getCurrentUser();
+
+  const members = await prisma.member.findMany({
+    where: {
+      userId: session.userId,
+    },
   });
+
+  const organizations = await prisma.organization.findMany({
+    where: {
+      id: {
+        in: members.map((member) => member.organizationId),
+      },
+    },
+  });
+
+  console.log("Organizations:", organizations);
 
   return organizations as Organization[];
 }
