@@ -284,11 +284,6 @@ enum StatusProspek {
   GUGUR
 }
 
-enum PaymentType {
-  CASH
-  CREDIT
-}
-
 enum KategoriProspek {
   HOT
   WARM
@@ -296,14 +291,14 @@ enum KategoriProspek {
 }
 
 model Prospek {
-  id                 String          @id
+  id                 String          @id @default(uuid()) @db.VarChar(36)
   nama_konsumen      String
   alamat_konsumen    String?
   hp1                String
   hp2                String?
   kategori_prospek   KategoriProspek
   status             StatusProspek   @default(BARU)
-  tipe_pembayaran    PaymentType
+  tipe_pembayaran    TipePembayaran
   tgl_perkiraan_beli DateTime?
   salesId            String
   subSumberId        Int             @db.UnsignedInt
@@ -341,13 +336,17 @@ enum ApprovalStatus {
   REJECTED
 }
 
+enum TipePembayaran {
+  CASH
+  CREDIT
+}
+
 model SPK {
-  id              String      @id
-  nomorSPK        String      @unique
-  tanggal         DateTime
-  tipe_pembayaran PaymentType
-  total_tagihan   Decimal
-  total_dibayar   Decimal     @default(0)
+  id            String   @id @default(uuid()) @db.VarChar(36)
+  nomorSPK      String   @unique
+  tanggal       DateTime
+  total_tagihan Decimal
+  total_dibayar Decimal  @default(0)
 
   alamat_pengiriman       String?
   id_kelurahan_pengiriman Int     @db.UnsignedInt
@@ -393,8 +392,8 @@ model SPK {
 }
 
 model FollowUp {
-  id        String        @id
-  prospekId String
+  id        String        @id @default(uuid()) @db.VarChar(36)
+  prospekId String        @db.VarChar(36)
   salesId   String
   tanggal   DateTime
   catatan   String?
@@ -475,8 +474,8 @@ model PembelianUnitDetail {
 }
 
 model LogPersetujuan {
-  id            String         @id
-  spkId         String
+  id            String         @id @default(uuid()) @db.VarChar(36)
+  spkId         String         @db.VarChar(36)
   approverId    String
   approval_role String
   status        ApprovalStatus
@@ -492,10 +491,10 @@ model LogPersetujuan {
 }
 
 model Faktur {
-  id            String    @id
+  id            String    @id @default(uuid()) @db.VarChar(36)
   nomorFaktur   String    @unique
   tanggal       DateTime
-  spkId         String    @unique
+  spkId         String    @unique @db.VarChar(36)
   validatedById String
   deletedAt     DateTime?
   createdAt     DateTime  @default(now())
@@ -531,7 +530,7 @@ model Leasing {
 
 model LeasingOrder {
   id             String    @id
-  spkId          String    @unique
+  spkId          String    @unique @db.VarChar(36)
   leasingId      String
   nomor_po       String?
   jumlah_piutang Decimal
@@ -544,7 +543,7 @@ model LeasingOrder {
   cabang       Organization @relation(fields: [cabangId], references: [id], onDelete: Restrict)
   spk          SPK          @relation("LeasingOrderSPK", fields: [spkId], references: [id], onDelete: Cascade)
   leasing      Leasing      @relation("LeasingOrderLeasing", fields: [leasingId], references: [id], onDelete: Restrict)
-  pembayaranId String?      @unique
+  pembayaranId String?      @unique @db.VarChar(36)
   pembayaran   Pembayaran?  @relation(fields: [pembayaranId], references: [id], onDelete: SetNull)
 
   @@index([spkId])
@@ -602,9 +601,9 @@ enum StatusPengiriman {
 }
 
 model SuratJalan {
-  id              String           @id
+  id              String           @id @default(uuid()) @db.VarChar(36)
   nomorSuratJalan String           @unique
-  fakturId        String           @unique
+  fakturId        String           @unique @db.VarChar(36)
   isOverridden    Boolean          @default(false)
   overrideById    String?
   overrideReason  String?
@@ -627,7 +626,7 @@ model SuratJalan {
   @@map("surat_jalan")
 }
 
-enum TipePembayaran {
+enum JenisPembayaran {
   DP
   CICILAN
   PELUNASAN
@@ -641,12 +640,12 @@ enum MetodePembayaran {
 }
 
 model Pembayaran {
-  id           String           @id
-  spkId        String
-  fakturId     String?
+  id           String           @id @default(uuid()) @db.VarChar(36)
+  spkId        String           @db.VarChar(36)
+  fakturId     String?          @db.VarChar(36)
   leasingId    String?
   jumlah       Decimal
-  tipe         TipePembayaran
+  jenis        JenisPembayaran
   metode       MetodePembayaran
   tanggalBayar DateTime?
   buktiBayar   String?

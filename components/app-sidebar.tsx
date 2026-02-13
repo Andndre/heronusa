@@ -1,5 +1,6 @@
 "use client";
 
+import { createContext, useContext, useState, ReactNode } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -26,11 +27,34 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode } from "react";
+import { RightSidebar, RightSidebarView } from "@/components/right-sidebar";
 
 interface AppSidebarProps {
   children: ReactNode;
   user: User;
+}
+
+interface RightSidebarContextProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  view: RightSidebarView;
+  setView: (view: RightSidebarView) => void;
+  content: ReactNode | null;
+  setContent: (content: ReactNode | null) => void;
+  title: string;
+  setTitle: (title: string) => void;
+}
+
+const RightSidebarContext = createContext<RightSidebarContextProps | null>(
+  null,
+);
+
+export function useRightSidebar() {
+  const context = useContext(RightSidebarContext);
+  if (!context) {
+    throw new Error("useRightSidebar must be used within AppSidebar.");
+  }
+  return context;
 }
 
 interface AppSidebarContentProps {
@@ -127,12 +151,49 @@ function AppSidebarContent({ user }: AppSidebarContentProps) {
 }
 
 export function AppSidebar({ children, user }: AppSidebarProps) {
+  const [rightOpen, setRightOpen] = useState(false);
+  const [rightView, setRightView] = useState<RightSidebarView>("none");
+  const [rightContent, setRightContent] = useState<ReactNode | null>(null);
+  const [rightTitle, setRightTitle] = useState("");
+
+  const handleCloseRightSidebar = () => {
+    setRightOpen(false);
+    setRightView("none");
+    setRightContent(null);
+  };
+
   return (
     <SidebarProvider>
-      <div className="flex min-h-svh w-full">
-        <AppSidebarContent user={user} />
-        {children}
-      </div>
+      <RightSidebarContext.Provider
+        value={{
+          open: rightOpen,
+          setOpen: setRightOpen,
+          view: rightView,
+          setView: setRightView,
+          content: rightContent,
+          setContent: setRightContent,
+          title: rightTitle,
+          setTitle: setRightTitle,
+        }}
+      >
+        <div className="flex min-h-svh w-full">
+          <AppSidebarContent user={user} />
+          {children}
+        </div>
+        <RightSidebar
+          open={rightOpen}
+          onOpenChange={(open) => {
+            setRightOpen(open);
+            if (!open) {
+              handleCloseRightSidebar();
+            }
+          }}
+          view={rightView}
+          title={rightTitle}
+        >
+          {rightContent}
+        </RightSidebar>
+      </RightSidebarContext.Provider>
     </SidebarProvider>
   );
 }

@@ -32,15 +32,22 @@ import { Button } from "@/components/ui/button";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onSelectRow?: (row: TData) => void;
+  onAdd?: () => void;
+  onEdit?: (row: TData) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onSelectRow,
+  onAdd,
+  onEdit,
 }: DataTableProps<TData, TValue>) {
   // State
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [selectedRow, setSelectedRow] = useState<TData | null>(null);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -58,9 +65,14 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const handleRowClick = (row: TData) => {
+    setSelectedRow(row);
+    onSelectRow?.(row);
+  };
+
   return (
     <div>
-      <div className="flex items-center pb-4 gap-3">
+      <div className="flex items-center justify-between pb-4 gap-3">
         <InputGroup className="max-w-sm">
           <InputGroupAddon>
             <Search />
@@ -78,9 +90,11 @@ export function DataTable<TData, TValue>({
             }
           />
         </InputGroup>
-        <Button variant={"outline"}>
-          <PlusIcon /> Tambah
-        </Button>
+        {onAdd && (
+          <Button variant={"outline"} onClick={onAdd}>
+            <PlusIcon /> Tambah
+          </Button>
+        )}
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -104,21 +118,27 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const rowData = row.original;
+                const isSelected = selectedRow === rowData;
+                return (
+                  <TableRow
+                    key={row.id}
+                    data-state={isSelected && "selected"}
+                    className={isSelected ? "bg-muted/50" : "cursor-pointer"}
+                    onClick={() => onSelectRow && handleRowClick(rowData)}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell

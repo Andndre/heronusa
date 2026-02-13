@@ -1,9 +1,12 @@
-import { getProspekData } from "@/server/prospek";
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
+import { getProspekData, getDropdownData } from "@/server/prospek";
+import { ProspekClientComponent } from "./prosek-client";
 
 export default async function ProspekPage() {
-  const data = await getProspekData();
+  const [data, dropdownData] = await Promise.all([
+    getProspekData(),
+    getDropdownData(),
+  ]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -13,7 +16,7 @@ export default async function ProspekPage() {
         </p>
       </div>
       <div>
-        <DataTable columns={columns} data={data} />
+        <ProspekClientComponent data={data} dropdownData={dropdownData} />
       </div>
     </div>
   );
