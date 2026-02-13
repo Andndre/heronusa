@@ -136,8 +136,7 @@ model TeamMember {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime?
 
-  @@index([teamId(length: 191)])
-  @@index([userId(length: 191)])
+  @@index([teamId])
   @@map("team_member")
 }
 
@@ -290,24 +289,30 @@ enum PaymentType {
   CREDIT
 }
 
+enum KategoriProspek {
+  HOT
+  WARM
+  COLD
+}
+
 model Prospek {
-  id                 String        @id
+  id                 String          @id
   nama_konsumen      String
   alamat_konsumen    String?
   hp1                String
   hp2                String?
-  kategori_prospek   String?
-  status             StatusProspek @default(BARU)
+  kategori_prospek   KategoriProspek
+  status             StatusProspek   @default(BARU)
   tipe_pembayaran    PaymentType
   tgl_perkiraan_beli DateTime?
   salesId            String
-  subSumberId        Int           @db.UnsignedInt
-  modelId            Int           @db.UnsignedInt
-  warnaId            Int           @db.UnsignedInt
-  kelurahanId        Int           @db.UnsignedInt
+  subSumberId        Int             @db.UnsignedInt
+  modelId            Int             @db.UnsignedInt
+  warnaId            Int             @db.UnsignedInt
+  kelurahanId        Int             @db.UnsignedInt
   deletedAt          DateTime?
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 
   cabangId  String
   cabang    Organization     @relation(fields: [cabangId], references: [id], onDelete: Restrict)

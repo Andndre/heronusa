@@ -24,6 +24,8 @@ import {
   Users,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 
 interface AppSidebarProps {
@@ -36,6 +38,8 @@ interface AppSidebarContentProps {
 }
 
 function AppSidebarContent({ user }: AppSidebarContentProps) {
+  const pathname = usePathname();
+
   const items = [
     {
       title: "Dashboard",
@@ -95,11 +99,11 @@ function AppSidebarContent({ user }: AppSidebarContentProps) {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                  <SidebarMenuButton asChild isActive={pathname === item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
