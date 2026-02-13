@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { StatusProspek } from "@/lib/generated/prisma/enums";
 import { Prospek } from "@/server/prospek";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
@@ -37,16 +39,24 @@ export const columns: ColumnDef<Prospek>[] = [
     accessorFn: (row) => `${row.hp1}${row.hp2 ? ", " + row.hp2 : ""}`,
   },
   {
-    accessorKey: "kelurahanId",
+    accessorFn: (row) => row.kelurahan.nama_kelurahan,
     header: "Kelurahan",
   },
   {
-    accessorKey: "modelId",
+    accessorFn: (row) => row.model.nama_model,
     header: "Model",
   },
   {
-    accessorKey: "status",
+    id: "status",
     header: "Status",
+    cell: ({ row }) => {
+      const status = row.original.status as StatusProspek;
+      return (
+        <Badge>
+          {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "createdAt",

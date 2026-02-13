@@ -23,8 +23,6 @@ export async function getOrganizations() {
     },
   });
 
-  console.log("Organizations:", organizations);
-
   return organizations as Organization[];
 }
 

@@ -7,6 +7,7 @@ import { DataTable } from "./data-table";
 import { ProspekDetailView, ProspekFormView } from "@/components/right-sidebar";
 import { useRightSidebar } from "@/components/app-sidebar";
 import { CreateProspekForm } from "@/components/forms/create-prospek-form";
+import { Prospek } from "@/server/prospek";
 
 export function ProspekClientComponent({
   data,
@@ -17,9 +18,9 @@ export function ProspekClientComponent({
 }) {
   const { setView, setContent, setTitle, setOpen } = useRightSidebar();
 
-  const handleSelectRow = (row: unknown) => {
+  const handleSelectRow = (row: Prospek) => {
     setContent(<ProspekDetailView data={row as Record<string, unknown>} />);
-    setTitle((row as { name: string }).name || "Detail");
+    setTitle("Info Prospek");
     setView("detail");
     setOpen(true);
   };
@@ -31,14 +32,14 @@ export function ProspekClientComponent({
         warnas={dropdownData.warnas}
         subSumberProspek={dropdownData.subSumberProspek}
         kelurahans={dropdownData.kelurahans}
-      />
+      />,
     );
     setTitle("Tambah Prospek");
     setView("form");
     setOpen(true);
   };
 
-  const handleEdit = (_row: unknown) => {
+  const handleEdit = (row: Prospek) => {
     setContent(<ProspekFormView title="Edit Prospek" />);
     setTitle("Edit Prospek");
     setView("form");
