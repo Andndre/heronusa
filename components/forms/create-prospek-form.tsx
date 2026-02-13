@@ -17,13 +17,13 @@ import { toast } from "sonner";
 import z from "zod";
 import { createProspek } from "@/server/prospek";
 import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { KategoriProspek, TipePembayaran } from "@/lib/generated/prisma/enums";
 
 const formSchema = z.object({
@@ -219,25 +219,23 @@ export function CreateProspekForm({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="kategori_prospek">Kategori</FieldLabel>
-                  <Combobox
-                    items={Object.values(KategoriProspek)}
-                    value={field.value?.toString() ?? null}
+                  <Select
+                    value={field.value}
                     onValueChange={(val) =>
                       field.onChange(val as KategoriProspek)
                     }
                   >
-                    <ComboboxInput placeholder="Pilih Kategori" />
-                    <ComboboxContent>
-                      <ComboboxEmpty>No items found.</ComboboxEmpty>
-                      <ComboboxList>
-                        {Object.values(KategoriProspek).map((item) => (
-                          <ComboboxItem key={item} value={item}>
-                            {item}
-                          </ComboboxItem>
-                        ))}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Pilih Kategori" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(KategoriProspek).map((item) => (
+                        <SelectItem key={item} value={item}>
+                          {item}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -252,25 +250,23 @@ export function CreateProspekForm({
                   <FieldLabel htmlFor="tipe_pembayaran">
                     Tipe Pembayaran
                   </FieldLabel>
-                  <Combobox
-                    items={["CASH", "CREDIT"]}
-                    value={field.value?.toString() ?? null}
+                  <Select
+                    value={field.value}
                     onValueChange={(val) =>
                       field.onChange(val as TipePembayaran)
                     }
                   >
-                    <ComboboxInput placeholder="Pilih Tipe Pembayaran" />
-                    <ComboboxContent>
-                      <ComboboxEmpty>No items found.</ComboboxEmpty>
-                      <ComboboxList>
-                        {["CASH", "CREDIT"].map((item) => (
-                          <ComboboxItem key={item} value={item}>
-                            {item}
-                          </ComboboxItem>
-                        ))}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Pilih Tipe Pembayaran" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["CASH", "CREDIT"].map((item) => (
+                        <SelectItem key={item} value={item}>
+                          {item}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -285,23 +281,16 @@ export function CreateProspekForm({
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="subSumberId">Sumber Prospek</FieldLabel>
-                <Combobox
-                  items={subSumberProspek}
-                  value={field.value?.toString() ?? null}
+                <SearchableSelect
+                  value={field.value?.toString()}
                   onValueChange={(val) => field.onChange(Number(val))}
-                >
-                  <ComboboxInput placeholder="Pilih sumber" />
-                  <ComboboxContent>
-                    <ComboboxEmpty>No items found.</ComboboxEmpty>
-                    <ComboboxList>
-                      {subSumberProspek.map((item) => (
-                        <ComboboxItem key={item.id} value={item.id.toString()}>
-                          {item.nama_subsumber}
-                        </ComboboxItem>
-                      ))}
-                    </ComboboxList>
-                  </ComboboxContent>
-                </Combobox>
+                  options={subSumberProspek.map((item) => ({
+                    value: item.id.toString(),
+                    label: item.nama_subsumber,
+                  }))}
+                  placeholder="Pilih sumber"
+                  emptyText="Tidak ada sumber prospek"
+                />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -316,26 +305,16 @@ export function CreateProspekForm({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="modelId">Model Motor</FieldLabel>
-                  <Combobox
-                    items={models}
-                    value={field.value?.toString() ?? null}
+                  <SearchableSelect
+                    value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(Number(val))}
-                  >
-                    <ComboboxInput placeholder="Select a framework" />
-                    <ComboboxContent>
-                      <ComboboxEmpty>No items found.</ComboboxEmpty>
-                      <ComboboxList>
-                        {models.map((item) => (
-                          <ComboboxItem
-                            key={item.id}
-                            value={item.id.toString()}
-                          >
-                            {item.nama_model}
-                          </ComboboxItem>
-                        ))}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
+                    options={models.map((item) => ({
+                      value: item.id.toString(),
+                      label: item.nama_model,
+                    }))}
+                    placeholder="Pilih model motor"
+                    emptyText="Tidak ada model motor"
+                  />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -348,26 +327,16 @@ export function CreateProspekForm({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="warnaId">Warna</FieldLabel>
-                  <Combobox
-                    items={warnas}
-                    value={field.value?.toString() ?? null}
+                  <SearchableSelect
+                    value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(Number(val))}
-                  >
-                    <ComboboxInput placeholder="Pilih warna" />
-                    <ComboboxContent>
-                      <ComboboxEmpty>No items found.</ComboboxEmpty>
-                      <ComboboxList>
-                        {warnas.map((item) => (
-                          <ComboboxItem
-                            key={item.id}
-                            value={item.id.toString()}
-                          >
-                            {item.warna}
-                          </ComboboxItem>
-                        ))}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
+                    options={warnas.map((item) => ({
+                      value: item.id.toString(),
+                      label: item.warna,
+                    }))}
+                    placeholder="Pilih warna"
+                    emptyText="Tidak ada warna"
+                  />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -382,23 +351,16 @@ export function CreateProspekForm({
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="kelurahanId">Kelurahan</FieldLabel>
-                <Combobox
-                  items={kelurahans}
-                  value={field.value?.toString() ?? null}
+                <SearchableSelect
+                  value={field.value?.toString()}
                   onValueChange={(val) => field.onChange(Number(val))}
-                >
-                  <ComboboxInput placeholder="Pilih kelurahan" />
-                  <ComboboxContent>
-                    <ComboboxEmpty>No items found.</ComboboxEmpty>
-                    <ComboboxList>
-                      {kelurahans.map((item) => (
-                        <ComboboxItem key={item.id} value={item.id.toString()}>
-                          {item.nama_kelurahan}
-                        </ComboboxItem>
-                      ))}
-                    </ComboboxList>
-                  </ComboboxContent>
-                </Combobox>
+                  options={kelurahans.map((item) => ({
+                    value: item.id.toString(),
+                    label: item.nama_kelurahan,
+                  }))}
+                  placeholder="Pilih kelurahan"
+                  emptyText="Tidak ada kelurahan"
+                />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
