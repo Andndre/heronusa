@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -67,44 +67,14 @@ export type CreateProspekFormProps = {
 
 export function CreateProspekForm({
   className,
-
   initialData,
-
   models: initialModels = [],
-
   warnas: initialWarnas = [],
-
   subSumberProspek: initialSubSumbers = [],
-
   kelurahans: initialKelurahans = [],
-
   ...props
 }: React.ComponentProps<"form"> & CreateProspekFormProps) {
   const [loading, setLoading] = useState(false);
-
-  // States for options
-
-  const [models, setModels] = useState<Array<{ value: string; label: string }>>(
-    initialModels.map((i) => ({ value: i.id, label: i.nama_model })),
-  );
-
-  const [warnas, setWarnas] = useState<Array<{ value: string; label: string }>>(
-    initialWarnas.map((i) => ({ value: i.id, label: i.warna })),
-  );
-
-  const [subSumbers, setSubSumbers] = useState<
-    Array<{ value: string; label: string }>
-  >(initialSubSumbers.map((i) => ({ value: i.id, label: i.nama_subsumber })));
-
-  const [kelurahans, setKelurahans] = useState<
-    Array<{ value: string; label: string }>
-  >(initialKelurahans.map((i) => ({ value: i.id, label: i.nama_kelurahan })));
-
-  // Loading states for search
-  const [loadingModels, setLoadingModels] = useState(false);
-  const [loadingWarnas, setLoadingWarnas] = useState(false);
-  const [loadingSubSumbers, setLoadingSubSumbers] = useState(false);
-  const [loadingKelurahans, setLoadingKelurahans] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -122,100 +92,6 @@ export function CreateProspekForm({
       subSumberId: initialData?.subSumberId,
     },
   });
-
-  const handleSearchModels = useCallback(
-    async (q: string) => {
-      setLoadingModels(true);
-      try {
-        const res = await searchModels(q);
-        const mapped = res.map((i) => ({ value: i.id, label: i.nama_model }));
-        setModels((prev) => {
-          const selected = prev.find(
-            (o) => o.value === form.getValues("modelId"),
-          );
-          if (selected && !mapped.find((o) => o.value === selected.value)) {
-            return [selected, ...mapped];
-          }
-          return mapped;
-        });
-      } finally {
-        setLoadingModels(false);
-      }
-    },
-    [form],
-  );
-
-  const handleSearchWarnas = useCallback(
-    async (q: string) => {
-      setLoadingWarnas(true);
-      try {
-        const res = await searchWarnas(q);
-        const mapped = res.map((i) => ({ value: i.id, label: i.warna }));
-        setWarnas((prev) => {
-          const selected = prev.find(
-            (o) => o.value === form.getValues("warnaId"),
-          );
-          if (selected && !mapped.find((o) => o.value === selected.value)) {
-            return [selected, ...mapped];
-          }
-          return mapped;
-        });
-      } finally {
-        setLoadingWarnas(false);
-      }
-    },
-    [form],
-  );
-
-  const handleSearchSubSumbers = useCallback(
-    async (q: string) => {
-      setLoadingSubSumbers(true);
-      try {
-        const res = await searchSubSumberProspek(q);
-        const mapped = res.map((i) => ({
-          value: i.id,
-          label: i.nama_subsumber,
-        }));
-        setSubSumbers((prev) => {
-          const selected = prev.find(
-            (o) => o.value === form.getValues("subSumberId"),
-          );
-          if (selected && !mapped.find((o) => o.value === selected.value)) {
-            return [selected, ...mapped];
-          }
-          return mapped;
-        });
-      } finally {
-        setLoadingSubSumbers(false);
-      }
-    },
-    [form],
-  );
-
-  const handleSearchKelurahans = useCallback(
-    async (q: string) => {
-      setLoadingKelurahans(true);
-      try {
-        const res = await searchKelurahans(q);
-        const mapped = res.map((i) => ({
-          value: i.id,
-          label: i.nama_kelurahan,
-        }));
-        setKelurahans((prev) => {
-          const selected = prev.find(
-            (o) => o.value === form.getValues("kelurahanId"),
-          );
-          if (selected && !mapped.find((o) => o.value === selected.value)) {
-            return [selected, ...mapped];
-          }
-          return mapped;
-        });
-      } finally {
-        setLoadingKelurahans(false);
-      }
-    },
-    [form],
-  );
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setLoading(true);
@@ -421,9 +297,17 @@ export function CreateProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    onSearch={handleSearchSubSumbers}
-                    loading={loadingSubSumbers}
-                    options={subSumbers}
+                    onSearch={async (q) => {
+                      const res = await searchSubSumberProspek(q);
+                      return res.map((i) => ({
+                        value: i.id,
+                        label: i.nama_subsumber,
+                      }));
+                    }}
+                    options={initialSubSumbers.map((i) => ({
+                      value: i.id,
+                      label: i.nama_subsumber,
+                    }))}
                     placeholder="Pilih sumber"
                     emptyText="Tidak ada sumber prospek"
                   />
@@ -443,9 +327,17 @@ export function CreateProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    onSearch={handleSearchModels}
-                    loading={loadingModels}
-                    options={models}
+                    onSearch={async (q) => {
+                      const res = await searchModels(q);
+                      return res.map((i) => ({
+                        value: i.id,
+                        label: i.nama_model,
+                      }));
+                    }}
+                    options={initialModels.map((i) => ({
+                      value: i.id,
+                      label: i.nama_model,
+                    }))}
                     placeholder="Pilih model motor"
                     emptyText="Tidak ada model motor"
                   />
@@ -464,9 +356,14 @@ export function CreateProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    onSearch={handleSearchWarnas}
-                    loading={loadingWarnas}
-                    options={warnas}
+                    onSearch={async (q) => {
+                      const res = await searchWarnas(q);
+                      return res.map((i) => ({ value: i.id, label: i.warna }));
+                    }}
+                    options={initialWarnas.map((i) => ({
+                      value: i.id,
+                      label: i.warna,
+                    }))}
                     placeholder="Pilih warna"
                     emptyText="Tidak ada warna"
                   />
@@ -486,9 +383,17 @@ export function CreateProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    onSearch={handleSearchKelurahans}
-                    loading={loadingKelurahans}
-                    options={kelurahans}
+                    onSearch={async (q) => {
+                      const res = await searchKelurahans(q);
+                      return res.map((i) => ({
+                        value: i.id,
+                        label: i.nama_kelurahan,
+                      }));
+                    }}
+                    options={initialKelurahans.map((i) => ({
+                      value: i.id,
+                      label: i.nama_kelurahan,
+                    }))}
                     placeholder="Pilih kelurahan"
                     emptyText="Tidak ada kelurahan"
                   />

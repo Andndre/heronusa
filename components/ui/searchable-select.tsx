@@ -1,15 +1,24 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronDown, X } from "lucide-react";
+import { Check, ChevronDown, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+
+export interface Option {
+  value: string;
+  label: string;
+}
 
 interface SearchableSelectProps {
   value?: string;
   onValueChange?: (value: string) => void;
-  onSearch?: (query: string) => void;
-  options: Array<{ value: string; label: string }>;
+  /**
+   * Function to handle search. If it returns a Promise<Option[]>,
+   * the component will manage internal loading and options state.
+   */
+  onSearch?: (query: string) => Promise<Option[]> | void;
+  options?: Option[];
   placeholder?: string;
   emptyText?: string;
   className?: string;
@@ -22,12 +31,12 @@ export function SearchableSelect({
   value,
   onValueChange,
   onSearch,
-  options,
+  options: externalOptions = [],
   placeholder = "Pilih...",
   emptyText = "Tidak ada data.",
   className,
   disabled = false,
-  loading = false,
+  loading: externalLoading = false,
   selectedLabel,
 }: SearchableSelectProps) {
   const [open, setOpen] = React.useState(false);
@@ -35,53 +44,79 @@ export function SearchableSelect({
   const [highlightedIndex, setHighlightedIndex] = React.useState(0);
   const [isTyping, setIsTyping] = React.useState(false);
 
+  const [internalOptions, setInternalOptions] =
+    React.useState<Option[]>(externalOptions);
+  const [internalLoading, setInternalLoading] = React.useState(false);
+
+  // Sync internal options when external options change
+  React.useEffect(() => {
+    setInternalOptions(externalOptions);
+  }, [externalOptions]);
+
   const containerRef = React.useRef<HTMLDivElement>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listboxId = React.useId();
 
   const selectedOption = React.useMemo(
-    () => options.find((option) => option.value === value),
-    [options, value],
+    () =>
+      internalOptions.find((option) => option.value === value) ||
+      externalOptions.find((option) => option.value === value),
+    [internalOptions, externalOptions, value],
   );
 
   const displayLabel = selectedLabel || selectedOption?.label || "";
 
   const filteredOptions = React.useMemo(() => {
-    // Jika ada onSearch, kita asumsikan filtering dilakukan di luar (server-side)
-    if (onSearch || !search) return options;
-    return options.filter((option) =>
+    // If onSearch is provided, we assume filtering is done externally or by the onSearch promise
+    if (onSearch || !search) return internalOptions;
+    return internalOptions.filter((option) =>
       option.label.toLowerCase().includes(search.toLowerCase()),
     );
-  }, [options, search, onSearch]);
+  }, [internalOptions, search, onSearch]);
 
-  // Jaga highlightedIndex tetap valid dan reset ke paling atas saat mencari
+  // Keep highlightedIndex valid
   React.useEffect(() => {
     setHighlightedIndex(0);
   }, [filteredOptions]);
 
-  // Trigger onSearch saat input berubah dengan debounce
-  const onSearchRef = React.useRef(onSearch);
-  const isFirstRender = React.useRef(true);
-
+  // Async search effect
   React.useEffect(() => {
-    onSearchRef.current = onSearch;
-  }, [onSearch]);
+    if (!onSearch) return;
 
-  React.useEffect(() => {
-    if (!onSearchRef.current) return;
-
-    // Jangan trigger search jika search kosong (kita pakai options awal)
-    if (search === "") return;
+    // Don't trigger search if search is empty and we already have options (initial state)
+    if (search === "" && internalOptions.length > 0) return;
 
     setIsTyping(true);
-    const handler = setTimeout(() => {
-      onSearchRef.current?.(search);
-      setIsTyping(false);
+    const handler = setTimeout(async () => {
+      try {
+        const result = onSearch(search);
+        if (result instanceof Promise) {
+          setInternalLoading(true);
+          const newOptions = await result;
+
+          setInternalOptions((prev) => {
+            // Preserve selected option if it's not in the new results
+            const selected =
+              prev.find((o) => o.value === value) ||
+              externalOptions.find((o) => o.value === value);
+
+            if (selected && !newOptions.find((o) => o.value === selected.value)) {
+              return [selected, ...newOptions];
+            }
+            return newOptions;
+          });
+        }
+      } catch (error) {
+        console.error("SearchableSelect search error:", error);
+      } finally {
+        setInternalLoading(false);
+        setIsTyping(false);
+      }
     }, 400);
 
     return () => clearTimeout(handler);
-  }, [search]);
+  }, [search, onSearch, value, externalOptions, internalOptions.length]);
 
   // Klik di luar → tutup dropdown
   React.useEffect(() => {
@@ -149,7 +184,7 @@ export function SearchableSelect({
         break;
 
       case "Tab":
-        setOpen(false); // biarkan Tab lanjut normal
+        setOpen(false);
         break;
     }
   };
@@ -164,7 +199,7 @@ export function SearchableSelect({
     }
   }, [highlightedIndex, open]);
 
-  const isLoading = loading || isTyping;
+  const isLoading = externalLoading || internalLoading || isTyping;
 
   return (
     <div
@@ -184,9 +219,6 @@ export function SearchableSelect({
         )}
         onClick={(e) => {
           if (disabled) return;
-
-          // Toggle only if clicking the container or chevron, not the input itself
-          // because input focus already handles opening.
           if (e.target !== inputRef.current) {
             if (open) {
               setOpen(false);
@@ -210,7 +242,7 @@ export function SearchableSelect({
             setSearch(e.target.value);
             if (!open) setOpen(true);
           }}
-          onFocus={(e) => {
+          onFocus={() => {
             if (!disabled && !open) {
               setOpen(true);
             }
@@ -223,7 +255,7 @@ export function SearchableSelect({
 
         <div className="flex items-center gap-1">
           {isLoading && (
-            <div className="border-muted-foreground/30 h-3 w-3 animate-spin rounded-full border-2 border-t-transparent" />
+            <Loader2 className="h-3 w-3 animate-spin opacity-50" />
           )}
 
           {value && !open && (
