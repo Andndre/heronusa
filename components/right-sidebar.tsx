@@ -58,7 +58,7 @@ export function RightSidebar({
               </Button>
             </div>
           </SidebarHeader>
-          <SidebarContent className="p-4">{children}</SidebarContent>
+          <SidebarContent className="p-4 pb-0">{children}</SidebarContent>
         </>
       )}
     </Sidebar>

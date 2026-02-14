@@ -130,193 +130,24 @@ export function CreateProspekForm({
       id="create-prospek-form"
       {...props}
       onSubmit={form.handleSubmit(onSubmit)}
-      className={cn("w-full space-y-4", className)}
+      className={cn("flex flex-col min-h-full", className)}
     >
-      <FieldGroup>
-        <div className="space-y-3">
-          <Controller
-            name="nama_konsumen"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="nama_konsumen">Nama</FieldLabel>
-                <Input
-                  id="nama_konsumen"
-                  type="text"
-                  placeholder="Nama Konsumen"
-                  required
-                  aria-invalid={fieldState.invalid}
-                  {...field}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Controller
-            name="hp1"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="hp1">Nomor HP</FieldLabel>
-                <Input
-                  id="hp1"
-                  type="tel"
-                  placeholder="08xxxxxxxxxx"
-                  required
-                  aria-invalid={fieldState.invalid}
-                  {...field}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Controller
-            name="hp2"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="hp2">Nomor HP 2 (Opsional)</FieldLabel>
-                <Input
-                  id="hp2"
-                  type="tel"
-                  placeholder="08xxxxxxxxxx"
-                  aria-invalid={fieldState.invalid}
-                  {...field}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Controller
-            name="alamat_konsumen"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="alamat_konsumen">
-                  Alamat Lengkap
-                </FieldLabel>
-                <Input
-                  id="alamat_konsumen"
-                  type="text"
-                  placeholder="Alamat Lengkap"
-                  aria-invalid={fieldState.invalid}
-                  {...field}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <div className="grid grid-cols-2 gap-3">
+      <div className="flex-1 space-y-4">
+        <FieldGroup>
+          <div className="space-y-3">
             <Controller
-              name="kategori_prospek"
+              name="nama_konsumen"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="kategori_prospek">Kategori</FieldLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={(val) =>
-                      field.onChange(val as KategoriProspek)
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Pilih Kategori" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.values(KategoriProspek).map((item) => (
-                        <SelectItem key={item} value={item}>
-                          {item}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name="tipe_pembayaran"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="tipe_pembayaran">
-                    Tipe Pembayaran
-                  </FieldLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={(val) =>
-                      field.onChange(val as TipePembayaran)
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Pilih Tipe Pembayaran" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {["CASH", "CREDIT"].map((item) => (
-                        <SelectItem key={item} value={item}>
-                          {item}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </div>
-
-          <Controller
-            name="subSumberId"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="subSumberId">Sumber Prospek</FieldLabel>
-                <SearchableSelect
-                  value={field.value?.toString()}
-                  onValueChange={(val) => field.onChange(Number(val))}
-                  options={subSumberProspek.map((item) => ({
-                    value: item.id.toString(),
-                    label: item.nama_subsumber,
-                  }))}
-                  placeholder="Pilih sumber"
-                  emptyText="Tidak ada sumber prospek"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <div className="grid grid-cols-2 gap-3">
-            <Controller
-              name="modelId"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="modelId">Model Motor</FieldLabel>
-                  <SearchableSelect
-                    value={field.value?.toString()}
-                    onValueChange={(val) => field.onChange(Number(val))}
-                    options={models.map((item) => ({
-                      value: item.id.toString(),
-                      label: item.nama_model,
-                    }))}
-                    placeholder="Pilih model motor"
-                    emptyText="Tidak ada model motor"
+                  <FieldLabel htmlFor="nama_konsumen">Nama</FieldLabel>
+                  <Input
+                    id="nama_konsumen"
+                    type="text"
+                    placeholder="Nama Konsumen"
+                    required
+                    aria-invalid={fieldState.invalid}
+                    {...field}
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -325,20 +156,18 @@ export function CreateProspekForm({
               )}
             />
             <Controller
-              name="warnaId"
+              name="hp1"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="warnaId">Warna</FieldLabel>
-                  <SearchableSelect
-                    value={field.value?.toString()}
-                    onValueChange={(val) => field.onChange(Number(val))}
-                    options={warnas.map((item) => ({
-                      value: item.id.toString(),
-                      label: item.warna,
-                    }))}
-                    placeholder="Pilih warna"
-                    emptyText="Tidak ada warna"
+                  <FieldLabel htmlFor="hp1">Nomor HP</FieldLabel>
+                  <Input
+                    id="hp1"
+                    type="tel"
+                    placeholder="08xxxxxxxxxx"
+                    required
+                    aria-invalid={fieldState.invalid}
+                    {...field}
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -346,93 +175,268 @@ export function CreateProspekForm({
                 </Field>
               )}
             />
-          </div>
-
-          <Controller
-            name="kelurahanId"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="kelurahanId">Kelurahan</FieldLabel>
-                <SearchableSelect
-                  value={field.value?.toString()}
-                  onValueChange={(val) => field.onChange(Number(val))}
-                  options={kelurahans.map((item) => ({
-                    value: item.id.toString(),
-                    label: item.nama_kelurahan,
-                  }))}
-                  placeholder="Pilih kelurahan"
-                  emptyText="Tidak ada kelurahan"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="tgl_perkiraan_beli"
-            control={form.control}
-            render={({ field, fieldState }) => {
-              const selectedDate = field.value
-                ? new Date(field.value)
-                : undefined;
-
-              return (
+            <Controller
+              name="hp2"
+              control={form.control}
+              render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="tgl_perkiraan_beli">
-                    Tanggal Perkiraan Beli (Opsional)
-                  </FieldLabel>
-
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className={cn(
-                          "justify-start font-normal w-full",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
-                        {selectedDate ? (
-                          format(selectedDate, "PPP")
-                        ) : (
-                          <span>Pilih Tanggal</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(date) => {
-                          if (!date) {
-                            field.onChange(undefined);
-                            return;
-                          }
-                          field.onChange(date);
-                        }}
-                        defaultMonth={selectedDate}
-                      />
-                    </PopoverContent>
-                  </Popover>
-
+                  <FieldLabel htmlFor="hp2">Nomor HP 2 (Opsional)</FieldLabel>
+                  <Input
+                    id="hp2"
+                    type="tel"
+                    placeholder="08xxxxxxxxxx"
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                  />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
                 </Field>
-              );
-            }}
-          />
-        </div>
-      </FieldGroup>
+              )}
+            />
+            <Controller
+              name="alamat_konsumen"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="alamat_konsumen">
+                    Alamat Lengkap
+                  </FieldLabel>
+                  <Input
+                    id="alamat_konsumen"
+                    type="text"
+                    placeholder="Alamat Lengkap"
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
 
-      <Button type="submit" className="w-full mt-6" disabled={loading}>
-        {loading ? <Loader className="mr-2 animate-spin" /> : null}
-        {loading ? "Memproses..." : "Buat Prospek"}
-      </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <Controller
+                name="kategori_prospek"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="kategori_prospek">Kategori</FieldLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={(val) =>
+                        field.onChange(val as KategoriProspek)
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Pilih Kategori" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(KategoriProspek).map((item) => (
+                          <SelectItem key={item} value={item}>
+                            {item}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="tipe_pembayaran"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="tipe_pembayaran">
+                      Tipe Pembayaran
+                    </FieldLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={(val) =>
+                        field.onChange(val as TipePembayaran)
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Pilih Tipe Pembayaran" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["CASH", "CREDIT"].map((item) => (
+                          <SelectItem key={item} value={item}>
+                            {item}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+
+            <Controller
+              name="subSumberId"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="subSumberId">Sumber Prospek</FieldLabel>
+                  <SearchableSelect
+                    value={field.value?.toString()}
+                    onValueChange={(val) => field.onChange(Number(val))}
+                    options={subSumberProspek.map((item) => ({
+                      value: item.id.toString(),
+                      label: item.nama_subsumber,
+                    }))}
+                    placeholder="Pilih sumber"
+                    emptyText="Tidak ada sumber prospek"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-3">
+              <Controller
+                name="modelId"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="modelId">Model Motor</FieldLabel>
+                    <SearchableSelect
+                      value={field.value?.toString()}
+                      onValueChange={(val) => field.onChange(Number(val))}
+                      options={models.map((item) => ({
+                        value: item.id.toString(),
+                        label: item.nama_model,
+                      }))}
+                      placeholder="Pilih model motor"
+                      emptyText="Tidak ada model motor"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="warnaId"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="warnaId">Warna</FieldLabel>
+                    <SearchableSelect
+                      value={field.value?.toString()}
+                      onValueChange={(val) => field.onChange(Number(val))}
+                      options={warnas.map((item) => ({
+                        value: item.id.toString(),
+                        label: item.warna,
+                      }))}
+                      placeholder="Pilih warna"
+                      emptyText="Tidak ada warna"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+
+            <Controller
+              name="kelurahanId"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="kelurahanId">Kelurahan</FieldLabel>
+                  <SearchableSelect
+                    value={field.value?.toString()}
+                    onValueChange={(val) => field.onChange(Number(val))}
+                    options={kelurahans.map((item) => ({
+                      value: item.id.toString(),
+                      label: item.nama_kelurahan,
+                    }))}
+                    placeholder="Pilih kelurahan"
+                    emptyText="Tidak ada kelurahan"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="tgl_perkiraan_beli"
+              control={form.control}
+              render={({ field, fieldState }) => {
+                const selectedDate = field.value
+                  ? new Date(field.value)
+                  : undefined;
+
+                return (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="tgl_perkiraan_beli">
+                      Tanggal Perkiraan Beli (Opsional)
+                    </FieldLabel>
+
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={cn(
+                            "justify-start font-normal w-full",
+                            !field.value && "text-muted-foreground",
+                          )}
+                        >
+                          {selectedDate ? (
+                            format(selectedDate, "PPP")
+                          ) : (
+                            <span>Pilih Tanggal</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={(date) => {
+                            if (!date) {
+                              field.onChange(undefined);
+                              return;
+                            }
+                            field.onChange(date);
+                          }}
+                          defaultMonth={selectedDate}
+                        />
+                      </PopoverContent>
+                    </Popover>
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+          </div>
+        </FieldGroup>
+      </div>
+
+      <div className="sticky -bottom-4 border-t pt-4 pb-4 -mx-4 px-4 mt-6 z-10">
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? <Loader className="mr-2 animate-spin" /> : null}
+          {loading ? "Memproses..." : "Buat Prospek"}
+        </Button>
+      </div>
     </form>
   );
 }
