@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { createSearchHandler, toOptions } from "@/lib/search-utils";
 
 const formSchema = z.object({
   nama_konsumen: z.string().min(3, "Nama minimal 3 karakter"),
@@ -297,17 +298,11 @@ export function CreateProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    onSearch={async (q) => {
-                      const res = await searchSubSumberProspek(q);
-                      return res.map((i) => ({
-                        value: i.id,
-                        label: i.nama_subsumber,
-                      }));
-                    }}
-                    options={initialSubSumbers.map((i) => ({
-                      value: i.id,
-                      label: i.nama_subsumber,
-                    }))}
+                    onSearch={createSearchHandler(
+                      searchSubSumberProspek,
+                      "nama_subsumber",
+                    )}
+                    options={toOptions(initialSubSumbers, "nama_subsumber")}
                     placeholder="Pilih sumber"
                     emptyText="Tidak ada sumber prospek"
                   />
@@ -327,17 +322,8 @@ export function CreateProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    onSearch={async (q) => {
-                      const res = await searchModels(q);
-                      return res.map((i) => ({
-                        value: i.id,
-                        label: i.nama_model,
-                      }));
-                    }}
-                    options={initialModels.map((i) => ({
-                      value: i.id,
-                      label: i.nama_model,
-                    }))}
+                    onSearch={createSearchHandler(searchModels, "nama_model")}
+                    options={toOptions(initialModels, "nama_model")}
                     placeholder="Pilih model motor"
                     emptyText="Tidak ada model motor"
                   />
@@ -356,14 +342,8 @@ export function CreateProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    onSearch={async (q) => {
-                      const res = await searchWarnas(q);
-                      return res.map((i) => ({ value: i.id, label: i.warna }));
-                    }}
-                    options={initialWarnas.map((i) => ({
-                      value: i.id,
-                      label: i.warna,
-                    }))}
+                    onSearch={createSearchHandler(searchWarnas, "warna")}
+                    options={toOptions(initialWarnas, "warna")}
                     placeholder="Pilih warna"
                     emptyText="Tidak ada warna"
                   />
@@ -383,17 +363,11 @@ export function CreateProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    onSearch={async (q) => {
-                      const res = await searchKelurahans(q);
-                      return res.map((i) => ({
-                        value: i.id,
-                        label: i.nama_kelurahan,
-                      }));
-                    }}
-                    options={initialKelurahans.map((i) => ({
-                      value: i.id,
-                      label: i.nama_kelurahan,
-                    }))}
+                    onSearch={createSearchHandler(
+                      searchKelurahans,
+                      "nama_kelurahan",
+                    )}
+                    options={toOptions(initialKelurahans, "nama_kelurahan")}
                     placeholder="Pilih kelurahan"
                     emptyText="Tidak ada kelurahan"
                   />

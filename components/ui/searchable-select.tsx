@@ -12,10 +12,7 @@ import { Check, ChevronDown, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
-export interface Option {
-  value: string;
-  label: string;
-}
+import { Option } from "@/lib/search-utils";
 
 interface SearchableSelectProps {
   value?: string;
