@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   InputGroup,
   InputGroupAddon,
@@ -28,10 +28,30 @@ import {
 } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
 import { InfoIcon, PlusIcon, Search } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  totalCount: number;
+  pageCount: number;
+  currentPage: number;
+  pageSize: number;
   onSelectRow?: (row: TData) => void;
   onAdd?: () => void;
   onEdit?: (row: TData) => void;
@@ -41,10 +61,18 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
+  totalCount,
+  pageCount,
+  currentPage,
+  pageSize,
   onSelectRow,
   onAdd,
   onShowDetail,
 }: DataTableProps<TData, TValue>) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   // State
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -60,11 +88,37 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    manualPagination: true,
+    pageCount: pageCount,
     state: {
       sorting,
       columnFilters,
+      pagination: {
+        pageIndex: currentPage - 1,
+        pageSize: pageSize,
+      },
     },
   });
+
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(name, value);
+      return params.toString();
+    },
+    [searchParams],
+  );
+
+  const handlePageChange = (page: number) => {
+    router.push(pathname + "?" + createQueryString("page", page.toString()));
+  };
+
+  const handlePageSizeChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("pageSize", value);
+    params.set("page", "1"); // Reset to page 1 on page size change
+    router.push(pathname + "?" + params.toString());
+  };
 
   const handleRowClick = (row: TData) => {
     setSelectedRow(row);
@@ -72,8 +126,8 @@ export function DataTable<TData, TValue>({
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between pb-4 gap-3">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center gap-2">
           <InputGroup className="max-w-sm">
             <InputGroupAddon>
@@ -166,6 +220,89 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span>Total {totalCount} data</span>
+          <div className="flex items-center gap-2">
+            <span>Baris per halaman:</span>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={handlePageSizeChange}
+            >
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue placeholder={pageSize.toString()} />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[10, 20, 30, 40, 50].map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <Pagination className="justify-end w-auto mx-0">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage > 1) handlePageChange(currentPage - 1);
+                }}
+                className={
+                  currentPage <= 1
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
+
+            {/* Simple page indicators */}
+            {Array.from({ length: Math.min(5, pageCount) }, (_, i) => {
+              // Logic to show pages around current page could be added here
+              let pageNum = i + 1;
+              if (pageCount > 5 && currentPage > 3) {
+                pageNum = currentPage - 3 + i + 1;
+                if (pageNum > pageCount) pageNum = pageCount - (4 - i);
+              }
+
+              return (
+                <PaginationItem key={pageNum}>
+                  <PaginationLink
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(pageNum);
+                    }}
+                    isActive={currentPage === pageNum}
+                  >
+                    {pageNum}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage < pageCount) handlePageChange(currentPage + 1);
+                }}
+                className={
+                  currentPage >= pageCount
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );

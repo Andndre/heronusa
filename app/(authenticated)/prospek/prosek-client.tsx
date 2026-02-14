@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getProspekData, getDropdownData } from "@/server/prospek";
+import { getDropdownData } from "@/server/prospek";
 import { getColumns } from "./columns";
 import { DataTable } from "./data-table";
 import { useRightSidebar } from "@/components/app-sidebar";
@@ -11,9 +11,17 @@ import RowDetail from "./row-detail";
 
 export function ProspekClientComponent({
   data,
+  totalCount,
+  pageCount,
+  currentPage,
+  pageSize,
   dropdownData,
 }: {
-  data: Awaited<ReturnType<typeof getProspekData>>;
+  data: Prospek[];
+  totalCount: number;
+  pageCount: number;
+  currentPage: number;
+  pageSize: number;
   dropdownData: Awaited<ReturnType<typeof getDropdownData>>;
 }) {
   const { setContent, setTitle, setDescription, setOpen, open, view, setView } =
@@ -102,6 +110,10 @@ export function ProspekClientComponent({
     <DataTable
       columns={columns}
       data={data}
+      totalCount={totalCount}
+      pageCount={pageCount}
+      currentPage={currentPage}
+      pageSize={pageSize}
       onSelectRow={handleSelectRow}
       onShowDetail={handleShowDetail}
       onAdd={handleAdd}

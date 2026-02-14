@@ -39,27 +39,39 @@ export async function getDropdownData() {
   };
 }
 
-export async function getProspekData() {
+export async function getProspekData(page: number = 1, pageSize: number = 10) {
   const { session } = await getCurrentUser();
   const activeOrganizationId = session?.activeOrganizationId;
 
+  const skip = (page - 1) * pageSize;
+
   // TODO: Add authorization
-  const prospek = await prisma.prospek.findMany({
-    where: {
-      deletedAt: null,
-      cabangId: activeOrganizationId ?? undefined,
-    },
-    include: {
-      cabang: true,
-      subSumber: true,
-      model: true,
-      warna: true,
-      kelurahan: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const [prospek, totalCount] = await Promise.all([
+    prisma.prospek.findMany({
+      where: {
+        deletedAt: null,
+        cabangId: activeOrganizationId ?? undefined,
+      },
+      include: {
+        cabang: true,
+        subSumber: true,
+        model: true,
+        warna: true,
+        kelurahan: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: pageSize,
+    }),
+    prisma.prospek.count({
+      where: {
+        deletedAt: null,
+        cabangId: activeOrganizationId ?? undefined,
+      },
+    }),
+  ]);
 
   // Convert Decimal fields to numbers for client components
   const serializedProspek = prospek.map((item) => ({
@@ -70,10 +82,15 @@ export async function getProspekData() {
     },
   }));
 
-  return serializedProspek;
+  return {
+    data: serializedProspek,
+    totalCount,
+    pageCount: Math.ceil(totalCount / pageSize),
+  };
 }
 
-export type Prospek = Awaited<ReturnType<typeof getProspekData>>[number];
+export type ProspekResponse = Awaited<ReturnType<typeof getProspekData>>;
+export type Prospek = ProspekResponse["data"][number];
 
 export async function createProspek(
   data: Omit<Prisma.ProspekCreateInput, "cabang" | "sales" | "id">,

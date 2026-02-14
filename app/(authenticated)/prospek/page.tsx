@@ -1,9 +1,17 @@
 import { getProspekData, getDropdownData } from "@/server/prospek";
 import { ProspekClientComponent } from "./prosek-client";
 
-export default async function ProspekPage() {
-  const [data, dropdownData] = await Promise.all([
-    getProspekData(),
+export default async function ProspekPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; pageSize?: string }>;
+}) {
+  const { page, pageSize } = await searchParams;
+  const currentPage = Number(page) || 1;
+  const currentPageSize = Number(pageSize) || 10;
+
+  const [prospekResponse, dropdownData] = await Promise.all([
+    getProspekData(currentPage, currentPageSize),
     getDropdownData(),
   ]);
 
@@ -16,7 +24,14 @@ export default async function ProspekPage() {
         </p>
       </div>
       <div>
-        <ProspekClientComponent data={data} dropdownData={dropdownData} />
+        <ProspekClientComponent
+          data={prospekResponse.data}
+          totalCount={prospekResponse.totalCount}
+          pageCount={prospekResponse.pageCount}
+          currentPage={currentPage}
+          pageSize={currentPageSize}
+          dropdownData={dropdownData}
+        />
       </div>
     </div>
   );
