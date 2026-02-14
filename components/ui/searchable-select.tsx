@@ -88,7 +88,11 @@ export function SearchableSelect({
 
     // Skip the very first empty search if we already have initial options.
     // This avoids redundant network calls on mount.
-    if (isInitialRender.current && search === "" && internalOptions.length > 0) {
+    if (
+      isInitialRender.current &&
+      search === "" &&
+      internalOptions.length > 0
+    ) {
       isInitialRender.current = false;
       return;
     }
@@ -128,7 +132,7 @@ export function SearchableSelect({
     }, 400);
 
     return () => clearTimeout(handler);
-  }, [search, onSearch, value, externalOptions]);
+  }, [search, onSearch, value, externalOptions, internalOptions.length]);
 
   // Klik di luar → tutup dropdown
   React.useEffect(() => {
@@ -266,9 +270,7 @@ export function SearchableSelect({
         />
 
         <div className="flex items-center gap-1">
-          {isLoading && (
-            <Loader2 className="h-3 w-3 animate-spin opacity-50" />
-          )}
+          {isLoading && <Loader2 className="h-3 w-3 animate-spin opacity-50" />}
 
           {value && !open && (
             <button
