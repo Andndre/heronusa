@@ -7,12 +7,10 @@ import { Prisma } from "@/lib/generated/prisma/client";
 export async function getDropdownData() {
   const [models, warnas, subSumberProspek, kelurahans] = await Promise.all([
     prisma.masterModel.findMany({
-      where: { id: { gt: 0 } },
       orderBy: { nama_model: "asc" },
       take: 100,
     }),
     prisma.masterWarna.findMany({
-      where: { id: { gt: 0 } },
       orderBy: { warna: "asc" },
       take: 100,
     }),
