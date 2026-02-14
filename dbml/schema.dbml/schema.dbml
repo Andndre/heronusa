@@ -1,0 +1,711 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table user {
+  id String [pk]
+  name String [not null]
+  email String [unique, not null]
+  emailVerified Boolean [not null, default: false]
+  image String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  batas_diskon Decimal
+  sessions session [not null]
+  accounts account [not null]
+  teammembers team_member [not null]
+  members member [not null]
+  invitations invitation [not null]
+  suratJalans surat_jalan [not null]
+  prospeks prospek [not null]
+  spvApprovedSPKs spk [not null]
+  mgrApprovedSPKs spk [not null]
+  faktursValidated faktur [not null]
+  followUps follow_up [not null]
+  pelanggans pelanggan [not null]
+  pembayarans pembayaran [not null]
+  dokumenKendaraans dokumen_kendaraan [not null]
+  logPersetujuans log_persetujuan [not null]
+  pembelianUnits pembelian_unit [not null]
+}
+
+Table session {
+  id String [pk]
+  expiresAt DateTime [not null]
+  token String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  ipAddress String
+  userAgent String
+  userId String [not null]
+  user user [not null]
+  activeOrganizationId String
+  activeTeamId String
+}
+
+Table account {
+  id String [pk]
+  accountId String [not null]
+  providerId String [not null]
+  userId String [not null]
+  user user [not null]
+  accessToken String
+  refreshToken String
+  idToken String
+  accessTokenExpiresAt DateTime
+  refreshTokenExpiresAt DateTime
+  scope String
+  password String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table verification {
+  id String [pk]
+  identifier String [not null]
+  value String [not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table organization {
+  id String [pk]
+  name String [not null]
+  slug String [unique, not null]
+  logo String
+  createdAt DateTime [default: `now()`, not null]
+  metadata String
+  teams team [not null]
+  members member [not null]
+  invitations invitation [not null]
+  prospeks prospek [not null]
+  pembelianUnits pembelian_unit [not null]
+  fakturs faktur [not null]
+  units unit [not null]
+  pembayarans pembayaran [not null]
+  suratJalans surat_jalan [not null]
+  leasingOrders leasing_order [not null]
+}
+
+Table team {
+  id String [pk]
+  name String [not null]
+  organizationId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  organization organization [not null]
+  teammembers team_member [not null]
+}
+
+Table team_member {
+  id String [pk]
+  teamId String [not null]
+  team team [not null]
+  userId String [not null]
+  user user [not null]
+  createdAt DateTime [default: `now()`]
+}
+
+Table member {
+  id String [pk]
+  organizationId String [not null]
+  organization organization [not null]
+  userId String [not null]
+  user user [not null]
+  role String [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table invitation {
+  id String [pk]
+  organizationId String [not null]
+  email String [not null]
+  role String
+  teamId String
+  status String [not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  inviterId String [not null]
+  organization organization [not null]
+  user user [not null]
+}
+
+Table kabupaten {
+  id String [pk]
+  nama_kabupaten String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  kecamatan kecamatan [not null]
+}
+
+Table kecamatan {
+  id String [pk]
+  nama_kecamatan String [not null]
+  kabupatenId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  kelurahan kelurahan [not null]
+  kabupaten kabupaten [not null]
+}
+
+Table kelurahan {
+  id String [pk]
+  nama_kelurahan String [not null]
+  kecamatanId String [not null]
+  latitude Float
+  longitude Float
+  prospek prospek [not null]
+  pelanggan pelanggan [not null]
+  kecamatan kecamatan [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  spks spk [not null]
+}
+
+Table master_model {
+  id String [pk]
+  nama_model String [not null]
+  kategori String [not null]
+  subkategori String [not null]
+  cc Int [not null]
+  series String [not null]
+  harga_otr Decimal [not null]
+  prospek prospek [not null]
+  unit unit [not null]
+  pembelianDetails pembelian_unit_detail [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table master_warna {
+  id String [pk]
+  warna String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  prospek prospek [not null]
+  unit unit [not null]
+  pembelianDetails pembelian_unit_detail [not null]
+}
+
+Table sumber_prospek {
+  id String [pk]
+  nama_sumber String [not null]
+  status StatusSumberProspek [not null, default: 'ACTIVE']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  subSumberProspek sub_sumber_prospek [not null]
+}
+
+Table sub_sumber_prospek {
+  id String [pk]
+  nama_subsumber String [not null]
+  sumberProspekId String [not null]
+  status StatusSumberProspek [not null, default: 'ACTIVE']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  prospek prospek [not null]
+  sumberProspek sumber_prospek [not null]
+}
+
+Table prospek {
+  id String [pk]
+  nama_konsumen String [not null]
+  alamat_konsumen String
+  hp1 String [not null]
+  hp2 String
+  kategori_prospek KategoriProspek [not null]
+  status StatusProspek [not null, default: 'BARU']
+  tipe_pembayaran TipePembayaran [not null]
+  tgl_perkiraan_beli DateTime
+  salesId String [not null]
+  subSumberId String [not null]
+  modelId String [not null]
+  warnaId String [not null]
+  kelurahanId String [not null]
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  cabangId String [not null]
+  spkId String [unique]
+  fakturId String [unique]
+  pelangganId String
+  pelanggan pelanggan
+  spk spk
+  cabang organization [not null]
+  sales user [not null]
+  subSumber sub_sumber_prospek [not null]
+  model master_model [not null]
+  warna master_warna [not null]
+  kelurahan kelurahan [not null]
+  followUps follow_up [not null]
+  pembayarans pembayaran [not null]
+}
+
+Table spk {
+  id String [pk]
+  nomorSPK String [unique, not null]
+  tanggal DateTime [not null]
+  totalTagihan Decimal [not null]
+  totalDibayar Decimal [not null, default: 0]
+  alamatPengiriman String [not null]
+  idKelurahanPengiriman String [not null]
+  diskonPengajuan Decimal
+  diskonDisetujui Decimal
+  spv_approval_status ApprovalStatus
+  spv_approval_by String
+  spv_approval_date DateTime
+  manager_approval_status ApprovalStatus
+  manager_approval_by String
+  manager_approval_date DateTime
+  pelangganId String [not null]
+  unitId String [unique, not null]
+  fakturId String [unique]
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  faktur faktur
+  kelurahanPengiriman kelurahan [not null]
+  pelanggan pelanggan [not null]
+  spvApprovedBy user
+  mgrApprovedBy user
+  unit unit [not null]
+  logApprovals log_persetujuan [not null]
+  pembayaran pembayaran [not null]
+  prospek prospek
+}
+
+Table follow_up {
+  id String [pk]
+  prospekId String [not null]
+  salesId String [not null]
+  tanggal DateTime [not null]
+  catatan String
+  createdAt DateTime [default: `now()`, not null]
+  status StatusProspek [not null]
+  prospek prospek [not null]
+  sales user [not null]
+}
+
+Table pelanggan {
+  id String [pk]
+  nama String [not null]
+  nik String [unique, not null]
+  noHp String [not null]
+  alamatLengkap String
+  kelurahanId String [not null]
+  createdById String [not null]
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  kelurahan kelurahan [not null]
+  createdBy user [not null]
+  prospeks prospek [not null]
+  spks spk [not null]
+  analitik analitik
+}
+
+Table pembelian_unit {
+  id String [pk]
+  nomorNotaDebet String [unique, not null]
+  nomorFaktur String [unique, not null]
+  tanggalNota DateTime [not null]
+  cabangId String [not null]
+  totalUnit Int [not null]
+  createdById String [not null]
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  fakturId String [unique]
+  faktur faktur
+  cabang organization [not null]
+  units unit [not null]
+  createdBy user [not null]
+  details pembelian_unit_detail [not null]
+}
+
+Table pembelian_unit_detail {
+  id String [pk]
+  pembelianUnitId String [not null]
+  modelId String [not null]
+  warnaId String [not null]
+  jumlah Int [not null]
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  pembelianUnit pembelian_unit [not null]
+  model master_model [not null]
+  warna master_warna [not null]
+}
+
+Table log_persetujuan {
+  id String [pk]
+  spkId String [not null]
+  approverId String [not null]
+  approval_role String [not null]
+  status ApprovalStatus [not null]
+  catatan String
+  createdAt DateTime [default: `now()`, not null]
+  spk spk [not null]
+  approver user [not null]
+}
+
+Table faktur {
+  id String [pk]
+  nomorFaktur String [unique, not null]
+  tanggal DateTime [not null]
+  validatedById String [not null]
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  jenisFaktur JenisFaktur [not null]
+  cabangId String [not null]
+  cabang organization [not null]
+  validatedBy user [not null]
+  suratJalan surat_jalan [not null]
+  pembayaran pembayaran [not null]
+  dokumenKendaraans dokumen_kendaraan
+  pembelianUnit pembelian_unit
+  spk spk
+}
+
+Table leasing {
+  id String [pk]
+  nama String [not null]
+  kontak String
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  leasingOrders leasing_order [not null]
+  pembayaran pembayaran [not null]
+}
+
+Table leasing_order {
+  id String [pk]
+  spkId String [unique, not null]
+  leasingId String [not null]
+  nomorPO String
+  jumlahPiutang Decimal [not null]
+  statusCair StatusLeasingOrder [not null, default: 'PENDING']
+  tanggalCair DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  cabangId String [not null]
+  pembayaranId String [unique]
+  cabang organization [not null]
+  leasing leasing [not null]
+  pembayaran pembayaran
+}
+
+Table unit {
+  id String [pk]
+  nomorRangka String [unique, not null]
+  nomorMesin String [unique, not null]
+  tahun Int [not null]
+  status StatusUnit [not null]
+  modelId String [not null]
+  warnaId String [not null]
+  pembelianUnitId String [not null]
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  cabangId String [not null]
+  cabang organization [not null]
+  model master_model [not null]
+  warna master_warna [not null]
+  pembelianUnit pembelian_unit [not null]
+  spk spk
+  dokumen dokumen_kendaraan
+}
+
+Table surat_jalan {
+  id String [pk]
+  nomorSuratJalan String [unique, not null]
+  fakturId String [unique, not null]
+  isOverridden Boolean [not null, default: false]
+  overrideById String
+  overrideReason String
+  status StatusPengiriman [not null, default: 'DIPROSES']
+  tanggalKirim DateTime
+  tanggalTerima DateTime
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  cabangId String [not null]
+  faktur faktur [not null]
+  overriddenBy user
+  cabang organization [not null]
+}
+
+Table pembayaran {
+  id String [pk]
+  prospekId String
+  fakturId String
+  leasingId String
+  jumlah Decimal [not null]
+  jenis JenisPembayaran [not null]
+  metode MetodePembayaran [not null]
+  buktiBayar String
+  createdById String [not null]
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  cabangId String [not null]
+  cabang organization [not null]
+  propek prospek
+  faktur faktur
+  leasing leasing
+  createdBy user [not null]
+  leasingOrder leasing_order
+  spk spk
+  sPKId String
+}
+
+Table dokumen_kendaraan {
+  id String [pk]
+  unitId String [unique, not null]
+  tglFakturMainDealer DateTime
+  tglFakturMainDealerDiterima DateTime
+  tglPengajuanSamsat DateTime
+  tglStnkDiterima DateTime
+  tglStnkDiserahkan DateTime
+  tglBpkbDiterima DateTime
+  tglBpkbDiserahkan DateTime
+  noPolisi String
+  nomorBpkb String
+  status StatusDokumen [not null, default: 'PENDING_FAKTUR']
+  deletedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  updatedById String
+  fakturId String [unique]
+  unit unit [not null]
+  updatedBy user
+  faktur faktur
+}
+
+Table analitik {
+  id String [pk]
+  pelangganId String [unique, not null]
+  rfts_recency Int [not null]
+  rfts_frequency Int [not null]
+  rfts_tenure Int [not null]
+  rfts_segment ProductSegment [not null]
+  clusterLabel LoyaltyCluster [not null]
+  deletedAt DateTime
+  updatedAt DateTime [not null]
+  pelanggan pelanggan [not null]
+}
+
+Enum StatusSumberProspek {
+  ACTIVE
+  INACTIVE
+}
+
+Enum StatusProspek {
+  BARU
+  FOLLOW_UP
+  PENGAJUAN_LEASING
+  DEAL
+  SPK
+  GUGUR
+}
+
+Enum KategoriProspek {
+  HOT
+  WARM
+  COLD
+}
+
+Enum ApprovalStatus {
+  AUTO_APPROVED
+  PENDING_SPV
+  PENDING_MANAGER
+  APPROVED
+  REJECTED
+}
+
+Enum TipePembayaran {
+  CASH
+  CREDIT
+}
+
+Enum JenisFaktur {
+  SPK
+  PEMBELIAN_UNIT
+  DOKUMEN_KENDARAAN
+}
+
+Enum StatusLeasingOrder {
+  PENDING
+  CAIR
+  DITOLAK
+}
+
+Enum StatusUnit {
+  GUDANG
+  PDC
+  NRFS
+  SHOWROOM
+  BOOKED
+  SOLD
+}
+
+Enum StatusPengiriman {
+  DIPROSES
+  DIKIRIM
+  DITERIMA
+}
+
+Enum JenisPembayaran {
+  UANG_TITIPAN
+  DP
+  PELUNASAN
+}
+
+Enum MetodePembayaran {
+  CASH
+  TRANSFER
+}
+
+Enum StatusDokumen {
+  PENDING_FAKTUR
+  PROSES_SAMSAT
+  STNK_DITERIMA
+  STNK_DISERAHKAN
+  BPKB_DITERIMA
+  BPKB_DISERAHKAN
+}
+
+Enum LoyaltyCluster {
+  LOYAL
+  POTENTIAL
+  STANDARD
+  AT_RISK
+  DORMANT
+}
+
+Enum ProductSegment {
+  Matic
+  Sport
+  Cub
+  Listrik
+}
+
+Ref: session.userId > user.id [delete: Cascade]
+
+Ref: account.userId > user.id [delete: Cascade]
+
+Ref: team.organizationId > organization.id [delete: Cascade]
+
+Ref: team_member.teamId > team.id [delete: Cascade]
+
+Ref: team_member.userId > user.id [delete: Cascade]
+
+Ref: member.organizationId > organization.id [delete: Cascade]
+
+Ref: member.userId > user.id [delete: Cascade]
+
+Ref: invitation.organizationId > organization.id [delete: Cascade]
+
+Ref: invitation.inviterId > user.id [delete: Cascade]
+
+Ref: kecamatan.kabupatenId > kabupaten.id [delete: Cascade]
+
+Ref: kelurahan.kecamatanId > kecamatan.id [delete: Cascade]
+
+Ref: sub_sumber_prospek.sumberProspekId > sumber_prospek.id [delete: Cascade]
+
+Ref: prospek.pelangganId > pelanggan.id [delete: Set Null]
+
+Ref: prospek.spkId - spk.id [delete: Set Null]
+
+Ref: prospek.cabangId > organization.id [delete: Restrict]
+
+Ref: prospek.salesId > user.id [delete: Restrict]
+
+Ref: prospek.subSumberId > sub_sumber_prospek.id [delete: Restrict]
+
+Ref: prospek.modelId > master_model.id [delete: Restrict]
+
+Ref: prospek.warnaId > master_warna.id [delete: Restrict]
+
+Ref: prospek.kelurahanId > kelurahan.id [delete: Restrict]
+
+Ref: spk.fakturId - faktur.id [delete: Set Null]
+
+Ref: spk.idKelurahanPengiriman > kelurahan.id [delete: Restrict]
+
+Ref: spk.pelangganId > pelanggan.id [delete: Restrict]
+
+Ref: spk.spv_approval_by > user.id [delete: Set Null]
+
+Ref: spk.manager_approval_by > user.id [delete: Set Null]
+
+Ref: spk.unitId - unit.id [delete: Restrict]
+
+Ref: follow_up.prospekId > prospek.id [delete: Cascade]
+
+Ref: follow_up.salesId > user.id [delete: Restrict]
+
+Ref: pelanggan.kelurahanId > kelurahan.id [delete: Restrict]
+
+Ref: pelanggan.createdById > user.id [delete: Restrict]
+
+Ref: pembelian_unit.fakturId - faktur.id [delete: Set Null]
+
+Ref: pembelian_unit.cabangId > organization.id [delete: Restrict]
+
+Ref: pembelian_unit.createdById > user.id [delete: Restrict]
+
+Ref: pembelian_unit_detail.pembelianUnitId > pembelian_unit.id [delete: Cascade]
+
+Ref: pembelian_unit_detail.modelId > master_model.id [delete: Restrict]
+
+Ref: pembelian_unit_detail.warnaId > master_warna.id [delete: Restrict]
+
+Ref: log_persetujuan.spkId > spk.id [delete: Cascade]
+
+Ref: log_persetujuan.approverId > user.id [delete: Restrict]
+
+Ref: faktur.cabangId > organization.id [delete: Restrict]
+
+Ref: faktur.validatedById > user.id [delete: Restrict]
+
+Ref: leasing_order.cabangId > organization.id [delete: Restrict]
+
+Ref: leasing_order.leasingId > leasing.id [delete: Restrict]
+
+Ref: leasing_order.pembayaranId - pembayaran.id [delete: Set Null]
+
+Ref: unit.cabangId > organization.id [delete: Restrict]
+
+Ref: unit.modelId > master_model.id [delete: Restrict]
+
+Ref: unit.warnaId > master_warna.id [delete: Restrict]
+
+Ref: unit.pembelianUnitId > pembelian_unit.id [delete: Restrict]
+
+Ref: surat_jalan.fakturId > faktur.id [delete: Cascade]
+
+Ref: surat_jalan.overrideById > user.id [delete: Set Null]
+
+Ref: surat_jalan.cabangId > organization.id [delete: Restrict]
+
+Ref: pembayaran.cabangId > organization.id [delete: Restrict]
+
+Ref: pembayaran.prospekId > prospek.id [delete: Cascade]
+
+Ref: pembayaran.fakturId > faktur.id [delete: Set Null]
+
+Ref: pembayaran.leasingId > leasing.id [delete: Set Null]
+
+Ref: pembayaran.createdById > user.id [delete: Restrict]
+
+Ref: pembayaran.sPKId > spk.id
+
+Ref: dokumen_kendaraan.unitId - unit.id [delete: Cascade]
+
+Ref: dokumen_kendaraan.updatedById > user.id [delete: Set Null]
+
+Ref: dokumen_kendaraan.fakturId - faktur.id [delete: Set Null]
+
+Ref: analitik.pelangganId - pelanggan.id [delete: Cascade]

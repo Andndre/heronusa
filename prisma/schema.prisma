@@ -1,3 +1,8 @@
+generator dbml {
+  provider = "prisma-dbml-generator"
+  output   = "../dbml/schema.dbml"
+}
+
 generator client {
   provider = "prisma-client"
   output   = "../lib/generated/prisma"
