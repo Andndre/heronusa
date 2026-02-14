@@ -177,7 +177,7 @@ model Invitation {
 // MASTER DATA
 
 model Kabupaten {
-  id             Int      @id @default(autoincrement()) @db.UnsignedInt
+  id             String   @id @default(uuid()) @db.VarChar(36)
   nama_kabupaten String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -188,9 +188,9 @@ model Kabupaten {
 }
 
 model Kecamatan {
-  id             Int      @id @default(autoincrement()) @db.UnsignedInt
+  id             String   @id @default(uuid()) @db.VarChar(36)
   nama_kecamatan String
-  kabupatenId    Int      @map("kabupatenId") @db.UnsignedInt
+  kabupatenId    String   @db.VarChar(36)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -202,9 +202,9 @@ model Kecamatan {
 }
 
 model Kelurahan {
-  id             Int    @id @default(autoincrement()) @db.UnsignedInt
+  id             String @id @default(uuid()) @db.VarChar(36)
   nama_kelurahan String
-  kecamatanId    Int    @map("kecamatanId") @db.UnsignedInt
+  kecamatanId    String @db.VarChar(36)
   latitude       Float?
   longitude      Float?
 
@@ -222,7 +222,7 @@ model Kelurahan {
 }
 
 model MasterModel {
-  id          Int     @id @default(autoincrement()) @db.UnsignedInt
+  id          String  @id @default(uuid()) @db.VarChar(36)
   nama_model  String
   kategori    String
   subkategori String
@@ -242,7 +242,7 @@ model MasterModel {
 }
 
 model MasterWarna {
-  id        Int      @id @default(autoincrement()) @db.UnsignedInt
+  id        String   @id @default(uuid()) @db.VarChar(36)
   warna     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -260,7 +260,7 @@ enum StatusSumberProspek {
 }
 
 model SumberProspek {
-  id          Int                 @id @default(autoincrement()) @db.UnsignedInt
+  id          String              @id @default(uuid()) @db.VarChar(36)
   nama_sumber String
   status      StatusSumberProspek @default(ACTIVE)
   createdAt   DateTime            @default(now())
@@ -272,9 +272,9 @@ model SumberProspek {
 }
 
 model SubSumberProspek {
-  id              Int                 @id @default(autoincrement()) @db.UnsignedInt
+  id              String              @id @default(uuid()) @db.VarChar(36)
   nama_subsumber  String
-  sumberProspekId Int                 @db.UnsignedInt
+  sumberProspekId String              @db.VarChar(36)
   status          StatusSumberProspek @default(ACTIVE)
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
@@ -312,17 +312,19 @@ model Prospek {
   tipe_pembayaran    TipePembayaran
   tgl_perkiraan_beli DateTime?
   salesId            String
-  subSumberId        Int             @db.UnsignedInt
-  modelId            Int             @db.UnsignedInt
-  warnaId            Int             @db.UnsignedInt
-  kelurahanId        Int             @db.UnsignedInt
+  subSumberId        String          @db.VarChar(36)
+  modelId            String          @db.VarChar(36)
+  warnaId            String          @db.VarChar(36)
+  kelurahanId        String          @db.VarChar(36)
   deletedAt          DateTime?
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
   cabangId           String
   spkId              String?         @unique @db.VarChar(36)
   fakturId           String?         @unique @db.VarChar(36)
+  pelangganId        String?         @db.VarChar(36) // RO: jika prospek sudah pernah menjadi pelanggan, maka data pelangganId akan terisi, dan ketika prospek DEAL, otomatis dibuatkan SPK baru dengan relasi ke pelanggan yang sama
 
+  pelanggan   Pelanggan?       @relation(fields: [pelangganId], references: [id], onDelete: SetNull)
   spk         SPK?             @relation(fields: [spkId], references: [id], onDelete: SetNull)
   cabang      Organization     @relation(fields: [cabangId], references: [id], onDelete: Restrict)
   sales       User             @relation("ProspekSales", fields: [salesId], references: [id], onDelete: Restrict)
@@ -363,7 +365,7 @@ model SPK {
   totalTagihan            Decimal
   totalDibayar            Decimal         @default(0)
   alamatPengiriman        String
-  idKelurahanPengiriman   Int             @db.UnsignedInt
+  idKelurahanPengiriman   String          @db.VarChar(36)
   diskonPengajuan         Decimal?
   diskonDisetujui         Decimal?
   spv_approval_status     ApprovalStatus?
@@ -372,8 +374,8 @@ model SPK {
   manager_approval_status ApprovalStatus?
   manager_approval_by     String?
   manager_approval_date   DateTime?
-  pelangganId             String
-  unitId                  String          @unique
+  pelangganId             String          @db.VarChar(36)
+  unitId                  String          @unique @db.VarChar(36)
   fakturId                String?         @unique @db.VarChar(36)
 
   deletedAt DateTime?
@@ -415,12 +417,12 @@ model FollowUp {
 }
 
 model Pelanggan {
-  id            String    @id
+  id            String    @id @default(uuid()) @db.VarChar(36)
   nama          String
   nik           String    @unique
   noHp          String
   alamatLengkap String?
-  kelurahanId   Int       @db.UnsignedInt
+  kelurahanId   String    @db.VarChar(36)
   createdById   String
   deletedAt     DateTime?
   createdAt     DateTime  @default(now())
@@ -428,6 +430,7 @@ model Pelanggan {
 
   kelurahan Kelurahan @relation(fields: [kelurahanId], references: [id], onDelete: Restrict)
   createdBy User      @relation("PelangganSales", fields: [createdById], references: [id], onDelete: Restrict)
+  prospeks  Prospek[]
   spks      SPK[] // Repeat Order (RO)
   analitik  Analitik?
 
@@ -463,10 +466,10 @@ model PembelianUnit {
 }
 
 model PembelianUnitDetail {
-  id              Int       @id @default(autoincrement()) @db.UnsignedInt
+  id              String    @id @default(uuid()) @db.VarChar(36)
   pembelianUnitId String    @db.VarChar(36)
-  modelId         Int       @db.UnsignedInt
-  warnaId         Int       @db.UnsignedInt
+  modelId         String    @db.VarChar(36)
+  warnaId         String    @db.VarChar(36)
   jumlah          Int
   deletedAt       DateTime?
   createdAt       DateTime  @default(now())
@@ -585,13 +588,13 @@ enum StatusUnit {
 }
 
 model Unit {
-  id              String     @id
+  id              String     @id @default(uuid()) @db.VarChar(36)
   nomorRangka     String     @unique
   nomorMesin      String     @unique
   tahun           Int
   status          StatusUnit
-  modelId         Int        @db.UnsignedInt
-  warnaId         Int        @db.UnsignedInt
+  modelId         String     @db.VarChar(36)
+  warnaId         String     @db.VarChar(36)
   pembelianUnitId String     @db.VarChar(36)
   deletedAt       DateTime?
   createdAt       DateTime   @default(now())
@@ -699,8 +702,8 @@ enum StatusDokumen {
 }
 
 model DokumenKendaraan {
-  id                          String        @id
-  unitId                      String        @unique
+  id                          String        @id @default(uuid()) @db.VarChar(36)
+  unitId                      String        @unique @db.VarChar(36)
   tglFakturMainDealer         DateTime?
   tglFakturMainDealerDiterima DateTime?
   tglPengajuanSamsat          DateTime?
@@ -743,8 +746,8 @@ enum ProductSegment {
 }
 
 model Analitik {
-  id             String         @id
-  pelangganId    String         @unique
+  id             String         @id @default(uuid()) @db.VarChar(36)
+  pelangganId    String         @unique @db.VarChar(36)
   rfts_recency   Int
   rfts_frequency Int
   rfts_tenure    Int
