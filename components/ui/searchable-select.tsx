@@ -8,25 +8,32 @@ import { Input } from "@/components/ui/input";
 interface SearchableSelectProps {
   value?: string;
   onValueChange?: (value: string) => void;
+  onSearch?: (query: string) => void;
   options: Array<{ value: string; label: string }>;
   placeholder?: string;
   emptyText?: string;
   className?: string;
   disabled?: boolean;
+  loading?: boolean;
+  selectedLabel?: string;
 }
 
 export function SearchableSelect({
   value,
   onValueChange,
+  onSearch,
   options,
   placeholder = "Pilih...",
   emptyText = "Tidak ada data.",
   className,
   disabled = false,
+  loading = false,
+  selectedLabel,
 }: SearchableSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const [highlightedIndex, setHighlightedIndex] = React.useState(0);
+  const [isTyping, setIsTyping] = React.useState(false);
 
   const containerRef = React.useRef<HTMLDivElement>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
@@ -38,17 +45,43 @@ export function SearchableSelect({
     [options, value],
   );
 
+  const displayLabel = selectedLabel || selectedOption?.label || "";
+
   const filteredOptions = React.useMemo(() => {
-    if (!search) return options;
+    // Jika ada onSearch, kita asumsikan filtering dilakukan di luar (server-side)
+    if (onSearch || !search) return options;
     return options.filter((option) =>
       option.label.toLowerCase().includes(search.toLowerCase()),
     );
-  }, [options, search]);
+  }, [options, search, onSearch]);
 
   // Jaga highlightedIndex tetap valid dan reset ke paling atas saat mencari
   React.useEffect(() => {
     setHighlightedIndex(0);
   }, [filteredOptions]);
+
+  // Trigger onSearch saat input berubah dengan debounce
+  const onSearchRef = React.useRef(onSearch);
+  const isFirstRender = React.useRef(true);
+
+  React.useEffect(() => {
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
+
+  React.useEffect(() => {
+    if (!onSearchRef.current) return;
+
+    // Jangan trigger search jika search kosong (kita pakai options awal)
+    if (search === "") return;
+
+    setIsTyping(true);
+    const handler = setTimeout(() => {
+      onSearchRef.current?.(search);
+      setIsTyping(false);
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [search]);
 
   // Klik di luar → tutup dropdown
   React.useEffect(() => {
@@ -131,6 +164,8 @@ export function SearchableSelect({
     }
   }, [highlightedIndex, open]);
 
+  const isLoading = loading || isTyping;
+
   return (
     <div
       ref={containerRef}
@@ -148,14 +183,19 @@ export function SearchableSelect({
           disabled && "cursor-not-allowed opacity-50",
         )}
         onClick={(e) => {
-          if (!disabled) {
-            // Jika yang diklik adalah input, jangan lakukan toggle (biarkan onFocus yang menangani)
-            // agar tidak terjadi open -> close instan karena bubble-up event.
-            if (e.target !== inputRef.current) {
-              setOpen((prev) => !prev);
+          if (disabled) return;
+
+          // Toggle only if clicking the container or chevron, not the input itself
+          // because input focus already handles opening.
+          if (e.target !== inputRef.current) {
+            if (open) {
+              setOpen(false);
+              setSearch("");
+            } else {
+              setOpen(true);
             }
-            inputRef.current?.focus();
           }
+          inputRef.current?.focus();
         }}
         role="combobox"
         aria-controls={listboxId}
@@ -165,12 +205,16 @@ export function SearchableSelect({
       >
         <Input
           ref={inputRef}
-          value={open ? search : (selectedOption?.label ?? "")}
+          value={open ? search : displayLabel}
           onChange={(e) => {
             setSearch(e.target.value);
             if (!open) setOpen(true);
           }}
-          onFocus={() => !disabled && setOpen(true)}
+          onFocus={(e) => {
+            if (!disabled && !open) {
+              setOpen(true);
+            }
+          }}
           onKeyDown={handleKeyDown}
           placeholder={open ? "Cari..." : placeholder}
           className="h-auto border-0 p-0 shadow-none focus-visible:ring-0"
@@ -178,7 +222,11 @@ export function SearchableSelect({
         />
 
         <div className="flex items-center gap-1">
-          {selectedOption && !open && (
+          {isLoading && (
+            <div className="border-muted-foreground/30 h-3 w-3 animate-spin rounded-full border-2 border-t-transparent" />
+          )}
+
+          {value && !open && (
             <button
               type="button"
               tabIndex={-1}
@@ -208,7 +256,7 @@ export function SearchableSelect({
         >
           {filteredOptions.length === 0 ? (
             <div className="text-muted-foreground py-6 text-center text-sm">
-              {emptyText}
+              {isLoading ? "Mencari..." : emptyText}
             </div>
           ) : (
             <div className="p-1">

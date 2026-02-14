@@ -11,11 +11,17 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
-import { createProspek } from "@/server/prospek";
+import {
+  createProspek,
+  searchKelurahans,
+  searchModels,
+  searchSubSumberProspek,
+  searchWarnas,
+} from "@/server/prospek";
 import {
   Select,
   SelectContent,
@@ -43,7 +49,7 @@ const formSchema = z.object({
   tipe_pembayaran: z.enum(TipePembayaran, {
     message: "Pilih tipe pembayaran",
   }),
-  alamat_konsumen: z.string(),
+  alamat_konsumen: z.string().optional(),
   modelId: z.string({ message: "Pilih model motor" }),
   warnaId: z.string({ message: "Pilih warna" }),
   subSumberId: z.string({ message: "Pilih sumber prospek" }),
@@ -52,6 +58,7 @@ const formSchema = z.object({
 });
 
 export type CreateProspekFormProps = {
+  initialData?: Partial<z.infer<typeof formSchema>>;
   models?: Array<{ id: string; nama_model: string }>;
   warnas?: Array<{ id: string; warna: string }>;
   subSumberProspek?: Array<{ id: string; nama_subsumber: string }>;
@@ -60,30 +67,155 @@ export type CreateProspekFormProps = {
 
 export function CreateProspekForm({
   className,
-  models = [],
-  warnas = [],
-  subSumberProspek = [],
-  kelurahans = [],
+
+  initialData,
+
+  models: initialModels = [],
+
+  warnas: initialWarnas = [],
+
+  subSumberProspek: initialSubSumbers = [],
+
+  kelurahans: initialKelurahans = [],
+
   ...props
 }: React.ComponentProps<"form"> & CreateProspekFormProps) {
   const [loading, setLoading] = useState(false);
 
+  // States for options
+
+  const [models, setModels] = useState<Array<{ value: string; label: string }>>(
+    initialModels.map((i) => ({ value: i.id, label: i.nama_model })),
+  );
+
+  const [warnas, setWarnas] = useState<Array<{ value: string; label: string }>>(
+    initialWarnas.map((i) => ({ value: i.id, label: i.warna })),
+  );
+
+  const [subSumbers, setSubSumbers] = useState<
+    Array<{ value: string; label: string }>
+  >(initialSubSumbers.map((i) => ({ value: i.id, label: i.nama_subsumber })));
+
+  const [kelurahans, setKelurahans] = useState<
+    Array<{ value: string; label: string }>
+  >(initialKelurahans.map((i) => ({ value: i.id, label: i.nama_kelurahan })));
+
+  // Loading states for search
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [loadingWarnas, setLoadingWarnas] = useState(false);
+  const [loadingSubSumbers, setLoadingSubSumbers] = useState(false);
+  const [loadingKelurahans, setLoadingKelurahans] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nama_konsumen: "",
-      hp1: "",
-      hp2: "",
-      kategori_prospek: undefined,
-      tipe_pembayaran: undefined,
-      alamat_konsumen: "",
-      modelId: undefined,
-      warnaId: undefined,
-      kelurahanId: undefined,
-      tgl_perkiraan_beli: undefined,
-      subSumberId: undefined,
+      nama_konsumen: initialData?.nama_konsumen || "",
+      hp1: initialData?.hp1 || "",
+      hp2: initialData?.hp2 || "",
+      kategori_prospek: initialData?.kategori_prospek,
+      tipe_pembayaran: initialData?.tipe_pembayaran,
+      alamat_konsumen: initialData?.alamat_konsumen || "",
+      modelId: initialData?.modelId,
+      warnaId: initialData?.warnaId,
+      kelurahanId: initialData?.kelurahanId,
+      tgl_perkiraan_beli: initialData?.tgl_perkiraan_beli,
+      subSumberId: initialData?.subSumberId,
     },
   });
+
+  const handleSearchModels = useCallback(
+    async (q: string) => {
+      setLoadingModels(true);
+      try {
+        const res = await searchModels(q);
+        const mapped = res.map((i) => ({ value: i.id, label: i.nama_model }));
+        setModels((prev) => {
+          const selected = prev.find(
+            (o) => o.value === form.getValues("modelId"),
+          );
+          if (selected && !mapped.find((o) => o.value === selected.value)) {
+            return [selected, ...mapped];
+          }
+          return mapped;
+        });
+      } finally {
+        setLoadingModels(false);
+      }
+    },
+    [form],
+  );
+
+  const handleSearchWarnas = useCallback(
+    async (q: string) => {
+      setLoadingWarnas(true);
+      try {
+        const res = await searchWarnas(q);
+        const mapped = res.map((i) => ({ value: i.id, label: i.warna }));
+        setWarnas((prev) => {
+          const selected = prev.find(
+            (o) => o.value === form.getValues("warnaId"),
+          );
+          if (selected && !mapped.find((o) => o.value === selected.value)) {
+            return [selected, ...mapped];
+          }
+          return mapped;
+        });
+      } finally {
+        setLoadingWarnas(false);
+      }
+    },
+    [form],
+  );
+
+  const handleSearchSubSumbers = useCallback(
+    async (q: string) => {
+      setLoadingSubSumbers(true);
+      try {
+        const res = await searchSubSumberProspek(q);
+        const mapped = res.map((i) => ({
+          value: i.id,
+          label: i.nama_subsumber,
+        }));
+        setSubSumbers((prev) => {
+          const selected = prev.find(
+            (o) => o.value === form.getValues("subSumberId"),
+          );
+          if (selected && !mapped.find((o) => o.value === selected.value)) {
+            return [selected, ...mapped];
+          }
+          return mapped;
+        });
+      } finally {
+        setLoadingSubSumbers(false);
+      }
+    },
+    [form],
+  );
+
+  const handleSearchKelurahans = useCallback(
+    async (q: string) => {
+      setLoadingKelurahans(true);
+      try {
+        const res = await searchKelurahans(q);
+        const mapped = res.map((i) => ({
+          value: i.id,
+          label: i.nama_kelurahan,
+        }));
+        setKelurahans((prev) => {
+          const selected = prev.find(
+            (o) => o.value === form.getValues("kelurahanId"),
+          );
+          if (selected && !mapped.find((o) => o.value === selected.value)) {
+            return [selected, ...mapped];
+          }
+          return mapped;
+        });
+      } finally {
+        setLoadingKelurahans(false);
+      }
+    },
+    [form],
+  );
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setLoading(true);
@@ -114,16 +246,15 @@ export function CreateProspekForm({
       });
 
       if (!result) {
-        toast.error("Failed to create prospek");
+        toast.error("Gagal membuat prospek");
         return;
       }
 
       toast.success("Prospek berhasil dibuat!");
       form.reset();
-      // Refresh page to show new data
       window.location.reload();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "An error occurred");
+      toast.error(error instanceof Error ? error.message : "Terjadi kesalahan");
     } finally {
       setLoading(false);
     }
@@ -267,7 +398,7 @@ export function CreateProspekForm({
                       <SelectValue placeholder="Pilih Tipe Pembayaran" />
                     </SelectTrigger>
                     <SelectContent>
-                      {["CASH", "CREDIT"].map((item) => (
+                      {Object.values(TipePembayaran).map((item) => (
                         <SelectItem key={item} value={item}>
                           {item}
                         </SelectItem>
@@ -290,10 +421,9 @@ export function CreateProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    options={subSumberProspek.map((item) => ({
-                      value: item.id.toString(),
-                      label: item.nama_subsumber,
-                    }))}
+                    onSearch={handleSearchSubSumbers}
+                    loading={loadingSubSumbers}
+                    options={subSumbers}
                     placeholder="Pilih sumber"
                     emptyText="Tidak ada sumber prospek"
                   />
@@ -313,10 +443,9 @@ export function CreateProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    options={models.map((item) => ({
-                      value: item.id.toString(),
-                      label: item.nama_model,
-                    }))}
+                    onSearch={handleSearchModels}
+                    loading={loadingModels}
+                    options={models}
                     placeholder="Pilih model motor"
                     emptyText="Tidak ada model motor"
                   />
@@ -335,10 +464,9 @@ export function CreateProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    options={warnas.map((item) => ({
-                      value: item.id.toString(),
-                      label: item.warna,
-                    }))}
+                    onSearch={handleSearchWarnas}
+                    loading={loadingWarnas}
+                    options={warnas}
                     placeholder="Pilih warna"
                     emptyText="Tidak ada warna"
                   />
@@ -358,10 +486,9 @@ export function CreateProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    options={kelurahans.map((item) => ({
-                      value: item.id.toString(),
-                      label: item.nama_kelurahan,
-                    }))}
+                    onSearch={handleSearchKelurahans}
+                    loading={loadingKelurahans}
+                    options={kelurahans}
                     placeholder="Pilih kelurahan"
                     emptyText="Tidak ada kelurahan"
                   />

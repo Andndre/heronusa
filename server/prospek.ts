@@ -4,35 +4,95 @@ import prisma from "@/lib/db";
 import { getCurrentUser } from "./user";
 import { Prisma } from "@/lib/generated/prisma/client";
 
+export async function searchModels(query?: string) {
+  const models = await prisma.masterModel.findMany({
+    where: query
+      ? {
+          nama_model: {
+            contains: query,
+          },
+        }
+      : undefined,
+    orderBy: { nama_model: "asc" },
+    take: 50,
+  });
+
+  return models.map((model) => ({
+    id: model.id,
+    nama_model: model.nama_model,
+  }));
+}
+
+export async function searchWarnas(query?: string) {
+  const warnas = await prisma.masterWarna.findMany({
+    where: query
+      ? {
+          warna: {
+            contains: query,
+          },
+        }
+      : undefined,
+    orderBy: { warna: "asc" },
+    take: 50,
+  });
+
+  return warnas.map((warna) => ({
+    id: warna.id,
+    warna: warna.warna,
+  }));
+}
+
+export async function searchSubSumberProspek(query?: string) {
+  const subSumber = await prisma.subSumberProspek.findMany({
+    where: {
+      status: "ACTIVE",
+      ...(query
+        ? {
+            nama_subsumber: {
+              contains: query,
+            },
+          }
+        : {}),
+    },
+    orderBy: { nama_subsumber: "asc" },
+    take: 50,
+  });
+
+  return subSumber.map((item) => ({
+    id: item.id,
+    nama_subsumber: item.nama_subsumber,
+  }));
+}
+
+export async function searchKelurahans(query?: string) {
+  const kelurahans = await prisma.kelurahan.findMany({
+    where: query
+      ? {
+          nama_kelurahan: {
+            contains: query,
+          },
+        }
+      : undefined,
+    orderBy: { nama_kelurahan: "asc" },
+    take: 50,
+  });
+
+  return kelurahans.map((item) => ({
+    id: item.id,
+    nama_kelurahan: item.nama_kelurahan,
+  }));
+}
+
 export async function getDropdownData() {
   const [models, warnas, subSumberProspek, kelurahans] = await Promise.all([
-    prisma.masterModel.findMany({
-      orderBy: { nama_model: "asc" },
-      take: 100,
-    }),
-    prisma.masterWarna.findMany({
-      orderBy: { warna: "asc" },
-      take: 100,
-    }),
-    prisma.subSumberProspek.findMany({
-      where: { status: "ACTIVE" },
-      orderBy: { nama_subsumber: "asc" },
-      take: 100,
-    }),
-    prisma.kelurahan.findMany({
-      orderBy: { nama_kelurahan: "asc" },
-      take: 500,
-    }),
+    searchModels(),
+    searchWarnas(),
+    searchSubSumberProspek(),
+    searchKelurahans(),
   ]);
 
-  // Convert Decimal fields to numbers for client components
-  const serializedModels = models.map((model) => ({
-    ...model,
-    harga_otr: model.harga_otr ? Number(model.harga_otr) : null,
-  }));
-
   return {
-    models: serializedModels,
+    models,
     warnas,
     subSumberProspek,
     kelurahans,
