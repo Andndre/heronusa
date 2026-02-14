@@ -129,7 +129,6 @@ export function CreateProspekForm({
 
       toast.success("Prospek berhasil dibuat!");
       form.reset();
-      window.location.reload();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Terjadi kesalahan");
     } finally {

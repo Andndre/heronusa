@@ -3,6 +3,7 @@
 import prisma from "@/lib/db";
 import { getCurrentUser } from "./user";
 import { Prisma } from "@/lib/generated/prisma/client";
+import { cacheTag, revalidateTag } from "next/cache";
 
 export async function searchModels(query?: string) {
   const models = await prisma.masterModel.findMany({
@@ -84,6 +85,10 @@ export async function searchKelurahans(query?: string) {
 }
 
 export async function getDropdownData() {
+  "use cache";
+  console.log("CACHE MISS: getDropdownData");
+  cacheTag("master-data");
+
   const [models, warnas, subSumberProspek, kelurahans] = await Promise.all([
     searchModels(),
     searchWarnas(),
@@ -99,18 +104,22 @@ export async function getDropdownData() {
   };
 }
 
-export async function getProspekData(page: number = 1, pageSize: number = 10) {
-  const { session } = await getCurrentUser();
-  const activeOrganizationId = session?.activeOrganizationId;
+async function fetchProspekData(
+  activeOrganizationId: string,
+  page: number,
+  pageSize: number,
+) {
+  "use cache";
+  console.log(`CACHE MISS: fetchProspekData for org ${activeOrganizationId}, page ${page}`);
+  cacheTag(`prospek-org-${activeOrganizationId}`);
 
   const skip = (page - 1) * pageSize;
 
-  // TODO: Add authorization
   const [prospek, totalCount] = await Promise.all([
     prisma.prospek.findMany({
       where: {
         deletedAt: null,
-        cabangId: activeOrganizationId ?? undefined,
+        cabangId: activeOrganizationId,
       },
       include: {
         cabang: true,
@@ -128,12 +137,11 @@ export async function getProspekData(page: number = 1, pageSize: number = 10) {
     prisma.prospek.count({
       where: {
         deletedAt: null,
-        cabangId: activeOrganizationId ?? undefined,
+        cabangId: activeOrganizationId,
       },
     }),
   ]);
 
-  // Convert Decimal fields to numbers for client components
   const serializedProspek = prospek.map((item) => ({
     ...item,
     model: {
@@ -149,6 +157,17 @@ export async function getProspekData(page: number = 1, pageSize: number = 10) {
   };
 }
 
+export async function getProspekData(page: number = 1, pageSize: number = 10) {
+  const { session } = await getCurrentUser();
+  const activeOrganizationId = session?.activeOrganizationId;
+
+  if (!activeOrganizationId) {
+    return { data: [], totalCount: 0, pageCount: 0 };
+  }
+
+  return fetchProspekData(activeOrganizationId, page, pageSize);
+}
+
 export type ProspekResponse = Awaited<ReturnType<typeof getProspekData>>;
 export type Prospek = ProspekResponse["data"][number];
 
@@ -162,7 +181,7 @@ export async function createProspek(
     throw new Error("No active organization");
   }
 
-  return prisma.prospek.create({
+  const result = await prisma.prospek.create({
     data: {
       ...data,
       cabang: {
@@ -177,6 +196,9 @@ export async function createProspek(
       },
     },
   });
+
+  revalidateTag(`prospek-org-${activeOrganizationId}`, "max");
+  return result;
 }
 
 export async function updateProspek(
@@ -198,19 +220,26 @@ export async function updateProspek(
     throw new Error("Prospek not found");
   }
 
-  // Check authorization
   if (prospek.cabangId !== activeOrganizationId) {
     throw new Error("Not authorized");
   }
 
-  return prisma.prospek.update({
+  const result = await prisma.prospek.update({
     where: { id },
     data,
   });
+
+  revalidateTag(`prospek-org-${activeOrganizationId}`, "max");
+  return result;
 }
 
 export async function deleteProspek(id: string) {
-  const { currentUser } = await getCurrentUser();
+  const { currentUser, session } = await getCurrentUser();
+  const activeOrganizationId = session?.activeOrganizationId;
+
+  if (!activeOrganizationId) {
+    throw new Error("No active organization");
+  }
 
   const prospek = await prisma.prospek.findUnique({
     where: { id },
@@ -220,18 +249,19 @@ export async function deleteProspek(id: string) {
     throw new Error("Prospek not found");
   }
 
-  // Check authorization
   if (prospek.salesId !== currentUser.id) {
     throw new Error("Not authorized");
   }
 
-  // Soft delete
-  return prisma.prospek.update({
+  const result = await prisma.prospek.update({
     where: { id },
     data: {
       deletedAt: new Date(),
     },
   });
+
+  revalidateTag(`prospek-org-${activeOrganizationId}`, "max");
+  return result;
 }
 
 export async function getProspekById(id: string) {
@@ -277,7 +307,6 @@ export async function getProspekById(id: string) {
 
   const activeOrganizationId = sessions[0]?.activeOrganizationId;
 
-  // Check authorization - user must be in the same organization
   if (prospek.cabangId !== activeOrganizationId) {
     throw new Error("Not authorized");
   }

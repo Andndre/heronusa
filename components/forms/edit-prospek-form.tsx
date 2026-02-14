@@ -131,7 +131,6 @@ export function EditProspekForm({
       }
 
       toast.success("Prospek berhasil diperbarui!");
-      window.location.reload();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Terjadi kesalahan");
     } finally {
