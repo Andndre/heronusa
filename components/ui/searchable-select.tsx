@@ -45,9 +45,9 @@ export function SearchableSelect({
     );
   }, [options, search]);
 
-  // Jaga highlightedIndex tetap valid
+  // Jaga highlightedIndex tetap valid dan reset ke paling atas saat mencari
   React.useEffect(() => {
-    setHighlightedIndex((prev) => Math.min(prev, filteredOptions.length - 1));
+    setHighlightedIndex(0);
   }, [filteredOptions]);
 
   // Klik di luar → tutup dropdown
