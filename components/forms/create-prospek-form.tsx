@@ -40,18 +40,18 @@ const formSchema = z.object({
     message: "Pilih tipe pembayaran",
   }),
   alamat_konsumen: z.string(),
-  modelId: z.number({ message: "Pilih model motor" }),
-  warnaId: z.number({ message: "Pilih warna" }),
-  subSumberId: z.number({ message: "Pilih sumber prospek" }),
-  kelurahanId: z.number({ message: "Pilih kelurahan" }),
+  modelId: z.string({ message: "Pilih model motor" }),
+  warnaId: z.string({ message: "Pilih warna" }),
+  subSumberId: z.string({ message: "Pilih sumber prospek" }),
+  kelurahanId: z.string({ message: "Pilih kelurahan" }),
   tgl_perkiraan_beli: z.date(),
 });
 
 export type CreateProspekFormProps = {
-  models?: Array<{ id: number; nama_model: string }>;
-  warnas?: Array<{ id: number; warna: string }>;
-  subSumberProspek?: Array<{ id: number; nama_subsumber: string }>;
-  kelurahans?: Array<{ id: number; nama_kelurahan: string }>;
+  models?: Array<{ id: string; nama_model: string }>;
+  warnas?: Array<{ id: string; warna: string }>;
+  subSumberProspek?: Array<{ id: string; nama_subsumber: string }>;
+  kelurahans?: Array<{ id: string; nama_kelurahan: string }>;
 };
 
 export function CreateProspekForm({
