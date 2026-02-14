@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   InputGroup,
   InputGroupAddon,
@@ -120,10 +120,50 @@ export function DataTable<TData, TValue>({
     router.push(pathname + "?" + params.toString());
   };
 
-  const handleRowClick = (row: TData) => {
-    setSelectedRow(row);
-    onSelectRow?.(row);
-  };
+  const handleRowClick = useCallback(
+    (row: TData) => {
+      setSelectedRow(row);
+      onSelectRow?.(row);
+    },
+    [onSelectRow],
+  );
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (!selectedRow) return;
+
+      // Don't trigger if user is typing in an input
+      if (
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA"
+      ) {
+        return;
+      }
+
+      const rows = table.getRowModel().rows;
+      const currentIndex = rows.findIndex(
+        (row) => row.original === selectedRow,
+      );
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        const nextRow = rows[currentIndex + 1];
+        if (nextRow) {
+          handleRowClick(nextRow.original);
+        }
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        const prevRow = rows[currentIndex - 1];
+        if (prevRow) {
+          handleRowClick(prevRow.original);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedRow, table, handleRowClick]);
 
   return (
     <div className="space-y-4">
@@ -231,7 +271,7 @@ export function DataTable<TData, TValue>({
               value={pageSize.toString()}
               onValueChange={handlePageSizeChange}
             >
-              <SelectTrigger className="h-8 w-[70px]">
+              <SelectTrigger className="h-8 w-17.5">
                 <SelectValue placeholder={pageSize.toString()} />
               </SelectTrigger>
               <SelectContent side="top">
@@ -292,7 +332,8 @@ export function DataTable<TData, TValue>({
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  if (currentPage < pageCount) handlePageChange(currentPage + 1);
+                  if (currentPage < pageCount)
+                    handlePageChange(currentPage + 1);
                 }}
                 className={
                   currentPage >= pageCount
