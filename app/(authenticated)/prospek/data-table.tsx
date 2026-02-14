@@ -271,7 +271,7 @@ export function DataTable<TData, TValue>({
               value={pageSize.toString()}
               onValueChange={handlePageSizeChange}
             >
-              <SelectTrigger className="h-8 w-17.5">
+              <SelectTrigger className="h-8 w-17.5" aria-label="Pilih jumlah baris per halaman">
                 <SelectValue placeholder={pageSize.toString()} />
               </SelectTrigger>
               <SelectContent side="top">
