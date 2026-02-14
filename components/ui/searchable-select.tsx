@@ -1,6 +1,13 @@
 "use client";
 
-import * as React from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  KeyboardEvent,
+} from "react";
 import { Check, ChevronDown, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -39,26 +46,28 @@ export function SearchableSelect({
   loading: externalLoading = false,
   selectedLabel,
 }: SearchableSelectProps) {
-  const [open, setOpen] = React.useState(false);
-  const [search, setSearch] = React.useState("");
-  const [highlightedIndex, setHighlightedIndex] = React.useState(0);
-  const [isTyping, setIsTyping] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(false);
 
   const [internalOptions, setInternalOptions] =
-    React.useState<Option[]>(externalOptions);
-  const [internalLoading, setInternalLoading] = React.useState(false);
+    useState<Option[]>(externalOptions);
+  const [internalLoading, setInternalLoading] = useState(false);
+
+  const isInitialRender = useRef(true);
+  const lastSearchedQuery = useRef<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listboxId = useId();
 
   // Sync internal options when external options change
-  React.useEffect(() => {
+  useEffect(() => {
     setInternalOptions(externalOptions);
   }, [externalOptions]);
 
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const listRef = React.useRef<HTMLDivElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const listboxId = React.useId();
-
-  const selectedOption = React.useMemo(
+  const selectedOption = useMemo(
     () =>
       internalOptions.find((option) => option.value === value) ||
       externalOptions.find((option) => option.value === value),
@@ -67,8 +76,7 @@ export function SearchableSelect({
 
   const displayLabel = selectedLabel || selectedOption?.label || "";
 
-  const filteredOptions = React.useMemo(() => {
-    // If onSearch is provided, we assume filtering is done externally or by the onSearch promise
+  const filteredOptions = useMemo(() => {
     if (onSearch || !search) return internalOptions;
     return internalOptions.filter((option) =>
       option.label.toLowerCase().includes(search.toLowerCase()),
@@ -76,18 +84,15 @@ export function SearchableSelect({
   }, [internalOptions, search, onSearch]);
 
   // Keep highlightedIndex valid
-  React.useEffect(() => {
+  useEffect(() => {
     setHighlightedIndex(0);
   }, [filteredOptions]);
 
-  const isInitialRender = React.useRef(true);
-
   // Async search effect
-  React.useEffect(() => {
-    if (!onSearch) return;
+  useEffect(() => {
+    if (!onSearch || !open) return;
 
     // Skip the very first empty search if we already have initial options.
-    // This avoids redundant network calls on mount.
     if (
       isInitialRender.current &&
       search === "" &&
@@ -97,7 +102,11 @@ export function SearchableSelect({
       return;
     }
 
-    // Once the user has interacted or if we have no options, allow empty searches.
+    // Skip if the query hasn't changed from the last executed search in this "session"
+    if (search === lastSearchedQuery.current) {
+      return;
+    }
+
     isInitialRender.current = false;
 
     setIsTyping(true);
@@ -107,9 +116,9 @@ export function SearchableSelect({
         if (result instanceof Promise) {
           setInternalLoading(true);
           const newOptions = await result;
+          lastSearchedQuery.current = search;
 
           setInternalOptions((prev) => {
-            // Preserve selected option if it's not in the new results
             const selected =
               prev.find((o) => o.value === value) ||
               externalOptions.find((o) => o.value === value);
@@ -132,10 +141,10 @@ export function SearchableSelect({
     }, 400);
 
     return () => clearTimeout(handler);
-  }, [search, onSearch, value, externalOptions, internalOptions.length]);
+  }, [search, onSearch, value, externalOptions, open, internalOptions.length]);
 
-  // Klik di luar → tutup dropdown
-  React.useEffect(() => {
+  // Handle clicking outside
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         containerRef.current &&
@@ -143,6 +152,7 @@ export function SearchableSelect({
       ) {
         setOpen(false);
         setSearch("");
+        lastSearchedQuery.current = null;
       }
     };
 
@@ -154,17 +164,21 @@ export function SearchableSelect({
     onValueChange?.(optionValue);
     setOpen(false);
     setSearch("");
-    inputRef.current?.focus();
+    lastSearchedQuery.current = null;
+    // We don't focus back to avoid immediate reopen,
+    // though UX-wise staying focused is usually better.
+    // To stay focused safely, we'd need to ensure onFocus doesn't call setOpen(true).
   };
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
     onValueChange?.("");
     setSearch("");
+    lastSearchedQuery.current = null;
     inputRef.current?.focus();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (!open) {
       if (e.key === "ArrowDown" || e.key === "Enter") {
         e.preventDefault();
@@ -197,6 +211,7 @@ export function SearchableSelect({
         e.preventDefault();
         setOpen(false);
         setSearch("");
+        lastSearchedQuery.current = null;
         break;
 
       case "Tab":
@@ -206,7 +221,7 @@ export function SearchableSelect({
   };
 
   // Scroll highlighted item ke view
-  React.useEffect(() => {
+  useEffect(() => {
     if (open && listRef.current) {
       const el = listRef.current.querySelector(
         `[data-index="${highlightedIndex}"]`,
@@ -225,6 +240,7 @@ export function SearchableSelect({
         if (!containerRef.current?.contains(e.relatedTarget as Node)) {
           setOpen(false);
           setSearch("");
+          lastSearchedQuery.current = null;
         }
       }}
     >
@@ -233,15 +249,10 @@ export function SearchableSelect({
           "border-input focus-within:border-ring focus-within:ring-ring/50 dark:bg-input/30 relative flex h-9 w-full items-center gap-2 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] focus-within:ring-[3px]",
           disabled && "cursor-not-allowed opacity-50",
         )}
-        onClick={(e) => {
+        onClick={() => {
           if (disabled) return;
-          if (e.target !== inputRef.current) {
-            if (open) {
-              setOpen(false);
-              setSearch("");
-            } else {
-              setOpen(true);
-            }
+          if (!open) {
+            setOpen(true);
           }
           inputRef.current?.focus();
         }}
@@ -260,11 +271,13 @@ export function SearchableSelect({
           }}
           onFocus={() => {
             if (!disabled && !open) {
-              setOpen(true);
+              // We don't auto-open on focus to prevent focus loops
+              // but we ensure search is ready if opened later
             }
           }}
           onKeyDown={handleKeyDown}
-          placeholder={open ? "Cari..." : placeholder}
+          // The "Placeholder Trick": Show displayLabel as placeholder when open but not searching
+          placeholder={open ? displayLabel || placeholder : placeholder}
           className="h-auto border-0 p-0 shadow-none focus-visible:ring-0"
           disabled={disabled}
         />
