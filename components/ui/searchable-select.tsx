@@ -80,12 +80,21 @@ export function SearchableSelect({
     setHighlightedIndex(0);
   }, [filteredOptions]);
 
+  const isInitialRender = React.useRef(true);
+
   // Async search effect
   React.useEffect(() => {
     if (!onSearch) return;
 
-    // Don't trigger search if search is empty and we already have options (initial state)
-    if (search === "" && internalOptions.length > 0) return;
+    // Skip the very first empty search if we already have initial options.
+    // This avoids redundant network calls on mount.
+    if (isInitialRender.current && search === "" && internalOptions.length > 0) {
+      isInitialRender.current = false;
+      return;
+    }
+
+    // Once the user has interacted or if we have no options, allow empty searches.
+    isInitialRender.current = false;
 
     setIsTyping(true);
     const handler = setTimeout(async () => {
@@ -101,7 +110,10 @@ export function SearchableSelect({
               prev.find((o) => o.value === value) ||
               externalOptions.find((o) => o.value === value);
 
-            if (selected && !newOptions.find((o) => o.value === selected.value)) {
+            if (
+              selected &&
+              !newOptions.find((o) => o.value === selected.value)
+            ) {
               return [selected, ...newOptions];
             }
             return newOptions;
@@ -116,7 +128,7 @@ export function SearchableSelect({
     }, 400);
 
     return () => clearTimeout(handler);
-  }, [search, onSearch, value, externalOptions, internalOptions.length]);
+  }, [search, onSearch, value, externalOptions]);
 
   // Klik di luar → tutup dropdown
   React.useEffect(() => {
