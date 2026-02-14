@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { User } from "better-auth";
 import { CabangSwitcher } from "./cabang-switcher";
 import { Organization } from "@/lib/generated/prisma/browser";
+import { Button } from "@/components/ui/button";
 
 interface AppNavbarProps {
   user: User;
@@ -44,12 +45,18 @@ export function AppNavbar({ user, organizations }: AppNavbarProps) {
       <div className="flex flex-1 items-center justify-end gap-4">
         <CabangSwitcher organizations={organizations} />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild className="cursor-pointer">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                {getInitials(user.name)}
-              </AvatarFallback>
-            </Avatar>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="h-8 w-8 rounded-full p-0"
+              aria-label="Menu pengguna"
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                  {getInitials(user.name)}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
