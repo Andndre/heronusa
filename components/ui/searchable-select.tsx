@@ -70,12 +70,14 @@ export function SearchableSelect({
     onValueChange?.(optionValue);
     setOpen(false);
     setSearch("");
+    inputRef.current?.focus();
   };
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
     onValueChange?.("");
     setSearch("");
+    inputRef.current?.focus();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -145,9 +147,13 @@ export function SearchableSelect({
           "border-input focus-within:border-ring focus-within:ring-ring/50 dark:bg-input/30 relative flex h-9 w-full items-center gap-2 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] focus-within:ring-[3px]",
           disabled && "cursor-not-allowed opacity-50",
         )}
-        onClick={() => {
+        onClick={(e) => {
           if (!disabled) {
-            setOpen((prev) => !prev);
+            // Jika yang diklik adalah input, jangan lakukan toggle (biarkan onFocus yang menangani)
+            // agar tidak terjadi open -> close instan karena bubble-up event.
+            if (e.target !== inputRef.current) {
+              setOpen((prev) => !prev);
+            }
             inputRef.current?.focus();
           }
         }}
@@ -212,6 +218,7 @@ export function SearchableSelect({
                   role="option"
                   aria-selected={value === option.value}
                   data-index={index}
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => handleSelect(option.value)}
                   onMouseEnter={() => setHighlightedIndex(index)}
                   className={cn(
