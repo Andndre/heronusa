@@ -16,16 +16,20 @@ export function ProspekClientComponent({
   data: Awaited<ReturnType<typeof getProspekData>>;
   dropdownData: Awaited<ReturnType<typeof getDropdownData>>;
 }) {
-  const { setContent, setTitle, setDescription, setOpen, open } =
+  const { setContent, setTitle, setDescription, setOpen, open, view, setView } =
     useRightSidebar();
-  const [selectedProspek, setSelectedProspek] = useState<Prospek | null>(null);
+  const [, setSelectedProspek] = useState<Prospek | null>(null);
 
   const handleSelectRow = (row: Prospek) => {
     setSelectedProspek(row);
+    // If sidebar is open and showing detail, update the content immediately
+    if (open && view === "detail") {
+      setContent(<RowDetail prospek={row} />);
+    }
   };
 
   const handleShowDetail = (row: Prospek) => {
-    if (open) {
+    if (open && view === "detail") {
       setOpen(false);
       return;
     }
@@ -33,6 +37,7 @@ export function ProspekClientComponent({
     setContent(<RowDetail prospek={row} />);
     setTitle("Detail Prospek");
     setDescription("Informasi lengkap tentang prospek yang dipilih.");
+    setView("detail");
     setOpen(true);
   };
 
@@ -47,6 +52,7 @@ export function ProspekClientComponent({
     );
     setTitle("Tambah Prospek");
     setDescription("Isi form untuk menambahkan prospek baru.");
+    setView("form");
     setOpen(true);
   };
 

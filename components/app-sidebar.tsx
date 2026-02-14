@@ -43,6 +43,8 @@ interface RightSidebarContextProps {
   setTitle: (title: string) => void;
   description: string;
   setDescription: (description: string) => void;
+  view: string;
+  setView: (view: string) => void;
 }
 
 const RightSidebarContext = createContext<RightSidebarContextProps | null>(
@@ -127,10 +129,12 @@ export function AppSidebar({ children, user }: AppSidebarProps) {
   const [rightContent, setRightContent] = useState<ReactNode | null>(null);
   const [rightTitle, setRightTitle] = useState("");
   const [rightDescription, setRightDescription] = useState("");
+  const [rightView, setRightView] = useState("none");
 
   const handleCloseRightSidebar = () => {
     setRightOpen(false);
     setRightContent(null);
+    setRightView("none");
   };
 
   return (
@@ -145,6 +149,8 @@ export function AppSidebar({ children, user }: AppSidebarProps) {
           setTitle: setRightTitle,
           description: rightDescription,
           setDescription: setRightDescription,
+          view: rightView,
+          setView: setRightView,
         }}
       >
         <AppSidebarContent user={user} />
