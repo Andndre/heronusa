@@ -11,22 +11,6 @@ Table user {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   batas_diskon Decimal
-  sessions session [not null]
-  accounts account [not null]
-  teammembers team_member [not null]
-  members member [not null]
-  invitations invitation [not null]
-  suratJalans surat_jalan [not null]
-  prospeks prospek [not null]
-  spvApprovedSPKs spk [not null]
-  mgrApprovedSPKs spk [not null]
-  faktursValidated faktur [not null]
-  followUps follow_up [not null]
-  pelanggans pelanggan [not null]
-  pembayarans pembayaran [not null]
-  dokumenKendaraans dokumen_kendaraan [not null]
-  logPersetujuans log_persetujuan [not null]
-  pembelianUnits pembelian_unit [not null]
 }
 
 Table session {
@@ -38,7 +22,6 @@ Table session {
   ipAddress String
   userAgent String
   userId String [not null]
-  user user [not null]
   activeOrganizationId String
   activeTeamId String
 }
@@ -48,7 +31,6 @@ Table account {
   accountId String [not null]
   providerId String [not null]
   userId String [not null]
-  user user [not null]
   accessToken String
   refreshToken String
   idToken String
@@ -76,16 +58,6 @@ Table organization {
   logo String
   createdAt DateTime [default: `now()`, not null]
   metadata String
-  teams team [not null]
-  members member [not null]
-  invitations invitation [not null]
-  prospeks prospek [not null]
-  pembelianUnits pembelian_unit [not null]
-  fakturs faktur [not null]
-  units unit [not null]
-  pembayarans pembayaran [not null]
-  suratJalans surat_jalan [not null]
-  leasingOrders leasing_order [not null]
 }
 
 Table team {
@@ -94,25 +66,19 @@ Table team {
   organizationId String [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime
-  organization organization [not null]
-  teammembers team_member [not null]
 }
 
 Table team_member {
   id String [pk]
   teamId String [not null]
-  team team [not null]
   userId String [not null]
-  user user [not null]
   createdAt DateTime [default: `now()`]
 }
 
 Table member {
   id String [pk]
   organizationId String [not null]
-  organization organization [not null]
   userId String [not null]
-  user user [not null]
   role String [not null]
   createdAt DateTime [default: `now()`, not null]
 }
@@ -127,8 +93,6 @@ Table invitation {
   expiresAt DateTime [not null]
   createdAt DateTime [default: `now()`, not null]
   inviterId String [not null]
-  organization organization [not null]
-  user user [not null]
 }
 
 Table kabupaten {
@@ -136,7 +100,6 @@ Table kabupaten {
   nama_kabupaten String [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  kecamatan kecamatan [not null]
 }
 
 Table kecamatan {
@@ -145,8 +108,6 @@ Table kecamatan {
   kabupatenId String [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  kelurahan kelurahan [not null]
-  kabupaten kabupaten [not null]
 }
 
 Table kelurahan {
@@ -155,12 +116,8 @@ Table kelurahan {
   kecamatanId String [not null]
   latitude Float
   longitude Float
-  prospek prospek [not null]
-  pelanggan pelanggan [not null]
-  kecamatan kecamatan [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  spks spk [not null]
 }
 
 Table master_model {
@@ -171,9 +128,6 @@ Table master_model {
   cc Int [not null]
   series String [not null]
   harga_otr Decimal [not null]
-  prospek prospek [not null]
-  unit unit [not null]
-  pembelianDetails pembelian_unit_detail [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
 }
@@ -183,9 +137,6 @@ Table master_warna {
   warna String [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  prospek prospek [not null]
-  unit unit [not null]
-  pembelianDetails pembelian_unit_detail [not null]
 }
 
 Table sumber_prospek {
@@ -194,7 +145,6 @@ Table sumber_prospek {
   status StatusSumberProspek [not null, default: 'ACTIVE']
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  subSumberProspek sub_sumber_prospek [not null]
 }
 
 Table sub_sumber_prospek {
@@ -204,8 +154,6 @@ Table sub_sumber_prospek {
   status StatusSumberProspek [not null, default: 'ACTIVE']
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  prospek prospek [not null]
-  sumberProspek sumber_prospek [not null]
 }
 
 Table prospek {
@@ -230,16 +178,6 @@ Table prospek {
   spkId String [unique]
   fakturId String [unique]
   pelangganId String
-  pelanggan pelanggan
-  spk spk
-  cabang organization [not null]
-  sales user [not null]
-  subSumber sub_sumber_prospek [not null]
-  model master_model [not null]
-  warna master_warna [not null]
-  kelurahan kelurahan [not null]
-  followUps follow_up [not null]
-  pembayarans pembayaran [not null]
 }
 
 Table spk {
@@ -264,15 +202,6 @@ Table spk {
   deletedAt DateTime
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  faktur faktur
-  kelurahanPengiriman kelurahan [not null]
-  pelanggan pelanggan [not null]
-  spvApprovedBy user
-  mgrApprovedBy user
-  unit unit [not null]
-  logApprovals log_persetujuan [not null]
-  pembayaran pembayaran [not null]
-  prospek prospek
 }
 
 Table follow_up {
@@ -283,8 +212,6 @@ Table follow_up {
   catatan String
   createdAt DateTime [default: `now()`, not null]
   status StatusProspek [not null]
-  prospek prospek [not null]
-  sales user [not null]
 }
 
 Table pelanggan {
@@ -298,11 +225,6 @@ Table pelanggan {
   deletedAt DateTime
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  kelurahan kelurahan [not null]
-  createdBy user [not null]
-  prospeks prospek [not null]
-  spks spk [not null]
-  analitik analitik
 }
 
 Table pembelian_unit {
@@ -316,11 +238,6 @@ Table pembelian_unit {
   deletedAt DateTime
   createdAt DateTime [default: `now()`, not null]
   fakturId String [unique]
-  faktur faktur
-  cabang organization [not null]
-  units unit [not null]
-  createdBy user [not null]
-  details pembelian_unit_detail [not null]
 }
 
 Table pembelian_unit_detail {
@@ -331,9 +248,6 @@ Table pembelian_unit_detail {
   jumlah Int [not null]
   deletedAt DateTime
   createdAt DateTime [default: `now()`, not null]
-  pembelianUnit pembelian_unit [not null]
-  model master_model [not null]
-  warna master_warna [not null]
 }
 
 Table log_persetujuan {
@@ -344,8 +258,6 @@ Table log_persetujuan {
   status ApprovalStatus [not null]
   catatan String
   createdAt DateTime [default: `now()`, not null]
-  spk spk [not null]
-  approver user [not null]
 }
 
 Table faktur {
@@ -358,13 +270,6 @@ Table faktur {
   updatedAt DateTime [not null]
   jenisFaktur JenisFaktur [not null]
   cabangId String [not null]
-  cabang organization [not null]
-  validatedBy user [not null]
-  suratJalan surat_jalan [not null]
-  pembayaran pembayaran [not null]
-  dokumenKendaraans dokumen_kendaraan
-  pembelianUnit pembelian_unit
-  spk spk
 }
 
 Table leasing {
@@ -374,8 +279,6 @@ Table leasing {
   deletedAt DateTime
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  leasingOrders leasing_order [not null]
-  pembayaran pembayaran [not null]
 }
 
 Table leasing_order {
@@ -390,9 +293,6 @@ Table leasing_order {
   updatedAt DateTime [not null]
   cabangId String [not null]
   pembayaranId String [unique]
-  cabang organization [not null]
-  leasing leasing [not null]
-  pembayaran pembayaran
 }
 
 Table unit {
@@ -408,12 +308,6 @@ Table unit {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   cabangId String [not null]
-  cabang organization [not null]
-  model master_model [not null]
-  warna master_warna [not null]
-  pembelianUnit pembelian_unit [not null]
-  spk spk
-  dokumen dokumen_kendaraan
 }
 
 Table surat_jalan {
@@ -430,9 +324,6 @@ Table surat_jalan {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   cabangId String [not null]
-  faktur faktur [not null]
-  overriddenBy user
-  cabang organization [not null]
 }
 
 Table pembayaran {
@@ -449,13 +340,6 @@ Table pembayaran {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   cabangId String [not null]
-  cabang organization [not null]
-  propek prospek
-  faktur faktur
-  leasing leasing
-  createdBy user [not null]
-  leasingOrder leasing_order
-  spk spk
   sPKId String
 }
 
@@ -477,9 +361,6 @@ Table dokumen_kendaraan {
   updatedAt DateTime [not null]
   updatedById String
   fakturId String [unique]
-  unit unit [not null]
-  updatedBy user
-  faktur faktur
 }
 
 Table analitik {
@@ -492,7 +373,6 @@ Table analitik {
   clusterLabel LoyaltyCluster [not null]
   deletedAt DateTime
   updatedAt DateTime [not null]
-  pelanggan pelanggan [not null]
 }
 
 Enum StatusSumberProspek {

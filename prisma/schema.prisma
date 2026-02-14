@@ -1,6 +1,7 @@
 generator dbml {
-  provider = "prisma-dbml-generator"
-  output   = "../dbml/schema.dbml"
+  provider              = "prisma-dbml-generator"
+  output                = "../dbml/schema.dbml"
+  includeRelationFields = false
 }
 
 generator client {
