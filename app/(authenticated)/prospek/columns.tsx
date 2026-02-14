@@ -81,23 +81,18 @@ export const getColumns = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            {onViewDetail && (
+              <DropdownMenuItem onClick={() => onViewDetail(prospek)}>
+                <User className="mr-2 h-4 w-4" />
+                Lihat Detail
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={() => onEdit(prospek)}>
               <Edit className="mr-2 h-4 w-4" />
               Edit Prospek
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(prospek.id)}
-            >
-              Copy ID
-            </DropdownMenuItem>
-            {onViewDetail && (
-              <DropdownMenuItem onClick={() => onViewDetail(prospek)}>
-                <User className="mr-2 h-4 w-4" />
-                View Details
-              </DropdownMenuItem>
-            )}
           </DropdownMenuContent>
+          {/* <DropdownMenuSeparator /> */}
         </DropdownMenu>
       );
     },
