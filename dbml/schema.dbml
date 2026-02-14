@@ -175,8 +175,6 @@ Table prospek {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   cabangId String [not null]
-  spkId String [unique]
-  fakturId String [unique]
   pelangganId String
 }
 
@@ -198,7 +196,7 @@ Table spk {
   manager_approval_date DateTime
   pelangganId String [not null]
   unitId String [unique, not null]
-  fakturId String [unique]
+  prospekId String [unique]
   deletedAt DateTime
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
@@ -270,6 +268,7 @@ Table faktur {
   updatedAt DateTime [not null]
   jenisFaktur JenisFaktur [not null]
   cabangId String [not null]
+  spkId String [unique]
 }
 
 Table leasing {
@@ -283,7 +282,6 @@ Table leasing {
 
 Table leasing_order {
   id String [pk]
-  spkId String [unique, not null]
   leasingId String [not null]
   nomorPO String
   jumlahPiutang Decimal [not null]
@@ -293,6 +291,7 @@ Table leasing_order {
   updatedAt DateTime [not null]
   cabangId String [not null]
   pembayaranId String [unique]
+  prospekId String [unique]
 }
 
 Table unit {
@@ -340,7 +339,7 @@ Table pembayaran {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   cabangId String [not null]
-  sPKId String
+  spkId String
 }
 
 Table dokumen_kendaraan {
@@ -496,8 +495,6 @@ Ref: sub_sumber_prospek.sumberProspekId > sumber_prospek.id [delete: Cascade]
 
 Ref: prospek.pelangganId > pelanggan.id [delete: Set Null]
 
-Ref: prospek.spkId - spk.id [delete: Set Null]
-
 Ref: prospek.cabangId > organization.id [delete: Restrict]
 
 Ref: prospek.salesId > user.id [delete: Restrict]
@@ -510,7 +507,7 @@ Ref: prospek.warnaId > master_warna.id [delete: Restrict]
 
 Ref: prospek.kelurahanId > kelurahan.id [delete: Restrict]
 
-Ref: spk.fakturId - faktur.id [delete: Set Null]
+Ref: spk.prospekId - prospek.id [delete: Set Null]
 
 Ref: spk.idKelurahanPengiriman > kelurahan.id [delete: Restrict]
 
@@ -550,6 +547,10 @@ Ref: faktur.cabangId > organization.id [delete: Restrict]
 
 Ref: faktur.validatedById > user.id [delete: Restrict]
 
+Ref: faktur.spkId - spk.id
+
+Ref: leasing_order.prospekId - prospek.id [delete: Cascade]
+
 Ref: leasing_order.cabangId > organization.id [delete: Restrict]
 
 Ref: leasing_order.leasingId > leasing.id [delete: Restrict]
@@ -580,7 +581,7 @@ Ref: pembayaran.leasingId > leasing.id [delete: Set Null]
 
 Ref: pembayaran.createdById > user.id [delete: Restrict]
 
-Ref: pembayaran.sPKId > spk.id
+Ref: pembayaran.spkId > spk.id
 
 Ref: dokumen_kendaraan.unitId - unit.id [delete: Cascade]
 
