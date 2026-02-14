@@ -6,6 +6,7 @@ import { getColumns } from "./columns";
 import { DataTable } from "./data-table";
 import { useRightSidebar } from "@/components/app-sidebar";
 import { CreateProspekForm } from "@/components/forms/create-prospek-form";
+import { EditProspekForm } from "@/components/forms/edit-prospek-form";
 import { Prospek } from "@/server/prospek";
 import RowDetail from "./row-detail";
 
@@ -72,9 +73,9 @@ export function ProspekClientComponent({
 
   const handleEdit = useCallback(
     (row: Prospek) => {
-      // For now, reuse CreateProspekForm or prepare for EditProspekForm
       setContent(
-        <CreateProspekForm
+        <EditProspekForm
+          prospek={row}
           models={dropdownData.models}
           warnas={dropdownData.warnas}
           subSumberProspek={dropdownData.subSumberProspek}

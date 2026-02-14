@@ -179,6 +179,36 @@ export async function createProspek(
   });
 }
 
+export async function updateProspek(
+  id: string,
+  data: Omit<Prisma.ProspekUpdateInput, "cabang" | "sales" | "id">,
+) {
+  const { session } = await getCurrentUser();
+  const activeOrganizationId = session?.activeOrganizationId;
+
+  if (!activeOrganizationId) {
+    throw new Error("No active organization");
+  }
+
+  const prospek = await prisma.prospek.findUnique({
+    where: { id },
+  });
+
+  if (!prospek) {
+    throw new Error("Prospek not found");
+  }
+
+  // Check authorization
+  if (prospek.cabangId !== activeOrganizationId) {
+    throw new Error("Not authorized");
+  }
+
+  return prisma.prospek.update({
+    where: { id },
+    data,
+  });
+}
+
 export async function deleteProspek(id: string) {
   const { currentUser } = await getCurrentUser();
 
