@@ -47,6 +47,7 @@ export function RightSidebar({
             size="icon"
             className="shrink-0"
             onClick={() => onOpenChange(false)}
+            aria-label="Tutup Sidebar"
           >
             <X className="h-4 w-4" />
           </Button>

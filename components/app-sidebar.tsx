@@ -70,10 +70,10 @@ function AppSidebarContent({ user }: AppSidebarContentProps) {
     { title: "Dashboard", url: "/", icon: Home },
     { title: "Manajemen Prospek", url: "/prospek", icon: Users },
     { title: "SPK & Diskon", url: "/spk", icon: FileText },
-    { title: "Pembayaran & Leasing", url: "/payment", icon: CreditCard },
-    { title: "Surat Jalan", url: "/surat-jalan", icon: Truck },
-    { title: "Dokumen Kendaraan", url: "/dokumen-kendaraan", icon: FileCheck },
-    { title: "Inventori", url: "/inventori", icon: Package },
+    { title: "Pembayaran & Leasing", url: "#", icon: CreditCard },
+    { title: "Surat Jalan", url: "#", icon: Truck },
+    { title: "Dokumen Kendaraan", url: "#", icon: FileCheck },
+    { title: "Inventori", url: "#", icon: Package },
   ];
 
   return (
