@@ -14,12 +14,17 @@ import { createSortableHeader } from "@/components/table-header-sorted";
 import { StatusProspek } from "@/lib/generated/prisma/enums";
 import { Prospek } from "@/server/prospek";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { Edit, MoreHorizontal, User } from "lucide-react";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
+interface ColumnActions {
+  onEdit: (prospek: Prospek) => void;
+  onViewDetail?: (prospek: Prospek) => void;
+}
 
-export const columns: ColumnDef<Prospek>[] = [
+export const getColumns = ({
+  onEdit,
+  onViewDetail,
+}: ColumnActions): ColumnDef<Prospek>[] => [
   {
     accessorKey: "nama_konsumen",
     header: createSortableHeader<Prospek>("Nama"),
@@ -63,6 +68,8 @@ export const columns: ColumnDef<Prospek>[] = [
     id: "actions",
     header: "Aksi",
     cell: ({ row }) => {
+      const prospek = row.original;
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -73,14 +80,22 @@ export const columns: ColumnDef<Prospek>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => onEdit(prospek)}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Prospek
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(row.original.id)}
+              onClick={() => navigator.clipboard.writeText(prospek.id)}
             >
               Copy ID
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View prospek details</DropdownMenuItem>
+            {onViewDetail && (
+              <DropdownMenuItem onClick={() => onViewDetail(prospek)}>
+                <User className="mr-2 h-4 w-4" />
+                View Details
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );

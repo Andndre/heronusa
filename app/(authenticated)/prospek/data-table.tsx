@@ -43,7 +43,6 @@ export function DataTable<TData, TValue>({
   data,
   onSelectRow,
   onAdd,
-  onEdit,
   onShowDetail,
 }: DataTableProps<TData, TValue>) {
   // State
