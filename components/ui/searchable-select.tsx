@@ -127,7 +127,7 @@ export function SearchableSelect({
               selected &&
               !newOptions.find((o) => o.value === selected.value)
             ) {
-              return [selected, ...newOptions];
+              return [...newOptions, selected];
             }
             return newOptions;
           });
