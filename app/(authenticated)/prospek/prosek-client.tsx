@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getProspekData, getDropdownData } from "@/server/prospek";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { useRightSidebar } from "@/components/app-sidebar";
 import { CreateProspekForm } from "@/components/forms/create-prospek-form";
 import { Prospek } from "@/server/prospek";
+import RowDetail from "./row-detail";
 
 export function ProspekClientComponent({
   data,
@@ -15,12 +16,23 @@ export function ProspekClientComponent({
   data: Awaited<ReturnType<typeof getProspekData>>;
   dropdownData: Awaited<ReturnType<typeof getDropdownData>>;
 }) {
-  const { setView, setContent, setTitle, setOpen } = useRightSidebar();
+  const { setContent, setTitle, setDescription, setOpen, open } =
+    useRightSidebar();
+  const [selectedProspek, setSelectedProspek] = useState<Prospek | null>(null);
 
   const handleSelectRow = (row: Prospek) => {
-    // setContent(<ProspekDetailView data={row as Record<string, unknown>} />);
-    setTitle("Info Prospek");
-    setView("detail");
+    setSelectedProspek(row);
+  };
+
+  const handleShowDetail = (row: Prospek) => {
+    if (open) {
+      setOpen(false);
+      return;
+    }
+
+    setContent(<RowDetail prospek={row} />);
+    setTitle("Detail Prospek");
+    setDescription("Informasi lengkap tentang prospek yang dipilih.");
     setOpen(true);
   };
 
@@ -34,31 +46,30 @@ export function ProspekClientComponent({
       />,
     );
     setTitle("Tambah Prospek");
-    setView("form");
+    setDescription("Isi form untuk menambahkan prospek baru.");
     setOpen(true);
   };
 
   const handleEdit = (row: Prospek) => {
     // setContent(<ProspekFormView title="Edit Prospek" />);
     setTitle("Edit Prospek");
-    setView("form");
     setOpen(true);
   };
 
   // Reset sidebar when unmounting/navigating away
   useEffect(() => {
     return () => {
-      setView("none");
       setContent(null);
       setOpen(false);
     };
-  }, [setView, setContent, setOpen]);
+  }, [setContent, setOpen]);
 
   return (
     <DataTable
       columns={columns}
       data={data}
       onSelectRow={handleSelectRow}
+      onShowDetail={handleShowDetail}
       onAdd={handleAdd}
       onEdit={handleEdit}
     />

@@ -27,7 +27,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { RightSidebar, RightSidebarView } from "@/components/right-sidebar";
+import { RightSidebar } from "@/components/right-sidebar";
 
 interface AppSidebarProps {
   children: ReactNode;
@@ -37,8 +37,6 @@ interface AppSidebarProps {
 interface RightSidebarContextProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  view: RightSidebarView;
-  setView: (view: RightSidebarView) => void;
   content: ReactNode | null;
   setContent: (content: ReactNode | null) => void;
   title: string;
@@ -126,12 +124,14 @@ function AppSidebarContent({ user }: AppSidebarContentProps) {
 
 export function AppSidebar({ children, user }: AppSidebarProps) {
   const [rightOpen, setRightOpen] = useState(false);
-  const [rightView, setRightView] = useState<RightSidebarView>("none");
   const [rightContent, setRightContent] = useState<ReactNode | null>(null);
   const [rightTitle, setRightTitle] = useState("");
   const [rightDescription, setRightDescription] = useState("");
 
-  const handleCloseRightSidebar = () => setRightOpen(false);
+  const handleCloseRightSidebar = () => {
+    setRightOpen(false);
+    setRightContent(null);
+  };
 
   return (
     <SidebarProvider>
@@ -139,8 +139,6 @@ export function AppSidebar({ children, user }: AppSidebarProps) {
         value={{
           open: rightOpen,
           setOpen: setRightOpen,
-          view: rightView,
-          setView: setRightView,
           content: rightContent,
           setContent: setRightContent,
           title: rightTitle,
@@ -157,7 +155,6 @@ export function AppSidebar({ children, user }: AppSidebarProps) {
             setRightOpen(open);
             if (!open) handleCloseRightSidebar();
           }}
-          view={rightView}
           title={rightTitle}
           description={rightDescription}
         >

@@ -287,7 +287,7 @@ export function CreateProspekForm({
                   <FieldLabel htmlFor="subSumberId">Sumber Prospek</FieldLabel>
                   <SearchableSelect
                     value={field.value?.toString()}
-                    onValueChange={(val) => field.onChange(Number(val))}
+                    onValueChange={(val) => field.onChange(val)}
                     options={subSumberProspek.map((item) => ({
                       value: item.id.toString(),
                       label: item.nama_subsumber,
@@ -311,7 +311,7 @@ export function CreateProspekForm({
                     <FieldLabel htmlFor="modelId">Model Motor</FieldLabel>
                     <SearchableSelect
                       value={field.value?.toString()}
-                      onValueChange={(val) => field.onChange(Number(val))}
+                      onValueChange={(val) => field.onChange(val)}
                       options={models.map((item) => ({
                         value: item.id.toString(),
                         label: item.nama_model,
@@ -333,7 +333,7 @@ export function CreateProspekForm({
                     <FieldLabel htmlFor="warnaId">Warna</FieldLabel>
                     <SearchableSelect
                       value={field.value?.toString()}
-                      onValueChange={(val) => field.onChange(Number(val))}
+                      onValueChange={(val) => field.onChange(val)}
                       options={warnas.map((item) => ({
                         value: item.id.toString(),
                         label: item.warna,
@@ -357,7 +357,7 @@ export function CreateProspekForm({
                   <FieldLabel htmlFor="kelurahanId">Kelurahan</FieldLabel>
                   <SearchableSelect
                     value={field.value?.toString()}
-                    onValueChange={(val) => field.onChange(Number(val))}
+                    onValueChange={(val) => field.onChange(val)}
                     options={kelurahans.map((item) => ({
                       value: item.id.toString(),
                       label: item.nama_kelurahan,
@@ -371,7 +371,6 @@ export function CreateProspekForm({
                 </Field>
               )}
             />
-
             <Controller
               name="tgl_perkiraan_beli"
               control={form.control}
@@ -431,7 +430,7 @@ export function CreateProspekForm({
         </FieldGroup>
       </div>
 
-      <div className="sticky -bottom-4 border-t pt-4 pb-4 -mx-4 px-4 mt-6 z-10">
+      <div className="sticky bottom-0 border-t bg-background py-4 -mx-4 px-4 mt-6 z-10">
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? <Loader className="mr-2 animate-spin" /> : null}
           {loading ? "Memproses..." : "Buat Prospek"}

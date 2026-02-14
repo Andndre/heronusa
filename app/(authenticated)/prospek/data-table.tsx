@@ -26,8 +26,8 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { PlusIcon, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { InfoIcon, PlusIcon, Search } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -35,6 +35,7 @@ interface DataTableProps<TData, TValue> {
   onSelectRow?: (row: TData) => void;
   onAdd?: () => void;
   onEdit?: (row: TData) => void;
+  onShowDetail?: (row: TData) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -43,6 +44,7 @@ export function DataTable<TData, TValue>({
   onSelectRow,
   onAdd,
   onEdit,
+  onShowDetail,
 }: DataTableProps<TData, TValue>) {
   // State
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -73,23 +75,37 @@ export function DataTable<TData, TValue>({
   return (
     <div>
       <div className="flex items-center justify-between pb-4 gap-3">
-        <InputGroup className="max-w-sm">
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-          <InputGroupInput
-            placeholder="Filter names..."
-            value={
-              (table.getColumn("nama_konsumen")?.getFilterValue() as string) ??
-              ""
-            }
-            onChange={(event) =>
-              table
-                .getColumn("nama_konsumen")
-                ?.setFilterValue(event.target.value)
-            }
-          />
-        </InputGroup>
+        <div className="flex flex-1 items-center gap-2">
+          <InputGroup className="max-w-sm">
+            <InputGroupAddon>
+              <Search />
+            </InputGroupAddon>
+            <InputGroupInput
+              placeholder="Filter names..."
+              value={
+                (table
+                  .getColumn("nama_konsumen")
+                  ?.getFilterValue() as string) ?? ""
+              }
+              onChange={(event) =>
+                table
+                  .getColumn("nama_konsumen")
+                  ?.setFilterValue(event.target.value)
+              }
+            />
+          </InputGroup>
+          {onShowDetail && (
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={!selectedRow}
+              onClick={() => selectedRow && onShowDetail(selectedRow)}
+              title="Lihat Detail"
+            >
+              <InfoIcon className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
         {onAdd && (
           <Button variant={"outline"} onClick={onAdd}>
             <PlusIcon /> Tambah
