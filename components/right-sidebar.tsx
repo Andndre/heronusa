@@ -30,7 +30,7 @@ export function RightSidebar({
       collapsible="offcanvas"
       open={open}
       onOpenChange={onOpenChange}
-      style={{ "--sidebar-width": "24rem" } as React.CSSProperties}
+      style={{ "--sidebar-width": "18rem" } as React.CSSProperties}
     >
       <SidebarHeader className="h-16 border-b px-4 shrink-0">
         <div className="flex items-center justify-between py-2">
