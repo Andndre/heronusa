@@ -43,6 +43,8 @@ interface RightSidebarContextProps {
   setContent: (content: ReactNode | null) => void;
   title: string;
   setTitle: (title: string) => void;
+  description: string;
+  setDescription: (description: string) => void;
 }
 
 const RightSidebarContext = createContext<RightSidebarContextProps | null>(
@@ -65,41 +67,13 @@ function AppSidebarContent({ user }: AppSidebarContentProps) {
   const pathname = usePathname();
 
   const items = [
-    {
-      title: "Dashboard",
-      url: "/",
-      icon: Home,
-    },
-    {
-      title: "Manajemen Prospek",
-      url: "/prospek",
-      icon: Users,
-    },
-    {
-      title: "SPK & Diskon",
-      url: "/spk",
-      icon: FileText,
-    },
-    {
-      title: "Pembayaran & Leasing",
-      url: "/payment",
-      icon: CreditCard,
-    },
-    {
-      title: "Surat Jalan",
-      url: "/surat-jalan",
-      icon: Truck,
-    },
-    {
-      title: "Dokumen Kendaraan",
-      url: "/dokumen-kendaraan",
-      icon: FileCheck,
-    },
-    {
-      title: "Inventori",
-      url: "/inventori",
-      icon: Package,
-    },
+    { title: "Dashboard", url: "/", icon: Home },
+    { title: "Manajemen Prospek", url: "/prospek", icon: Users },
+    { title: "SPK & Diskon", url: "/spk", icon: FileText },
+    { title: "Pembayaran & Leasing", url: "/payment", icon: CreditCard },
+    { title: "Surat Jalan", url: "/surat-jalan", icon: Truck },
+    { title: "Dokumen Kendaraan", url: "/dokumen-kendaraan", icon: FileCheck },
+    { title: "Inventori", url: "/inventori", icon: Package },
   ];
 
   return (
@@ -155,12 +129,9 @@ export function AppSidebar({ children, user }: AppSidebarProps) {
   const [rightView, setRightView] = useState<RightSidebarView>("none");
   const [rightContent, setRightContent] = useState<ReactNode | null>(null);
   const [rightTitle, setRightTitle] = useState("");
+  const [rightDescription, setRightDescription] = useState("");
 
-  const handleCloseRightSidebar = () => {
-    setRightOpen(false);
-    setRightView("none");
-    setRightContent(null);
-  };
+  const handleCloseRightSidebar = () => setRightOpen(false);
 
   return (
     <SidebarProvider>
@@ -174,22 +145,21 @@ export function AppSidebar({ children, user }: AppSidebarProps) {
           setContent: setRightContent,
           title: rightTitle,
           setTitle: setRightTitle,
+          description: rightDescription,
+          setDescription: setRightDescription,
         }}
       >
-        <div className="flex min-h-svh w-full">
-          <AppSidebarContent user={user} />
-          {children}
-        </div>
+        <AppSidebarContent user={user} />
+        {children}
         <RightSidebar
           open={rightOpen}
           onOpenChange={(open) => {
             setRightOpen(open);
-            if (!open) {
-              handleCloseRightSidebar();
-            }
+            if (!open) handleCloseRightSidebar();
           }}
           view={rightView}
           title={rightTitle}
+          description={rightDescription}
         >
           {rightContent}
         </RightSidebar>

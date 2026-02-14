@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { getProspekData, getDropdownData } from "@/server/prospek";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
-import { ProspekDetailView, ProspekFormView } from "@/components/right-sidebar";
 import { useRightSidebar } from "@/components/app-sidebar";
 import { CreateProspekForm } from "@/components/forms/create-prospek-form";
 import { Prospek } from "@/server/prospek";
@@ -19,7 +18,7 @@ export function ProspekClientComponent({
   const { setView, setContent, setTitle, setOpen } = useRightSidebar();
 
   const handleSelectRow = (row: Prospek) => {
-    setContent(<ProspekDetailView data={row as Record<string, unknown>} />);
+    // setContent(<ProspekDetailView data={row as Record<string, unknown>} />);
     setTitle("Info Prospek");
     setView("detail");
     setOpen(true);
@@ -40,7 +39,7 @@ export function ProspekClientComponent({
   };
 
   const handleEdit = (row: Prospek) => {
-    setContent(<ProspekFormView title="Edit Prospek" />);
+    // setContent(<ProspekFormView title="Edit Prospek" />);
     setTitle("Edit Prospek");
     setView("form");
     setOpen(true);

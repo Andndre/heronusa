@@ -25,7 +25,7 @@ export default async function AuthenticatedLayout({
     <AppSidebar user={user}>
       <SidebarInset>
         <AppNavbar user={user} organizations={organizations} />
-        <main className="flex-1 overflow-y-auto bg-background p-6">
+        <main className="flex-1 overflow-auto bg-background p-6">
           {children}
         </main>
       </SidebarInset>

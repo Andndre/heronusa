@@ -157,13 +157,21 @@ function Sidebar({
   collapsible = "offcanvas",
   className,
   children,
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
   ...props
 }: React.ComponentProps<"div"> & {
   side?: "left" | "right";
   variant?: "sidebar" | "floating" | "inset";
   collapsible?: "offcanvas" | "icon" | "none";
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+  const { isMobile, state: contextState, openMobile, setOpenMobile } = useSidebar();
+
+  const state = openProp !== undefined ? (openProp ? "expanded" : "collapsed") : contextState;
+  const isSheetOpen = openProp !== undefined ? openProp : openMobile;
+  const onSheetOpenChange = onOpenChangeProp !== undefined ? onOpenChangeProp : setOpenMobile;
 
   if (collapsible === "none") {
     return (
@@ -182,7 +190,7 @@ function Sidebar({
 
   if (isMobile) {
     return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+      <Sheet open={isSheetOpen} onOpenChange={onSheetOpenChange} {...props}>
         <SheetContent
           data-sidebar="sidebar"
           data-slot="sidebar"
@@ -207,12 +215,13 @@ function Sidebar({
 
   return (
     <div
-      className="group peer text-sidebar-foreground hidden md:block"
+      className="group peer text-sidebar-foreground hidden md:block shrink-0 relative"
       data-state={state}
       data-collapsible={state === "collapsed" ? collapsible : ""}
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
+      {...props}
     >
       {/* This is what handles the sidebar gap on desktop */}
       <div
@@ -229,7 +238,7 @@ function Sidebar({
       <div
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+          "absolute inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
             : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
@@ -239,7 +248,6 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
           className,
         )}
-        {...props}
       >
         <div
           data-sidebar="sidebar"
@@ -309,7 +317,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
     <main
       data-slot="sidebar-inset"
       className={cn(
-        "bg-background relative flex w-full flex-1 flex-col",
+        "bg-background relative flex min-w-0 flex-1 flex-col",
         "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
         className,
       )}
