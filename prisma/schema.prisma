@@ -27,7 +27,7 @@ model User {
   teammembers       TeamMember[]
   members           Member[]
   invitations       Invitation[]
-  suratJalans       SuratJalan[]
+  suratJalans       SuratJalan[]       @relation("OverrideSuratJalan")
   prospeks          Prospek[]          @relation("ProspekSales")
   spvApprovedSPKs   SPK[]              @relation("SpvApproval")
   mgrApprovedSPKs   SPK[]              @relation("ManagerApproval")
@@ -639,7 +639,7 @@ model SuratJalan {
   cabangId        String
 
   faktur       Faktur       @relation("SuratJalanFaktur", fields: [fakturId], references: [id], onDelete: Cascade)
-  overriddenBy User?        @relation(fields: [overrideById], references: [id], onDelete: SetNull)
+  overriddenBy User?        @relation("OverrideSuratJalan", fields: [overrideById], references: [id], onDelete: SetNull)
   cabang       Organization @relation(fields: [cabangId], references: [id], onDelete: Restrict)
 
   @@index([overrideById])
