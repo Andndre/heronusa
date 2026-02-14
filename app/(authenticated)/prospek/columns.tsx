@@ -15,6 +15,7 @@ import { StatusProspek } from "@/lib/generated/prisma/enums";
 import { Prospek } from "@/server/prospek";
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit, MoreHorizontal, User } from "lucide-react";
+import { format } from "date-fns";
 
 interface ColumnActions {
   onEdit: (prospek: Prospek) => void;
@@ -61,7 +62,7 @@ export const getColumns = ({
     header: createSortableHeader<Prospek>("Tanggal Dibuat"),
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
-      return date.toLocaleDateString();
+      return format(date, "d/M/yyyy, HH:mm");
     },
   },
   {

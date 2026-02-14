@@ -430,7 +430,7 @@ export function CreateProspekForm({
         </FieldGroup>
       </div>
 
-      <div className="sticky bottom-0 border-t bg-background py-4 -mx-4 px-4 mt-6 z-10">
+      <div className="sticky bottom-0 border-t bg-background py-4 -mx-4 px-4 mt-6 z-10 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? <Loader className="mr-2 animate-spin" /> : null}
           {loading ? "Memproses..." : "Buat Prospek"}
