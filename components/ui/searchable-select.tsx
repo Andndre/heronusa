@@ -87,7 +87,11 @@ export function SearchableSelect({
 
   // Async search effect
   useEffect(() => {
-    if (!onSearch || !open) return;
+    if (!onSearch || !open) {
+      setIsTyping(false);
+      setInternalLoading(false);
+      return;
+    }
 
     // Skip the very first empty search if we already have initial options.
     if (
@@ -106,13 +110,18 @@ export function SearchableSelect({
 
     isInitialRender.current = false;
 
+    let isEffectActive = true;
     setIsTyping(true);
+
     const handler = setTimeout(async () => {
       try {
         const result = onSearch(search);
         if (result instanceof Promise) {
+          if (!isEffectActive) return;
           setInternalLoading(true);
           const newOptions = await result;
+          
+          if (!isEffectActive) return;
           lastSearchedQuery.current = search;
 
           setInternalOptions((prev) => {
@@ -132,12 +141,17 @@ export function SearchableSelect({
       } catch (error) {
         console.error("SearchableSelect search error:", error);
       } finally {
-        setInternalLoading(false);
-        setIsTyping(false);
+        if (isEffectActive) {
+          setInternalLoading(false);
+          setIsTyping(false);
+        }
       }
     }, 400);
 
-    return () => clearTimeout(handler);
+    return () => {
+      isEffectActive = false;
+      clearTimeout(handler);
+    };
   }, [search, onSearch, value, externalOptions, open, internalOptions.length]);
 
   // Handle clicking outside
@@ -162,9 +176,6 @@ export function SearchableSelect({
     setOpen(false);
     setSearch("");
     lastSearchedQuery.current = null;
-    // We don't focus back to avoid immediate reopen,
-    // though UX-wise staying focused is usually better.
-    // To stay focused safely, we'd need to ensure onFocus doesn't call setOpen(true).
   };
 
   const handleClear = (e: React.MouseEvent) => {
@@ -268,8 +279,7 @@ export function SearchableSelect({
           }}
           onFocus={() => {
             if (!disabled && !open) {
-              // We don't auto-open on focus to prevent focus loops
-              // but we ensure search is ready if opened later
+              setOpen(true);
             }
           }}
           onKeyDown={handleKeyDown}
