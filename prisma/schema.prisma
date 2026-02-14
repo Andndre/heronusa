@@ -688,6 +688,9 @@ model Pembayaran {
   leasingOrder LeasingOrder?
   spk          SPK?          @relation(fields: [spkId], references: [id])
 
+  @@index([cabangId])
+  @@index([spkId])
+  @@index([leasingId])
   @@index([deletedAt])
   @@index([prospekId])
   @@index([fakturId])
