@@ -263,7 +263,7 @@ export function DataTable<TData, TValue>({
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span>Total {totalCount} data</span>
           <div className="flex items-center gap-2">
             <span>Baris per halaman:</span>
