@@ -104,11 +104,7 @@ export async function getDropdownData() {
   };
 }
 
-async function fetchProspekData(
-  activeOrganizationId: string,
-  page: number,
-  pageSize: number,
-) {
+async function fetchProspekData(activeOrganizationId: string, page: number, pageSize: number) {
   "use cache";
   console.log(`CACHE MISS: fetchProspekData for org ${activeOrganizationId}, page ${page}`);
   cacheTag(`prospek-org-${activeOrganizationId}`);
@@ -172,7 +168,7 @@ export type ProspekResponse = Awaited<ReturnType<typeof getProspekData>>;
 export type Prospek = ProspekResponse["data"][number];
 
 export async function createProspek(
-  data: Omit<Prisma.ProspekCreateInput, "cabang" | "sales" | "id">,
+  data: Omit<Prisma.ProspekCreateInput, "cabang" | "sales" | "id">
 ) {
   const { currentUser, session } = await getCurrentUser();
   const activeOrganizationId = session?.activeOrganizationId;
@@ -203,7 +199,7 @@ export async function createProspek(
 
 export async function updateProspek(
   id: string,
-  data: Omit<Prisma.ProspekUpdateInput, "cabang" | "sales" | "id">,
+  data: Omit<Prisma.ProspekUpdateInput, "cabang" | "sales" | "id">
 ) {
   const { session } = await getCurrentUser();
   const activeOrganizationId = session?.activeOrganizationId;

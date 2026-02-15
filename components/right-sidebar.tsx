@@ -3,11 +3,7 @@
 import { ReactNode } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-} from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar";
 
 interface RightSidebarProps {
   open: boolean;
@@ -32,15 +28,11 @@ export function RightSidebar({
       onOpenChange={onOpenChange}
       style={{ "--sidebar-width": "18rem" } as React.CSSProperties}
     >
-      <SidebarHeader className="h-16 border-b px-4 shrink-0">
+      <SidebarHeader className="h-16 shrink-0 border-b px-4">
         <div className="flex items-center justify-between py-2">
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold leading-none truncate">
-              {title}
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1 truncate">
-              {description}
-            </p>
+            <h2 className="truncate text-lg leading-none font-semibold">{title}</h2>
+            <p className="text-muted-foreground mt-1 truncate text-sm">{description}</p>
           </div>
           <Button
             variant="ghost"

@@ -28,10 +28,7 @@ export function CabangSwitcher({ organizations }: CabangSwitcherProps) {
   };
 
   return (
-    <Select
-      onValueChange={handleChangeCabang}
-      value={activeOrganization?.id ?? ""}
-    >
+    <Select onValueChange={handleChangeCabang} value={activeOrganization?.id ?? ""}>
       <SelectTrigger className="w-full max-w-48" aria-label="Pilih Cabang">
         <SelectValue placeholder="Pilih Cabang" />
       </SelectTrigger>

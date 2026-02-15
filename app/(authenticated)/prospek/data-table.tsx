@@ -21,11 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useCallback, useEffect, useState } from "react";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
 import { InfoIcon, PlusIcon, Search } from "lucide-react";
 import {
@@ -106,7 +102,7 @@ export function DataTable<TData, TValue>({
       params.set(name, value);
       return params.toString();
     },
-    [searchParams],
+    [searchParams]
   );
 
   const handlePageChange = (page: number) => {
@@ -125,7 +121,7 @@ export function DataTable<TData, TValue>({
       setSelectedRow(row);
       onSelectRow?.(row);
     },
-    [onSelectRow],
+    [onSelectRow]
   );
 
   // Keyboard navigation
@@ -142,9 +138,7 @@ export function DataTable<TData, TValue>({
       }
 
       const rows = table.getRowModel().rows;
-      const currentIndex = rows.findIndex(
-        (row) => row.original === selectedRow,
-      );
+      const currentIndex = rows.findIndex((row) => row.original === selectedRow);
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
@@ -175,15 +169,9 @@ export function DataTable<TData, TValue>({
             </InputGroupAddon>
             <InputGroupInput
               placeholder="Filter names..."
-              value={
-                (table
-                  .getColumn("nama_konsumen")
-                  ?.getFilterValue() as string) ?? ""
-              }
+              value={(table.getColumn("nama_konsumen")?.getFilterValue() as string) ?? ""}
               onChange={(event) =>
-                table
-                  .getColumn("nama_konsumen")
-                  ?.setFilterValue(event.target.value)
+                table.getColumn("nama_konsumen")?.setFilterValue(event.target.value)
               }
             />
           </InputGroup>
@@ -200,11 +188,7 @@ export function DataTable<TData, TValue>({
           )}
         </div>
         {onAdd && (
-          <Button
-            variant={"outline"}
-            onClick={onAdd}
-            className="w-full sm:w-auto"
-          >
+          <Button variant={"outline"} onClick={onAdd} className="w-full sm:w-auto">
             <PlusIcon /> Tambah
           </Button>
         )}
@@ -219,10 +203,7 @@ export function DataTable<TData, TValue>({
                     <TableHead key={header.id}>
                       {header.isPlaceholder
                         ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   );
                 })}
@@ -243,10 +224,7 @@ export function DataTable<TData, TValue>({
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -254,10 +232,7 @@ export function DataTable<TData, TValue>({
               })
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   Tidak ada data
                 </TableCell>
               </TableRow>
@@ -267,18 +242,12 @@ export function DataTable<TData, TValue>({
       </div>
 
       <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-        <div className="flex flex-col items-center gap-4 text-sm text-muted-foreground sm:flex-row">
+        <div className="text-muted-foreground flex flex-col items-center gap-4 text-sm sm:flex-row">
           <span>Total {totalCount} data</span>
           <div className="flex items-center gap-2">
             <span>Baris per halaman:</span>
-            <Select
-              value={pageSize.toString()}
-              onValueChange={handlePageSizeChange}
-            >
-              <SelectTrigger
-                className="h-8 w-17.5"
-                aria-label="Pilih jumlah baris per halaman"
-              >
+            <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+              <SelectTrigger className="h-8 w-17.5" aria-label="Pilih jumlah baris per halaman">
                 <SelectValue placeholder={pageSize.toString()} />
               </SelectTrigger>
               <SelectContent side="top">
@@ -301,11 +270,7 @@ export function DataTable<TData, TValue>({
                   e.preventDefault();
                   if (currentPage > 1) handlePageChange(currentPage - 1);
                 }}
-                className={
-                  currentPage <= 1
-                    ? "pointer-events-none opacity-70"
-                    : "cursor-pointer"
-                }
+                className={currentPage <= 1 ? "pointer-events-none opacity-70" : "cursor-pointer"}
               />
             </PaginationItem>
 
@@ -339,13 +304,10 @@ export function DataTable<TData, TValue>({
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  if (currentPage < pageCount)
-                    handlePageChange(currentPage + 1);
+                  if (currentPage < pageCount) handlePageChange(currentPage + 1);
                 }}
                 className={
-                  currentPage >= pageCount
-                    ? "pointer-events-none opacity-70"
-                    : "cursor-pointer"
+                  currentPage >= pageCount ? "pointer-events-none opacity-70" : "cursor-pointer"
                 }
               />
             </PaginationItem>

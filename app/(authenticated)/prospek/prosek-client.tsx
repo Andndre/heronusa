@@ -25,8 +25,7 @@ export function ProspekClientComponent({
   pageSize: number;
   dropdownData: Awaited<ReturnType<typeof getDropdownData>>;
 }) {
-  const { setContent, setTitle, setDescription, setOpen, open, view, setView } =
-    useRightSidebar();
+  const { setContent, setTitle, setDescription, setOpen, open, view, setView } = useRightSidebar();
   const [, setSelectedProspek] = useState<Prospek | null>(null);
 
   const handleSelectRow = useCallback(
@@ -37,7 +36,7 @@ export function ProspekClientComponent({
         setContent(<RowDetail key={row.id} prospek={row} />);
       }
     },
-    [open, view, setContent],
+    [open, view, setContent]
   );
 
   const handleShowDetail = useCallback(
@@ -53,7 +52,7 @@ export function ProspekClientComponent({
       setView("detail");
       setOpen(true);
     },
-    [open, view, setOpen, setContent, setTitle, setDescription, setView],
+    [open, view, setOpen, setContent, setTitle, setDescription, setView]
   );
 
   const handleAdd = useCallback(() => {
@@ -63,7 +62,7 @@ export function ProspekClientComponent({
         warnas={dropdownData.warnas}
         subSumberProspek={dropdownData.subSumberProspek}
         kelurahans={dropdownData.kelurahans}
-      />,
+      />
     );
     setTitle("Tambah Prospek");
     setDescription("Isi form untuk menambahkan prospek baru.");
@@ -81,14 +80,14 @@ export function ProspekClientComponent({
           warnas={dropdownData.warnas}
           subSumberProspek={dropdownData.subSumberProspek}
           kelurahans={dropdownData.kelurahans}
-        />,
+        />
       );
       setTitle(`Edit Prospek: ${row.nama_konsumen}`);
       setDescription("Perbarui informasi prospek.");
       setView("form");
       setOpen(true);
     },
-    [dropdownData, setContent, setTitle, setDescription, setView, setOpen],
+    [dropdownData, setContent, setTitle, setDescription, setView, setOpen]
   );
 
   const columns = useMemo(
@@ -97,7 +96,7 @@ export function ProspekClientComponent({
         onEdit: handleEdit,
         onViewDetail: handleShowDetail,
       }),
-    [handleEdit, handleShowDetail],
+    [handleEdit, handleShowDetail]
   );
 
   // Reset sidebar when unmounting/navigating away

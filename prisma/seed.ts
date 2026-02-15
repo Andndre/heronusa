@@ -38,12 +38,7 @@ async function main() {
     });
   }
 
-  async function ensureKelurahan(
-    nama: string,
-    kecamatanId: string,
-    lat?: number,
-    lng?: number,
-  ) {
+  async function ensureKelurahan(nama: string, kecamatanId: string, lat?: number, lng?: number) {
     const existing = await prisma.kelurahan.findFirst({
       where: { nama_kelurahan: nama, kecamatanId },
     });
@@ -63,10 +58,7 @@ async function main() {
   console.log("Kabupaten seeded");
 
   // 3. Seed Kecamatan & Kelurahan secara hirarkis
-  const denpasarSelatan = await ensureKecamatan(
-    "Denpasar Selatan",
-    denpasar.id,
-  );
+  const denpasarSelatan = await ensureKecamatan("Denpasar Selatan", denpasar.id);
   const denpasarTimur = await ensureKecamatan("Denpasar Timur", denpasar.id);
   const denpasarBarat = await ensureKecamatan("Denpasar Barat", denpasar.id);
   const denpasarUtara = await ensureKecamatan("Denpasar Utara", denpasar.id);
@@ -129,14 +121,7 @@ async function main() {
   console.log("Kelurahan seeded");
 
   // 4. Seed Sumber Prospek
-  const sumberData = [
-    "Walk In",
-    "Referral",
-    "Online",
-    "Event",
-    "Telemarketing",
-    "Media Sosial",
-  ];
+  const sumberData = ["Walk In", "Referral", "Online", "Event", "Telemarketing", "Media Sosial"];
   for (const nama of sumberData) {
     const existing = await prisma.sumberProspek.findFirst({
       where: { nama_sumber: nama },
@@ -150,15 +135,7 @@ async function main() {
   console.log("Sumber Prospek seeded");
 
   // 5. Seed Master Warna
-  const warnaData = [
-    "Hitam",
-    "Putih",
-    "Merah",
-    "Biru",
-    "Silver",
-    "Abu-abu",
-    "Hitam Doff",
-  ];
+  const warnaData = ["Hitam", "Putih", "Merah", "Biru", "Silver", "Abu-abu", "Hitam Doff"];
   for (const warna of warnaData) {
     const existing = await prisma.masterWarna.findFirst({
       where: { warna: warna },

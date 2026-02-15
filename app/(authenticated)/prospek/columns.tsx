@@ -21,10 +21,7 @@ interface ColumnActions {
   onViewDetail?: (prospek: Prospek) => void;
 }
 
-export const getColumns = ({
-  onEdit,
-  onViewDetail,
-}: ColumnActions): ColumnDef<Prospek>[] => [
+export const getColumns = ({ onEdit, onViewDetail }: ColumnActions): ColumnDef<Prospek>[] => [
   {
     accessorKey: "nama_konsumen",
     header: createSortableHeader<Prospek>("Nama"),
@@ -49,11 +46,7 @@ export const getColumns = ({
     header: createSortableHeader<Prospek>("Status"),
     cell: ({ row }) => {
       const status = row.original.status as StatusProspek;
-      return (
-        <Badge>
-          {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
-        </Badge>
-      );
+      return <Badge>{status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}</Badge>;
     },
   },
   {
@@ -73,11 +66,7 @@ export const getColumns = ({
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="h-8 w-8 p-0"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>

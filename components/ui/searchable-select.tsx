@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  KeyboardEvent,
-} from "react";
+import { useEffect, useId, useMemo, useRef, useState, KeyboardEvent } from "react";
 import { Check, ChevronDown, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -48,8 +41,7 @@ export function SearchableSelect({
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
 
-  const [internalOptions, setInternalOptions] =
-    useState<Option[]>(externalOptions);
+  const [internalOptions, setInternalOptions] = useState<Option[]>(externalOptions);
   const [internalLoading, setInternalLoading] = useState(false);
 
   const isInitialRender = useRef(true);
@@ -68,7 +60,7 @@ export function SearchableSelect({
     () =>
       internalOptions.find((option) => option.value === value) ||
       externalOptions.find((option) => option.value === value),
-    [internalOptions, externalOptions, value],
+    [internalOptions, externalOptions, value]
   );
 
   const displayLabel = selectedLabel || selectedOption?.label || "";
@@ -76,7 +68,7 @@ export function SearchableSelect({
   const filteredOptions = useMemo(() => {
     if (onSearch || !search) return internalOptions;
     return internalOptions.filter((option) =>
-      option.label.toLowerCase().includes(search.toLowerCase()),
+      option.label.toLowerCase().includes(search.toLowerCase())
     );
   }, [internalOptions, search, onSearch]);
 
@@ -94,11 +86,7 @@ export function SearchableSelect({
     }
 
     // Skip the very first empty search if we already have initial options.
-    if (
-      isInitialRender.current &&
-      search === "" &&
-      internalOptions.length > 0
-    ) {
+    if (isInitialRender.current && search === "" && internalOptions.length > 0) {
       isInitialRender.current = false;
       return;
     }
@@ -120,19 +108,15 @@ export function SearchableSelect({
           if (!isEffectActive) return;
           setInternalLoading(true);
           const newOptions = await result;
-          
+
           if (!isEffectActive) return;
           lastSearchedQuery.current = search;
 
           setInternalOptions((prev) => {
             const selected =
-              prev.find((o) => o.value === value) ||
-              externalOptions.find((o) => o.value === value);
+              prev.find((o) => o.value === value) || externalOptions.find((o) => o.value === value);
 
-            if (
-              selected &&
-              !newOptions.find((o) => o.value === selected.value)
-            ) {
+            if (selected && !newOptions.find((o) => o.value === selected.value)) {
               return [...newOptions, selected];
             }
             return newOptions;
@@ -157,10 +141,7 @@ export function SearchableSelect({
   // Handle clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setOpen(false);
         setSearch("");
         lastSearchedQuery.current = null;
@@ -198,9 +179,7 @@ export function SearchableSelect({
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
-        setHighlightedIndex((prev) =>
-          prev < filteredOptions.length - 1 ? prev + 1 : prev,
-        );
+        setHighlightedIndex((prev) => (prev < filteredOptions.length - 1 ? prev + 1 : prev));
         break;
 
       case "ArrowUp":
@@ -231,9 +210,7 @@ export function SearchableSelect({
   // Scroll highlighted item ke view
   useEffect(() => {
     if (open && listRef.current) {
-      const el = listRef.current.querySelector(
-        `[data-index="${highlightedIndex}"]`,
-      );
+      const el = listRef.current.querySelector(`[data-index="${highlightedIndex}"]`);
       el?.scrollIntoView({ block: "nearest" });
     }
   }, [highlightedIndex, open]);
@@ -255,7 +232,7 @@ export function SearchableSelect({
       <div
         className={cn(
           "border-input focus-within:border-ring focus-within:ring-ring/50 dark:bg-input/30 relative flex h-9 w-full items-center gap-2 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] focus-within:ring-[3px]",
-          disabled && "cursor-not-allowed opacity-50",
+          disabled && "cursor-not-allowed opacity-50"
         )}
         onClick={() => {
           if (disabled) return;
@@ -305,10 +282,7 @@ export function SearchableSelect({
           )}
 
           <ChevronDown
-            className={cn(
-              "h-4 w-4 shrink-0 opacity-50 transition-transform",
-              open && "rotate-180",
-            )}
+            className={cn("h-4 w-4 shrink-0 opacity-50 transition-transform", open && "rotate-180")}
           />
         </div>
       </div>
@@ -339,14 +313,13 @@ export function SearchableSelect({
                     "relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm select-none",
                     "hover:bg-accent hover:text-accent-foreground",
                     value === option.value && "bg-accent/50",
-                    highlightedIndex === index &&
-                      "bg-accent text-accent-foreground",
+                    highlightedIndex === index && "bg-accent text-accent-foreground"
                   )}
                 >
                   <Check
                     className={cn(
                       "h-4 w-4 shrink-0",
-                      value === option.value ? "opacity-100" : "opacity-0",
+                      value === option.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                   <span className="flex-1 truncate">{option.label}</span>

@@ -40,17 +40,13 @@ export function AppNavbar({ user, organizations }: AppNavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center gap-2 border-b bg-background px-4 md:gap-4 md:px-6">
+    <header className="bg-background sticky top-0 z-10 flex h-16 items-center gap-2 border-b px-4 md:gap-4 md:px-6">
       <SidebarTrigger />
       <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
         <CabangSwitcher organizations={organizations} />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="h-8 w-8 rounded-full p-0"
-              aria-label="Menu pengguna"
-            >
+            <Button variant="ghost" className="h-8 w-8 rounded-full p-0" aria-label="Menu pengguna">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
                   {getInitials(user.name)}
@@ -62,7 +58,7 @@ export function AppNavbar({ user, organizations }: AppNavbarProps) {
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium">{user.name}</p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
+                <p className="text-muted-foreground text-xs">{user.email}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

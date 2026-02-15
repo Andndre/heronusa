@@ -15,15 +15,7 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar";
 import { User } from "better-auth";
-import {
-  CreditCard,
-  FileCheck,
-  FileText,
-  Home,
-  Package,
-  Truck,
-  Users,
-} from "lucide-react";
+import { CreditCard, FileCheck, FileText, Home, Package, Truck, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -47,9 +39,7 @@ interface RightSidebarContextProps {
   setView: (view: string) => void;
 }
 
-const RightSidebarContext = createContext<RightSidebarContextProps | null>(
-  null,
-);
+const RightSidebarContext = createContext<RightSidebarContextProps | null>(null);
 
 export function useRightSidebar() {
   const context = useContext(RightSidebarContext);
@@ -111,12 +101,12 @@ function AppSidebarContent({ user }: AppSidebarContentProps) {
       </SidebarContent>
       <SidebarFooter>
         <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-full bg-muted">
+          <div className="bg-muted flex size-8 items-center justify-center rounded-full">
             <span className="text-xs font-medium">U</span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-medium">{user.name}</span>
-            <span className="text-xs text-muted-foreground">{user.email}</span>
+            <span className="text-muted-foreground text-xs">{user.email}</span>
           </div>
         </div>
       </SidebarFooter>

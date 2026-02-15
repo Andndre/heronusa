@@ -15,17 +15,7 @@ services:
       MYSQL_PASSWORD: dbheronusa45A
     healthcheck:
       # Gunakan password 'rootpassword' sesuai env di atas
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u",
-          "root",
-          "-prootpassword",
-        ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
 
     ports:
       - "3308:3306"

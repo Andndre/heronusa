@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="overflow-x-hidden">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased min-h-screen w-full overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen w-full overflow-x-hidden font-sans antialiased`}
       >
         {children}
         <Toaster />

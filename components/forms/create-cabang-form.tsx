@@ -1,12 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
@@ -22,10 +17,7 @@ const formSchema = z.object({
   slug: z.string().min(3),
 });
 
-export function CreateCabangForm({
-  className,
-  ...props
-}: React.ComponentProps<"form">) {
+export function CreateCabangForm({ className, ...props }: React.ComponentProps<"form">) {
   const [loading, setLoading] = useState(false);
 
   const form = useForm({
@@ -83,9 +75,7 @@ export function CreateCabangForm({
                   aria-invalid={fieldState.invalid}
                   {...field}
                 />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
             )}
           />
@@ -103,20 +93,13 @@ export function CreateCabangForm({
                   aria-invalid={fieldState.invalid}
                   {...field}
                 />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
             )}
           />
         </div>
       </FieldGroup>
-      <Button
-        type="submit"
-        form="create-cabang-form"
-        className="w-full mt-6"
-        disabled={loading}
-      >
+      <Button type="submit" form="create-cabang-form" className="mt-6 w-full" disabled={loading}>
         {loading ? <Loader className="mr-2 animate-spin" /> : null}
         {loading ? "Membuat..." : "Buat"}
       </Button>

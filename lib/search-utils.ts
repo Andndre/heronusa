@@ -14,7 +14,7 @@ export type SearchFunction<T> = (query: string) => Promise<T[]>;
 export function toOptions<T extends Record<string, unknown>>(
   data: T[],
   labelKey: keyof T,
-  valueKey: keyof T = "id" as keyof T,
+  valueKey: keyof T = "id" as keyof T
 ): Option[] {
   return data.map((item) => ({
     value: String(item[valueKey]),
@@ -29,7 +29,7 @@ export function toOptions<T extends Record<string, unknown>>(
 export function createSearchHandler<T extends Record<string, unknown>>(
   searchFn: SearchFunction<T>,
   labelKey: keyof T,
-  valueKey: keyof T = "id" as keyof T,
+  valueKey: keyof T = "id" as keyof T
 ) {
   return async (q: string): Promise<Option[]> => {
     const results = await searchFn(q);

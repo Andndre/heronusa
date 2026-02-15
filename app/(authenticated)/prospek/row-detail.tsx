@@ -7,7 +7,7 @@ interface RowDetailProps {
 export default function RowDetail({ prospek }: RowDetailProps) {
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-4">{prospek.nama_konsumen}</h3>
+      <h3 className="mb-4 text-lg font-semibold">{prospek.nama_konsumen}</h3>
     </div>
   );
 }

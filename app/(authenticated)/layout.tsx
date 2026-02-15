@@ -7,16 +7,12 @@ import { getOrganizations } from "@/server/organizations";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-export default function AuthenticatedLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
       fallback={
         <div className="flex h-screen w-full items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
         </div>
       }
     >
@@ -25,11 +21,7 @@ export default function AuthenticatedLayout({
   );
 }
 
-async function AuthenticatedContent({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+async function AuthenticatedContent({ children }: { children: React.ReactNode }) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -45,7 +37,7 @@ async function AuthenticatedContent({
     <AppSidebar user={user}>
       <SidebarInset>
         <AppNavbar user={user} organizations={organizations} />
-        <div className="flex-1 overflow-y-auto overflow-x-hidden bg-background p-4 md:p-6">
+        <div className="bg-background flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6">
           {children}
         </div>
       </SidebarInset>

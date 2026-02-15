@@ -1,13 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldSeparator,
-} from "@/components/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,10 +18,7 @@ const formSchema = z.object({
   password: z.string().min(8),
 });
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"form">) {
+export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -100,9 +91,7 @@ export function LoginForm({
                   aria-invalid={fieldState.invalid}
                   {...field}
                 />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
             )}
           />
@@ -120,20 +109,13 @@ export function LoginForm({
                   aria-invalid={fieldState.invalid}
                   {...field}
                 />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
             )}
           />
         </div>
       </FieldGroup>
-      <Button
-        type="submit"
-        form="login-form"
-        className="w-full mt-6"
-        disabled={loading}
-      >
+      <Button type="submit" form="login-form" className="mt-6 w-full" disabled={loading}>
         {loading ? <Loader className="mr-2 animate-spin" /> : null}
         {loading ? "Masuk..." : "Masuk"}
       </Button>

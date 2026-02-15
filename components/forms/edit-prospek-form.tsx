@@ -1,12 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,11 +27,7 @@ import {
 } from "@/components/ui/select";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { KategoriProspek, TipePembayaran } from "@/lib/generated/prisma/enums";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { createSearchHandler, toOptions } from "@/lib/search-utils";
@@ -108,9 +99,7 @@ export function EditProspekForm({
         kategori_prospek: data.kategori_prospek,
         tipe_pembayaran: data.tipe_pembayaran,
         alamat_konsumen: data.alamat_konsumen || undefined,
-        tgl_perkiraan_beli: data.tgl_perkiraan_beli
-          ? new Date(data.tgl_perkiraan_beli)
-          : undefined,
+        tgl_perkiraan_beli: data.tgl_perkiraan_beli ? new Date(data.tgl_perkiraan_beli) : undefined,
         kelurahan: {
           connect: { id: data.kelurahanId },
         },
@@ -143,7 +132,7 @@ export function EditProspekForm({
       id="edit-prospek-form"
       {...props}
       onSubmit={form.handleSubmit(onSubmit)}
-      className={cn("flex flex-col min-h-full", className)}
+      className={cn("flex min-h-full flex-col", className)}
     >
       <div className="flex-1 space-y-4">
         <FieldGroup>
@@ -162,9 +151,7 @@ export function EditProspekForm({
                     aria-invalid={fieldState.invalid}
                     {...field}
                   />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
             />
@@ -182,9 +169,7 @@ export function EditProspekForm({
                     aria-invalid={fieldState.invalid}
                     {...field}
                   />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
             />
@@ -201,9 +186,7 @@ export function EditProspekForm({
                     aria-invalid={fieldState.invalid}
                     {...field}
                   />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
             />
@@ -212,9 +195,7 @@ export function EditProspekForm({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="alamat_konsumen">
-                    Alamat Lengkap
-                  </FieldLabel>
+                  <FieldLabel htmlFor="alamat_konsumen">Alamat Lengkap</FieldLabel>
                   <Input
                     id="alamat_konsumen"
                     type="text"
@@ -222,9 +203,7 @@ export function EditProspekForm({
                     aria-invalid={fieldState.invalid}
                     {...field}
                   />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
             />
@@ -237,9 +216,7 @@ export function EditProspekForm({
                   <FieldLabel htmlFor="kategori_prospek">Kategori</FieldLabel>
                   <Select
                     value={field.value}
-                    onValueChange={(val) =>
-                      field.onChange(val as KategoriProspek)
-                    }
+                    onValueChange={(val) => field.onChange(val as KategoriProspek)}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Pilih Kategori" />
@@ -252,9 +229,7 @@ export function EditProspekForm({
                       ))}
                     </SelectContent>
                   </Select>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
             />
@@ -263,14 +238,10 @@ export function EditProspekForm({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="tipe_pembayaran">
-                    Tipe Pembayaran
-                  </FieldLabel>
+                  <FieldLabel htmlFor="tipe_pembayaran">Tipe Pembayaran</FieldLabel>
                   <Select
                     value={field.value}
-                    onValueChange={(val) =>
-                      field.onChange(val as TipePembayaran)
-                    }
+                    onValueChange={(val) => field.onChange(val as TipePembayaran)}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Pilih Tipe Pembayaran" />
@@ -283,9 +254,7 @@ export function EditProspekForm({
                       ))}
                     </SelectContent>
                   </Select>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
             />
@@ -299,17 +268,12 @@ export function EditProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    onSearch={createSearchHandler(
-                      searchSubSumberProspek,
-                      "nama_subsumber",
-                    )}
+                    onSearch={createSearchHandler(searchSubSumberProspek, "nama_subsumber")}
                     options={toOptions(initialSubSumbers, "nama_subsumber")}
                     placeholder="Pilih sumber"
                     emptyText="Tidak ada sumber prospek"
                   />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
             />
@@ -328,9 +292,7 @@ export function EditProspekForm({
                     placeholder="Pilih model motor"
                     emptyText="Tidak ada model motor"
                   />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
             />
@@ -348,9 +310,7 @@ export function EditProspekForm({
                     placeholder="Pilih warna"
                     emptyText="Tidak ada warna"
                   />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
             />
@@ -364,17 +324,12 @@ export function EditProspekForm({
                   <SearchableSelect
                     value={field.value?.toString()}
                     onValueChange={(val) => field.onChange(val)}
-                    onSearch={createSearchHandler(
-                      searchKelurahans,
-                      "nama_kelurahan",
-                    )}
+                    onSearch={createSearchHandler(searchKelurahans, "nama_kelurahan")}
                     options={toOptions(initialKelurahans, "nama_kelurahan")}
                     placeholder="Pilih kelurahan"
                     emptyText="Tidak ada kelurahan"
                   />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
             />
@@ -382,9 +337,7 @@ export function EditProspekForm({
               name="tgl_perkiraan_beli"
               control={form.control}
               render={({ field, fieldState }) => {
-                const selectedDate = field.value
-                  ? new Date(field.value)
-                  : undefined;
+                const selectedDate = field.value ? new Date(field.value) : undefined;
 
                 return (
                   <Field data-invalid={fieldState.invalid}>
@@ -398,15 +351,11 @@ export function EditProspekForm({
                           type="button"
                           variant="outline"
                           className={cn(
-                            "justify-start font-normal w-full",
-                            !field.value && "text-muted-foreground",
+                            "w-full justify-start font-normal",
+                            !field.value && "text-muted-foreground"
                           )}
                         >
-                          {selectedDate ? (
-                            format(selectedDate, "PPP")
-                          ) : (
-                            <span>Pilih Tanggal</span>
-                          )}
+                          {selectedDate ? format(selectedDate, "PPP") : <span>Pilih Tanggal</span>}
                         </Button>
                       </PopoverTrigger>
 
@@ -426,9 +375,7 @@ export function EditProspekForm({
                       </PopoverContent>
                     </Popover>
 
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 );
               }}
@@ -437,7 +384,7 @@ export function EditProspekForm({
         </FieldGroup>
       </div>
 
-      <div className="sticky bottom-0 border-t bg-background py-4 -mx-4 px-4 mt-6 z-10 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+      <div className="bg-background sticky bottom-0 z-10 -mx-4 mt-6 border-t px-4 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? <Loader className="mr-2 animate-spin" /> : null}
           {loading ? "Memproses..." : "Simpan Perubahan"}
