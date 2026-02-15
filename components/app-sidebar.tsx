@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, ReactNode } from "react";
-import { User } from "better-auth";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { LeftSidebar } from "@/components/left-sidebar";
 import { RightSidebar } from "@/components/right-sidebar";
@@ -9,10 +8,9 @@ import { RightSidebarProvider } from "@/components/sidebar-context";
 
 interface AppSidebarProps {
   children: ReactNode;
-  user: User;
 }
 
-export function AppSidebar({ children, user }: AppSidebarProps) {
+export function AppSidebar({ children }: AppSidebarProps) {
   const [rightOpen, setRightOpen] = useState(false);
   const [rightContent, setRightContent] = useState<ReactNode | null>(null);
   const [rightTitle, setRightTitle] = useState("");
@@ -41,7 +39,7 @@ export function AppSidebar({ children, user }: AppSidebarProps) {
   return (
     <SidebarProvider>
       <RightSidebarProvider value={rightSidebarValue}>
-        <LeftSidebar user={user} />
+        <LeftSidebar />
         {children}
         <RightSidebar
           open={rightOpen}

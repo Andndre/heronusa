@@ -34,7 +34,7 @@ async function AuthenticatedContent({ children }: { children: React.ReactNode })
   }
 
   return (
-    <AppSidebar user={user}>
+    <AppSidebar>
       <SidebarInset>
         <AppNavbar user={user} organizations={organizations} />
         <div className="bg-background flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6">
