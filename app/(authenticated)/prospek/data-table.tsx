@@ -263,7 +263,7 @@ export function DataTable<TData, TValue>({
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <span>Total {totalCount} data</span>
           <div className="flex items-center gap-2">
             <span>Baris per halaman:</span>
@@ -271,7 +271,10 @@ export function DataTable<TData, TValue>({
               value={pageSize.toString()}
               onValueChange={handlePageSizeChange}
             >
-              <SelectTrigger className="h-8 w-17.5" aria-label="Pilih jumlah baris per halaman">
+              <SelectTrigger
+                className="h-8 w-17.5"
+                aria-label="Pilih jumlah baris per halaman"
+              >
                 <SelectValue placeholder={pageSize.toString()} />
               </SelectTrigger>
               <SelectContent side="top">
@@ -296,7 +299,7 @@ export function DataTable<TData, TValue>({
                 }}
                 className={
                   currentPage <= 1
-                    ? "pointer-events-none opacity-50"
+                    ? "pointer-events-none opacity-70"
                     : "cursor-pointer"
                 }
               />
@@ -337,7 +340,7 @@ export function DataTable<TData, TValue>({
                 }}
                 className={
                   currentPage >= pageCount
-                    ? "pointer-events-none opacity-50"
+                    ? "pointer-events-none opacity-70"
                     : "cursor-pointer"
                 }
               />
