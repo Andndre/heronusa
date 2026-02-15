@@ -15,7 +15,7 @@ export default function AuthenticatedLayout({
   return (
     <Suspense
       fallback={
-        <div className="flex h-screen w-screen items-center justify-center">
+        <div className="flex h-screen w-full items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       }
@@ -45,9 +45,9 @@ async function AuthenticatedContent({
     <AppSidebar user={user}>
       <SidebarInset>
         <AppNavbar user={user} organizations={organizations} />
-        <main className="flex-1 overflow-auto bg-background p-6">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden bg-background p-4 md:p-6">
           {children}
-        </main>
+        </div>
       </SidebarInset>
     </AppSidebar>
   );
