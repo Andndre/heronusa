@@ -167,9 +167,9 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
-          <InputGroup className="max-w-sm">
+          <InputGroup className="w-full sm:max-w-sm">
             <InputGroupAddon>
               <Search />
             </InputGroupAddon>
@@ -200,7 +200,11 @@ export function DataTable<TData, TValue>({
           )}
         </div>
         {onAdd && (
-          <Button variant={"outline"} onClick={onAdd}>
+          <Button
+            variant={"outline"}
+            onClick={onAdd}
+            className="w-full sm:w-auto"
+          >
             <PlusIcon /> Tambah
           </Button>
         )}
@@ -262,8 +266,8 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+      <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+        <div className="flex flex-col items-center gap-4 text-sm text-muted-foreground sm:flex-row">
           <span>Total {totalCount} data</span>
           <div className="flex items-center gap-2">
             <span>Baris per halaman:</span>
@@ -288,7 +292,7 @@ export function DataTable<TData, TValue>({
           </div>
         </div>
 
-        <Pagination className="justify-end w-auto mx-0">
+        <Pagination className="mx-0 w-full justify-center sm:w-auto sm:justify-end">
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
