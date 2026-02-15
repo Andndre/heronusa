@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { getDropdownData } from "@/server/prospek";
 import { getColumns } from "./columns";
 import { DataTable } from "./data-table";
-import { useRightSidebar } from "@/components/app-sidebar";
+import { useRightSidebar } from "@/components/sidebar-context";
 import { CreateProspekForm } from "@/components/forms/create-prospek-form";
 import { EditProspekForm } from "@/components/forms/edit-prospek-form";
 import { Prospek } from "@/server/prospek";
