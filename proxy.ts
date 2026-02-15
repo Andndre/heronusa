@@ -1,28 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { checkRateLimit, getClientIP, applyRateLimitHeaders } from "@/lib/rate-limiter";
 
-export async function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest): Promise<NextResponse> {
+  const ip = getClientIP(request);
+  const rateLimit = await checkRateLimit(ip);
+
+  if (!rateLimit.success) {
+    return applyRateLimitHeaders(
+      NextResponse.json(
+        { error: "Terlalu banyak permintaan. Silakan coba lagi." },
+        { status: 429 }
+      ),
+      rateLimit
+    );
+  }
+
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
+  const pathname = new URL(request.url).pathname;
   const publicRoutes = ["/login", "/forgot-password", "/api/auth"];
-
   const isLoggedIn = !!session;
 
-  // Allow public routes
-  if (publicRoutes.some((route) => new URL(request.url).pathname.startsWith(route))) {
-    return NextResponse.next();
+  let response: NextResponse;
+
+  if (isLoggedIn || publicRoutes.some((route) => pathname.startsWith(route))) {
+    response = NextResponse.next();
+  } else {
+    response = NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // This is the recommended approach to optimistically redirect users
-  // We recommend handling auth checks in each page/route
-  if (!isLoggedIn) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  return NextResponse.next();
+  return applyRateLimitHeaders(response, rateLimit);
 }
 
 export const config = {
