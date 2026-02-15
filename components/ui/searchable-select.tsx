@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState, KeyboardEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, KeyboardEvent, useCallback } from "react";
 import { Check, ChevronDown, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -13,8 +13,9 @@ interface SearchableSelectProps {
   /**
    * Function to handle search. If it returns a Promise<Option[]>,
    * the component will manage internal loading and options state.
+   * Receives AbortSignal for cancelling requests.
    */
-  onSearch?: (query: string) => Promise<Option[]> | void;
+  onSearch?: (query: string, signal?: AbortSignal) => Promise<Option[]> | void;
   options?: Option[];
   placeholder?: string;
   emptyText?: string;
@@ -77,55 +78,63 @@ export function SearchableSelect({
     setHighlightedIndex(0);
   }, [filteredOptions]);
 
-  // Async search effect
+  // Centralized reset/close logic
+  const resetSearch = useCallback(() => {
+    setOpen(false);
+    setSearch("");
+    lastSearchedQuery.current = null;
+  }, []);
+
+  // Combined Search & Cleanup Effect
   useEffect(() => {
-    if (!onSearch || !open) {
+    if (!onSearch) return;
+
+    // Handle closing/cleanup
+    if (!open) {
       setIsTyping(false);
       setInternalLoading(false);
       return;
     }
 
-    // Skip the very first empty search if we already have initial options.
-    if (isInitialRender.current && search === "" && internalOptions.length > 0) {
+    // Skip redundant search
+    if (search === lastSearchedQuery.current) return;
+
+    // Skip initial empty search if we already have options
+    if (isInitialRender.current) {
       isInitialRender.current = false;
-      return;
+      if (search === "" && internalOptions.length > 0) return;
     }
 
-    // Skip if the query hasn't changed from the last executed search in this "session"
-    if (search === lastSearchedQuery.current) {
-      return;
-    }
-
-    isInitialRender.current = false;
-
-    let isEffectActive = true;
+    const controller = new AbortController();
     setIsTyping(true);
 
     const handler = setTimeout(async () => {
       try {
-        const result = onSearch(search);
+        if (controller.signal.aborted || !open) return;
+
+        const result = onSearch(search, controller.signal);
         if (result instanceof Promise) {
-          if (!isEffectActive) return;
           setInternalLoading(true);
           const newOptions = await result;
 
-          if (!isEffectActive) return;
-          lastSearchedQuery.current = search;
+          if (controller.signal.aborted || !open) return;
 
+          lastSearchedQuery.current = search;
           setInternalOptions((prev) => {
             const selected =
               prev.find((o) => o.value === value) || externalOptions.find((o) => o.value === value);
 
-            if (selected && !newOptions.find((o) => o.value === selected.value)) {
-              return [...newOptions, selected];
-            }
-            return newOptions;
+            return selected && !newOptions.find((o) => o.value === selected.value)
+              ? [...newOptions, selected]
+              : newOptions;
           });
         }
       } catch (error) {
-        console.error("SearchableSelect search error:", error);
+        if (error instanceof Error && error.name !== "AbortError") {
+          console.error("SearchableSelect search error:", error);
+        }
       } finally {
-        if (isEffectActive) {
+        if (!controller.signal.aborted && open) {
           setInternalLoading(false);
           setIsTyping(false);
         }
@@ -133,30 +142,14 @@ export function SearchableSelect({
     }, 400);
 
     return () => {
-      isEffectActive = false;
       clearTimeout(handler);
+      controller.abort();
     };
-  }, [search, onSearch, value, externalOptions, open, internalOptions.length]);
-
-  // Handle clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setOpen(false);
-        setSearch("");
-        lastSearchedQuery.current = null;
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [search, onSearch, open, value, externalOptions, internalOptions.length]);
 
   const handleSelect = (optionValue: string) => {
     onValueChange?.(optionValue);
-    setOpen(false);
-    setSearch("");
-    lastSearchedQuery.current = null;
+    resetSearch();
   };
 
   const handleClear = (e: React.MouseEvent) => {
@@ -196,9 +189,7 @@ export function SearchableSelect({
 
       case "Escape":
         e.preventDefault();
-        setOpen(false);
-        setSearch("");
-        lastSearchedQuery.current = null;
+        resetSearch();
         break;
 
       case "Tab":
@@ -223,9 +214,7 @@ export function SearchableSelect({
       className={cn("relative w-full", className)}
       onBlur={(e) => {
         if (!containerRef.current?.contains(e.relatedTarget as Node)) {
-          setOpen(false);
-          setSearch("");
-          lastSearchedQuery.current = null;
+          resetSearch();
         }
       }}
     >
