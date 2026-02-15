@@ -1,10 +1,11 @@
 "use client";
 
-import { User } from "better-auth";
-import { CreditCard, FileCheck, FileText, Home, Package, Truck, Users } from "lucide-react";
+import { useState } from "react";
+import { CreditCard, FileCheck, FileText, Home, Package, Search, Truck, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -17,13 +18,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { GlobalCommandDialog, useCommandShortcut } from "@/components/command-dialog";
 
-interface LeftSidebarProps {
-  user: User;
-}
-
-export function LeftSidebar({ user }: LeftSidebarProps) {
+export function LeftSidebar() {
   const pathname = usePathname();
+  const [commandOpen, setCommandOpen] = useState(false);
+
+  useCommandShortcut(() => setCommandOpen((prev) => !prev));
 
   const items = [
     { title: "Dashboard", url: "/", icon: Home },
@@ -51,7 +52,7 @@ export function LeftSidebar({ user }: LeftSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Navigasi</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -69,16 +70,22 @@ export function LeftSidebar({ user }: LeftSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <div className="flex items-center gap-2">
-          <div className="bg-muted flex size-8 items-center justify-center rounded-full">
-            <span className="text-xs font-medium">U</span>
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-2 px-2"
+          onClick={() => setCommandOpen(true)}
+        >
+          <Search className="h-4 w-4 shrink-0" />
+          <div className="flex flex-1 flex-col items-start">
+            <span className="text-sm font-medium">Cari</span>
+            <span className="text-muted-foreground text-xs">Navigasi cepat fitur...</span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">{user.name}</span>
-            <span className="text-muted-foreground text-xs">{user.email}</span>
-          </div>
-        </div>
+          <kbd className="bg-muted text-muted-foreground pointer-events-none ml-auto inline-flex h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none">
+            <span className="text-xs">⌘</span>K
+          </kbd>
+        </Button>
       </SidebarFooter>
+      <GlobalCommandDialog open={commandOpen} onOpenChange={setCommandOpen} />
     </Sidebar>
   );
 }
