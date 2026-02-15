@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getDropdownData } from "@/server/prospek";
 import { getColumns } from "./columns";
 import { DataTable } from "./data-table";
@@ -25,6 +26,8 @@ export function ProspekClientComponent({
   pageSize: number;
   dropdownData: Awaited<ReturnType<typeof getDropdownData>>;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { setContent, setTitle, setDescription, setOpen, open, view, setView } = useRightSidebar();
   const [, setSelectedProspek] = useState<Prospek | null>(null);
 
@@ -98,6 +101,15 @@ export function ProspekClientComponent({
       }),
     [handleEdit, handleShowDetail]
   );
+
+  useEffect(() => {
+    const action = searchParams.get("action");
+
+    if (action === "create") {
+      handleAdd();
+      router.replace("/prospek", { scroll: false });
+    }
+  }, [searchParams, handleAdd, router]);
 
   // Reset sidebar when unmounting/navigating away
   useEffect(() => {

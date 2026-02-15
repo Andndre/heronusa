@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -67,6 +67,7 @@ export function CreateProspekForm({
   ...props
 }: React.ComponentProps<"form"> & CreateProspekFormProps) {
   const [loading, setLoading] = useState(false);
+  const [firstInputEl, setFirstInputEl] = useState<HTMLInputElement | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -84,6 +85,16 @@ export function CreateProspekForm({
       subSumberId: initialData?.subSumberId,
     },
   });
+
+  // Auto focus to first input when form mounts
+  useEffect(() => {
+    // Small delay to ensure the sidebar animation is complete
+    const timer = setTimeout(() => {
+      firstInputEl?.focus();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [firstInputEl]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setLoading(true);
@@ -142,12 +153,16 @@ export function CreateProspekForm({
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="nama_konsumen">Nama</FieldLabel>
                   <Input
+                    {...field}
+                    ref={(el) => {
+                      setFirstInputEl(el);
+                      field.ref(el);
+                    }}
                     id="nama_konsumen"
                     type="text"
                     placeholder="Nama Konsumen"
                     required
                     aria-invalid={fieldState.invalid}
-                    {...field}
                   />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
