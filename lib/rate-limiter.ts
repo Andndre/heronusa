@@ -23,6 +23,18 @@ export interface RateLimitResult {
   limit: number;
 }
 
+/**
+ * Memeriksa dan memberlakukan rate limit untuk kunci tertentu menggunakan Redis.
+ * @param {string} key - Parameter `key` dalam fungsi `checkRateLimit` adalah string yang
+ * mewakili pengidentifikasi unik untuk memeriksa rate limit. Digunakan untuk melacak
+ * rate limit untuk entitas atau sumber daya tertentu.
+ * @returns `Promise` yang resolve ke objek `RateLimitResult`.
+ * Objek `RateLimitResult` berisi properti berikut:
+ * - `success`: Boolean yang menunjukkan apakah pemeriksaan rate limit berhasil.
+ * - `remaining`: Jumlah permintaan yang tersisa dalam jendela rate limit.
+ * - `reset`: Waktu ketika jendela rate limit direset.
+ * - `limit`: Jumlah maksimum permintaan yang diizinkan dalam jendela rate limit.
+ */
 export async function checkRateLimit(key: string): Promise<RateLimitResult> {
   try {
     const client = await getRedis();
@@ -51,6 +63,19 @@ export async function checkRateLimit(key: string): Promise<RateLimitResult> {
   }
 }
 
+/**
+ * Menetapkan header terkait rate limit dalam objek respons berdasarkan
+ * hasil rate limit yang diberikan.
+ * @param {NextResponse} response - Parameter `response` dalam fungsi `applyRateLimitHeaders` adalah
+ * tipe `NextResponse`, yang merupakan objek yang mewakili respons untuk dikirim kembali ke
+ * klien dalam aplikasi Next.js. Objek ini biasanya berisi informasi seperti headers,
+ * status code, dan konten body respons.
+ * @param {RateLimitResult} result - Parameter `result` dalam fungsi `applyRateLimitHeaders`
+ * berisi informasi terkait rate limiting, seperti limit, permintaan yang tersisa, waktu reset,
+ * dan apakah permintaan berhasil atau tidak. Ini adalah tipe `RateLimitResult`.
+ * @returns Objek `response` yang telah diperbarui dengan
+ * header rate limit yang ditetapkan berdasarkan `RateLimitResult` yang diberikan sebagai input.
+ */
 export function applyRateLimitHeaders(response: NextResponse, result: RateLimitResult) {
   response.headers.set("X-RateLimit-Limit", result.limit.toString());
   response.headers.set("X-RateLimit-Remaining", result.remaining.toString());
