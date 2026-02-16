@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
 import { InfoIcon, PlusIcon, Search } from "lucide-react";
@@ -52,6 +52,7 @@ interface DataTableProps<TData, TValue> {
   onAdd?: () => void;
   onEdit?: (row: TData) => void;
   onShowDetail?: (row: TData) => void;
+  shouldFocusSearch?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -64,15 +65,24 @@ export function DataTable<TData, TValue>({
   onSelectRow,
   onAdd,
   onShowDetail,
+  shouldFocusSearch,
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // State
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [selectedRow, setSelectedRow] = useState<TData | null>(null);
+
+  // Focus search input when shouldFocusSearch is true
+  useEffect(() => {
+    if (shouldFocusSearch) {
+      searchInputRef.current?.focus();
+    }
+  }, [shouldFocusSearch]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -168,6 +178,7 @@ export function DataTable<TData, TValue>({
               <Search />
             </InputGroupAddon>
             <InputGroupInput
+              ref={searchInputRef}
               placeholder="Filter names..."
               value={(table.getColumn("nama_konsumen")?.getFilterValue() as string) ?? ""}
               onChange={(event) =>

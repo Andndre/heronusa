@@ -31,6 +31,8 @@ export function ProspekClientComponent({
   const { setContent, setTitle, setDescription, setOpen, open, view, setView } = useRightSidebar();
   const [, setSelectedProspek] = useState<Prospek | null>(null);
 
+  const [shouldFocusSearch, setShouldFocusSearch] = useState(false);
+
   const handleSelectRow = useCallback(
     (row: Prospek) => {
       setSelectedProspek(row);
@@ -108,8 +110,19 @@ export function ProspekClientComponent({
     if (action === "create") {
       handleAdd();
       router.replace("/prospek", { scroll: false });
+    } else if (action === "focus") {
+      setTimeout(() => setShouldFocusSearch(true), 0);
+      router.replace("/prospek", { scroll: false });
     }
   }, [searchParams, handleAdd, router]);
+
+  // Reset focus state after it's been triggered
+  useEffect(() => {
+    if (shouldFocusSearch) {
+      const timer = setTimeout(() => setShouldFocusSearch(false), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldFocusSearch]);
 
   // Reset sidebar when unmounting/navigating away
   useEffect(() => {
@@ -131,6 +144,7 @@ export function ProspekClientComponent({
       onShowDetail={handleShowDetail}
       onAdd={handleAdd}
       onEdit={handleEdit}
+      shouldFocusSearch={shouldFocusSearch}
     />
   );
 }

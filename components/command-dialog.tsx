@@ -41,7 +41,7 @@ export function GlobalCommandDialog({ open, onOpenChange }: CommandDialogProps) 
       id: "nav-prospek",
       label: "Manajemen Prospek",
       icon: Users,
-      action: () => router.push("/prospek"),
+      action: () => router.push("/prospek?action=focus"),
       keywords: ["prospek", "lead", "leads"],
     },
     {
