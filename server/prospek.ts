@@ -7,7 +7,6 @@ import { cacheTag, revalidateTag } from "next/cache";
 
 export async function searchModels(query?: string) {
   "use cache";
-  console.log("CACHE MISS: searchModels with query", query);
   cacheTag("master-data");
   const models = await prisma.masterModel.findMany({
     where: query
@@ -29,7 +28,6 @@ export async function searchModels(query?: string) {
 
 export async function searchWarnas(query?: string) {
   "use cache";
-  console.log("CACHE MISS: searchWarnas with query", query);
   cacheTag("master-data");
   const warnas = await prisma.masterWarna.findMany({
     where: query
@@ -51,7 +49,6 @@ export async function searchWarnas(query?: string) {
 
 export async function searchSubSumberProspek(query?: string) {
   "use cache";
-  console.log("CACHE MISS: searchSubSumberProspek with query", query);
   cacheTag("master-data");
   const subSumber = await prisma.subSumberProspek.findMany({
     where: {
@@ -97,7 +94,6 @@ export async function searchKelurahans(query?: string) {
 
 export async function getDropdownData() {
   "use cache";
-  console.log("CACHE MISS: getDropdownData");
   cacheTag("master-data");
 
   const [models, warnas, subSumberProspek, kelurahans] = await Promise.all([
@@ -117,7 +113,6 @@ export async function getDropdownData() {
 
 async function fetchProspekData(activeOrganizationId: string, page: number, pageSize: number) {
   "use cache";
-  console.log(`CACHE MISS: fetchProspekData for org ${activeOrganizationId}, page ${page}`);
   cacheTag(`prospek-org-${activeOrganizationId}`);
 
   const skip = (page - 1) * pageSize;
