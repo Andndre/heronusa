@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CreditCard, FileCheck, FileText, Home, Package, Search, Truck, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -22,6 +22,7 @@ import { GlobalCommandDialog, useCommandShortcut } from "@/components/command-di
 
 export function LeftSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [commandOpen, setCommandOpen] = useState(false);
 
   useCommandShortcut(() => setCommandOpen((prev) => !prev));
@@ -61,8 +62,11 @@ export function LeftSidebar() {
                     asChild
                     isActive={pathname === item.url}
                     aria-current={pathname === item.url}
+                    onMouseEnter={() => {
+                      if (item.url !== "#") router.prefetch(item.url);
+                    }}
                   >
-                    <Link href={item.url} prefetch>
+                    <Link href={item.url} prefetch={false}>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
