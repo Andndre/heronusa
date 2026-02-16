@@ -57,8 +57,12 @@ export function LeftSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.url}
+                    aria-current={pathname === item.url}
+                  >
+                    <Link href={item.url} prefetch>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
