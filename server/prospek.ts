@@ -6,6 +6,9 @@ import { Prisma } from "@/lib/generated/prisma/client";
 import { cacheTag, revalidateTag } from "next/cache";
 
 export async function searchModels(query?: string) {
+  "use cache";
+  console.log("CACHE MISS: searchModels with query", query);
+  cacheTag("master-data");
   const models = await prisma.masterModel.findMany({
     where: query
       ? {
@@ -25,6 +28,9 @@ export async function searchModels(query?: string) {
 }
 
 export async function searchWarnas(query?: string) {
+  "use cache";
+  console.log("CACHE MISS: searchWarnas with query", query);
+  cacheTag("master-data");
   const warnas = await prisma.masterWarna.findMany({
     where: query
       ? {
@@ -44,6 +50,9 @@ export async function searchWarnas(query?: string) {
 }
 
 export async function searchSubSumberProspek(query?: string) {
+  "use cache";
+  console.log("CACHE MISS: searchSubSumberProspek with query", query);
+  cacheTag("master-data");
   const subSumber = await prisma.subSumberProspek.findMany({
     where: {
       status: "ACTIVE",
@@ -66,6 +75,8 @@ export async function searchSubSumberProspek(query?: string) {
 }
 
 export async function searchKelurahans(query?: string) {
+  "use cache";
+  cacheTag("master-data");
   const kelurahans = await prisma.kelurahan.findMany({
     where: query
       ? {
