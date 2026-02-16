@@ -16,6 +16,7 @@ import { User } from "better-auth";
 import { CabangSwitcher } from "./cabang-switcher";
 import { Organization } from "@/lib/generated/prisma/browser";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "./theme-toggle";
 
 interface AppNavbarProps {
   user: User;
@@ -61,6 +62,10 @@ export function AppNavbar({ user, organizations }: AppNavbarProps) {
                 <p className="text-muted-foreground text-xs">{user.email}</p>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="px-2 py-1.5">
+              <ThemeToggle />
+            </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
