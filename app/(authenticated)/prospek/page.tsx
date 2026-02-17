@@ -1,5 +1,5 @@
 import { getProspekData, getDropdownData } from "@/server/prospek";
-import { ProspekClientComponent } from "./prosek-client";
+import { ProspekClientComponent } from "./prospek-client";
 
 export default async function ProspekPage({
   searchParams,

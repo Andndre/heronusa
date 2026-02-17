@@ -52,10 +52,11 @@ interface DataTableProps<TData, TValue> {
   pageCount: number;
   currentPage: number;
   pageSize: number;
-  onSelectRow?: (row: TData) => void;
-  onAdd?: () => void;
-  onShowDetail?: (row: TData) => void;
-  renderRowActions?: (row: TData) => React.ReactNode;
+  selectedRow?: TData | null;
+  onSelectRow: (row: TData) => void;
+  onAdd: () => void;
+  onShowDetail: (row: TData) => void;
+  renderRowActions: (row: TData) => React.ReactNode;
   shouldFocusSearch?: boolean;
   initialQuery?: string;
 }
@@ -67,6 +68,7 @@ export function DataTable<TData, TValue>({
   pageCount,
   currentPage,
   pageSize,
+  selectedRow: propSelectedRow,
   onSelectRow,
   onAdd,
   onShowDetail,
@@ -83,7 +85,9 @@ export function DataTable<TData, TValue>({
   // State
   const [sorting, setSorting] = useState<SortingState>([]);
   const [searchValue, setSearchValue] = useState(initialQuery);
-  const [selectedRow, setSelectedRow] = useState<TData | null>(null);
+  const [internalSelectedRow, setInternalSelectedRow] = useState<TData | null>(null);
+
+  const selectedRow = propSelectedRow !== undefined ? propSelectedRow : internalSelectedRow;
 
   // Focus search input when shouldFocusSearch is true
   useEffect(() => {
@@ -163,10 +167,12 @@ export function DataTable<TData, TValue>({
 
   const handleRowClick = useCallback(
     (row: TData) => {
-      setSelectedRow(row);
-      onSelectRow?.(row);
+      if (propSelectedRow === undefined) {
+        setInternalSelectedRow(row);
+      }
+      onSelectRow(row);
     },
-    [onSelectRow]
+    [onSelectRow, propSelectedRow]
   );
 
   // Keyboard navigation
@@ -219,23 +225,19 @@ export function DataTable<TData, TValue>({
               onChange={(event) => setSearchValue(event.target.value)}
             />
           </InputGroup>
-          {onShowDetail && (
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={!selectedRow}
-              onClick={() => selectedRow && onShowDetail(selectedRow)}
-              title="Lihat Detail"
-            >
-              <InfoIcon className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-        {onAdd && (
-          <Button variant={"outline"} onClick={onAdd} className="w-full sm:w-auto">
-            <PlusIcon /> Tambah
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={!selectedRow}
+            onClick={() => selectedRow && onShowDetail(selectedRow)}
+            title="Lihat Detail"
+          >
+            <InfoIcon className="h-4 w-4" />
           </Button>
-        )}
+        </div>
+        <Button variant={"outline"} onClick={onAdd} className="w-full sm:w-auto">
+          <PlusIcon /> Tambah
+        </Button>
       </div>
       <div className="relative overflow-hidden rounded-md border">
         <div className="overflow-x-auto">
@@ -266,8 +268,8 @@ export function DataTable<TData, TValue>({
                         <TableRow
                           data-state={isSelected && "selected"}
                           className={isSelected ? "bg-muted/50" : "cursor-pointer"}
-                          onClick={() => onSelectRow && handleRowClick(rowData)}
-                          onContextMenu={() => onSelectRow && handleRowClick(rowData)}
+                          onClick={() => handleRowClick(rowData)}
+                          onContextMenu={() => handleRowClick(rowData)}
                         >
                           {row.getVisibleCells().map((cell) => (
                             <TableCell key={cell.id}>
@@ -278,7 +280,7 @@ export function DataTable<TData, TValue>({
                       </ContextMenuTrigger>
                       <ContextMenuContent className="w-48">
                         <ContextMenuLabel>Aksi</ContextMenuLabel>
-                        {renderRowActions?.(rowData)}
+                        {renderRowActions(rowData)}
                       </ContextMenuContent>
                     </ContextMenu>
                   );

@@ -33,36 +33,36 @@ export function ProspekClientComponent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setContent, setTitle, setDescription, setOpen, open, view, setView } = useRightSidebar();
-  const [, setSelectedProspek] = useState<Prospek | null>(null);
+  const [selectedProspek, setSelectedProspek] = useState<Prospek | null>(null);
 
   const [shouldFocusSearch, setShouldFocusSearch] = useState(false);
 
-  const handleSelectRow = useCallback(
-    (row: Prospek) => {
-      setSelectedProspek(row);
-      // If sidebar is open and showing detail, update the content immediately
-      if (open && view === "detail") {
-        setContent(<RowDetail key={row.id} prospekId={row.id} />);
-      }
-    },
-    [open, view, setContent]
-  );
+  const handleSelectRow = useCallback((row: Prospek) => {
+    setSelectedProspek(row);
+  }, []);
 
   const handleShowDetail = useCallback(
     (row: Prospek) => {
-      if (open && view === "detail") {
+      if (open && view === "detail" && row.id === selectedProspek?.id) {
         setOpen(false);
         return;
       }
 
-      setContent(<RowDetail key={row.id} prospekId={row.id} />);
+      setSelectedProspek(row);
       setTitle("Detail Prospek");
       setDescription("Informasi lengkap tentang prospek yang dipilih.");
       setView("detail");
       setOpen(true);
     },
-    [open, view, setOpen, setContent, setTitle, setDescription, setView]
+    [open, view, setOpen, setTitle, setDescription, setView, selectedProspek?.id]
   );
+
+  // Sync sidebar content when selectedProspek changes and view is detail
+  useEffect(() => {
+    if (open && view === "detail" && selectedProspek) {
+      setContent(<RowDetail key={selectedProspek.id} prospekId={selectedProspek.id} />);
+    }
+  }, [selectedProspek?.id, open, view, setContent]);
 
   const handleAdd = useCallback(() => {
     setContent(
@@ -81,6 +81,7 @@ export function ProspekClientComponent({
 
   const handleEdit = useCallback(
     (row: Prospek) => {
+      setSelectedProspek(row);
       setContent(
         <EditProspekForm
           key={row.id}
@@ -123,7 +124,9 @@ export function ProspekClientComponent({
   // Reset focus state after it's been triggered
   useEffect(() => {
     if (shouldFocusSearch) {
-      const timer = setTimeout(() => setShouldFocusSearch(false), 100);
+      const timer = setTimeout(() => {
+        setShouldFocusSearch(false);
+      }, 100);
       return () => clearTimeout(timer);
     }
   }, [shouldFocusSearch]);
@@ -144,6 +147,7 @@ export function ProspekClientComponent({
       pageCount={pageCount}
       currentPage={currentPage}
       pageSize={pageSize}
+      selectedRow={selectedProspek}
       onSelectRow={handleSelectRow}
       onShowDetail={handleShowDetail}
       onAdd={handleAdd}

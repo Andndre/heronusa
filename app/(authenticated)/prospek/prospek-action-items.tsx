@@ -7,7 +7,7 @@ import React from "react";
 interface ProspekActionItemsProps {
   prospek: Prospek;
   onEdit: (prospek: Prospek) => void;
-  onViewDetail?: (prospek: Prospek) => void;
+  onViewDetail: (prospek: Prospek) => void;
   ActionItem: React.ComponentType<{
     onClick?: (e: React.MouseEvent) => void;
     children: React.ReactNode;
@@ -22,17 +22,15 @@ export function ProspekActionItems({
 }: ProspekActionItemsProps) {
   return (
     <>
-      {onViewDetail && (
-        <ActionItem
-          onClick={(e) => {
-            e.stopPropagation();
-            onViewDetail(prospek);
-          }}
-        >
-          <User className="mr-2 h-4 w-4" />
-          Lihat Detail
-        </ActionItem>
-      )}
+      <ActionItem
+        onClick={(e) => {
+          e.stopPropagation();
+          onViewDetail(prospek);
+        }}
+      >
+        <User className="mr-2 h-4 w-4" />
+        Lihat Detail
+      </ActionItem>
       <ActionItem
         onClick={(e) => {
           e.stopPropagation();

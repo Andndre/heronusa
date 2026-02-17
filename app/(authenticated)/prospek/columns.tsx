@@ -21,7 +21,7 @@ import { ProspekActionItems } from "./prospek-action-items";
 
 interface ColumnActions {
   onEdit: (prospek: Prospek) => void;
-  onViewDetail?: (prospek: Prospek) => void;
+  onViewDetail: (prospek: Prospek) => void;
 }
 
 export const getColumns = ({ onEdit, onViewDetail }: ColumnActions): ColumnDef<Prospek>[] => [
