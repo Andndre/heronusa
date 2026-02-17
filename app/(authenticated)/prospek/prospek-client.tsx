@@ -62,7 +62,7 @@ export function ProspekClientComponent({
     if (open && view === "detail" && selectedProspek) {
       setContent(<RowDetail key={selectedProspek.id} prospekId={selectedProspek.id} />);
     }
-  }, [selectedProspek?.id, open, view, setContent]);
+  }, [selectedProspek?.id, open, view, setContent, selectedProspek]);
 
   const handleAdd = useCallback(() => {
     setContent(
