@@ -38,7 +38,7 @@ export function ProspekClientComponent({
       setSelectedProspek(row);
       // If sidebar is open and showing detail, update the content immediately
       if (open && view === "detail") {
-        setContent(<RowDetail key={row.id} prospek={row} />);
+        setContent(<RowDetail key={row.id} prospekId={row.id} />);
       }
     },
     [open, view, setContent]
@@ -51,7 +51,7 @@ export function ProspekClientComponent({
         return;
       }
 
-      setContent(<RowDetail key={row.id} prospek={row} />);
+      setContent(<RowDetail key={row.id} prospekId={row.id} />);
       setTitle("Detail Prospek");
       setDescription("Informasi lengkap tentang prospek yang dipilih.");
       setView("detail");

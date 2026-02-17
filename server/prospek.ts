@@ -265,3 +265,104 @@ export async function deleteProspek(id: string) {
   revalidateTag(`prospek-org-${activeOrganizationId}`, "max");
   return result;
 }
+
+export async function getProspekDetail(id: string) {
+  const { session } = await getCurrentUser();
+  const activeOrganizationId = session?.activeOrganizationId;
+
+  if (!activeOrganizationId) {
+    throw new Error("No active organization");
+  }
+
+  const prospek = await prisma.prospek.findUnique({
+    where: { id },
+    include: {
+      cabang: true,
+      sales: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      subSumber: {
+        include: {
+          sumberProspek: true,
+        },
+      },
+      model: true,
+      warna: true,
+      kelurahan: {
+        include: {
+          kecamatan: {
+            include: {
+              kabupaten: true,
+            },
+          },
+        },
+      },
+      pelanggan: true,
+      followUps: {
+        orderBy: { tanggal: "desc" },
+      },
+      pembayarans: {
+        orderBy: { createdAt: "desc" },
+      },
+      spk: {
+        include: {
+          pelanggan: true,
+          unit: {
+            include: {
+              model: true,
+              warna: true,
+            },
+          },
+        },
+      },
+      leasingOrder: {
+        include: {
+          leasing: true,
+          pembayaran: true,
+        },
+      },
+    },
+  });
+
+  if (!prospek) {
+    throw new Error("Prospek not found");
+  }
+
+  if (prospek.cabangId !== activeOrganizationId) {
+    throw new Error("Not authorized");
+  }
+
+  // Convert Decimal to number
+  return {
+    ...prospek,
+    model: {
+      ...prospek.model,
+      harga_otr: Number(prospek.model.harga_otr),
+    },
+    spk: prospek.spk
+      ? {
+          ...prospek.spk,
+          totalTagihan: Number(prospek.spk.totalTagihan),
+          totalDibayar: Number(prospek.spk.totalDibayar),
+          diskonPengajuan: prospek.spk.diskonPengajuan ? Number(prospek.spk.diskonPengajuan) : null,
+          diskonDisetujui: prospek.spk.diskonDisetujui ? Number(prospek.spk.diskonDisetujui) : null,
+        }
+      : null,
+    leasingOrder: prospek.leasingOrder
+      ? {
+          ...prospek.leasingOrder,
+          jumlahPiutang: Number(prospek.leasingOrder.jumlahPiutang),
+        }
+      : null,
+    pembayarans: prospek.pembayarans.map((p) => ({
+      ...p,
+      jumlah: Number(p.jumlah),
+    })),
+  };
+}
+
+export type ProspekDetail = Awaited<ReturnType<typeof getProspekDetail>>;

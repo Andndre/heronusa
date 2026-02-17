@@ -16,6 +16,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Edit, MoreHorizontal, User } from "lucide-react";
 import { format } from "date-fns";
 
+import { STATUS_PROSPEK_VARIANTS } from "@/lib/prospek-shared";
+
 interface ColumnActions {
   onEdit: (prospek: Prospek) => void;
   onViewDetail?: (prospek: Prospek) => void;
@@ -46,7 +48,11 @@ export const getColumns = ({ onEdit, onViewDetail }: ColumnActions): ColumnDef<P
     header: createSortableHeader<Prospek>("Status"),
     cell: ({ row }) => {
       const status = row.original.status as StatusProspek;
-      return <Badge>{status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}</Badge>;
+      return (
+        <Badge variant={STATUS_PROSPEK_VARIANTS[status] || "outline"}>
+          {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
+        </Badge>
+      );
     },
   },
   {
