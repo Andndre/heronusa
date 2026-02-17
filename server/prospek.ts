@@ -318,6 +318,14 @@ async function fetchProspekDetailData(id: string) {
       pelanggan: true,
       followUps: {
         orderBy: { tanggal: "desc" },
+        include: {
+          sales: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       },
       pembayarans: {
         orderBy: { createdAt: "desc" },
@@ -391,3 +399,58 @@ export async function getProspekDetail(id: string) {
 }
 
 export type ProspekDetail = Awaited<ReturnType<typeof getProspekDetail>>;
+
+export async function createFollowUp(data: {
+  prospekId: string;
+  tanggal: Date;
+  catatan?: string;
+  status: "BARU" | "FOLLOW_UP" | "PENGAJUAN_LEASING" | "DEAL" | "SPK" | "GUGUR";
+}) {
+  const { currentUser, session } = await getCurrentUser();
+  const activeOrganizationId = session?.activeOrganizationId;
+
+  if (!activeOrganizationId) {
+    throw new Error("No active organization");
+  }
+
+  // Verify prospek exists and user has access
+  const prospek = await prisma.prospek.findUnique({
+    where: { id: data.prospekId },
+  });
+
+  if (!prospek) {
+    throw new Error("Prospek not found");
+  }
+
+  if (prospek.cabangId !== activeOrganizationId) {
+    throw new Error("Not authorized");
+  }
+
+  const result = await prisma.followUp.create({
+    data: {
+      prospek: {
+        connect: { id: data.prospekId },
+      },
+      sales: {
+        connect: { id: currentUser.id },
+      },
+      tanggal: data.tanggal,
+      catatan: data.catatan,
+      status: data.status,
+    },
+    include: {
+      sales: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  revalidateTag(`prospek-detail-${data.prospekId}`, "max");
+  revalidateTag(`prospek-org-${activeOrganizationId}`, "max");
+  return result;
+}
+
+export type FollowUp = Awaited<ReturnType<typeof createFollowUp>>;

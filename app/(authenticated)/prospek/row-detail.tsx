@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getProspekDetail, ProspekDetail } from "@/server/prospek";
 import { Badge, BadgeProps } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Phone,
   MapPin,
@@ -18,7 +19,7 @@ import {
   Loader2,
   LucideIcon,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, isToday } from "date-fns";
 import { id } from "date-fns/locale";
 import { cn, formatCurrency } from "@/lib/utils";
 import { STATUS_PROSPEK_VARIANTS, KATEGORI_PROSPEK_VARIANTS } from "@/lib/prospek-shared";
@@ -66,6 +67,24 @@ function InfoRow({
       <span className={cn("text-right font-medium", valueClassName)}>{value}</span>
     </div>
   );
+}
+
+// Helper function to format follow-up date
+function formatFollowUpDate(date: Date | string): string {
+  const followUpDate = typeof date === "string" ? new Date(date) : date;
+  return isToday(followUpDate)
+    ? format(followUpDate, "HH:mm", { locale: id })
+    : format(followUpDate, "dd MMM yyyy", { locale: id });
+}
+
+// Helper function to get initials from name
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 const LEASING_STATUS_CONFIG: Record<
@@ -193,23 +212,38 @@ export default function RowDetail({ prospekId }: RowDetailProps) {
       {/* FOLLOW-UP HISTORY */}
       {prospek.followUps.length > 0 && (
         <Section title={`Riwayat Follow-Up (${prospek.followUps.length})`} icon={Clock}>
-          <div className="space-y-4 pt-1">
-            {prospek.followUps.map((followUp) => (
-              <div
-                key={followUp.id}
-                className="border-muted border-l-2 pb-4 pl-4 last:border-0 last:pb-0"
-              >
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="text-sm font-medium">
-                    {format(new Date(followUp.tanggal), "dd MMM yyyy", { locale: id })}
-                  </span>
-                  <Badge variant="outline" className="text-xs">
-                    {followUp.status}
-                  </Badge>
+          <div className="space-y-6 pt-1">
+            {prospek.followUps.map((followUp, index) => (
+              <div key={followUp.id} className="flex gap-3">
+                {/* Sales Avatar */}
+                <div className="flex shrink-0 flex-col items-center">
+                  <Avatar size="sm" className="bg-primary text-primary-foreground text-xs">
+                    <AvatarFallback>{getInitials(followUp.sales.name)}</AvatarFallback>
+                  </Avatar>
+                  {/* Vertical line connector (not for last item) */}
+                  {index < prospek.followUps.length - 1 && (
+                    <div className="bg-border mt-2 w-px flex-1" />
+                  )}
                 </div>
-                {followUp.catatan && (
-                  <p className="text-muted-foreground text-sm">{followUp.catatan}</p>
-                )}
+
+                {/* Timeline Content */}
+                <div className="flex-1 space-y-1 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">
+                      {formatFollowUpDate(followUp.tanggal)}
+                    </span>
+                    <Badge
+                      variant={STATUS_PROSPEK_VARIANTS[followUp.status] || "outline"}
+                      className="text-xs"
+                    >
+                      {followUp.status}
+                    </Badge>
+                  </div>
+                  {followUp.catatan && (
+                    <p className="text-muted-foreground text-sm">{followUp.catatan}</p>
+                  )}
+                  <p className="text-muted-foreground mt-1 text-xs">oleh {followUp.sales.name}</p>
+                </div>
               </div>
             ))}
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, User } from "lucide-react";
+import { Edit, MessageCirclePlus, User } from "lucide-react";
 import { Prospek } from "@/server/prospek";
 import React from "react";
 
@@ -8,6 +8,7 @@ interface ProspekActionItemsProps {
   prospek: Prospek;
   onEdit: (prospek: Prospek) => void;
   onViewDetail: (prospek: Prospek) => void;
+  onAddFollowUp: (prospek: Prospek) => void;
   ActionItem: React.ComponentType<{
     onClick?: (e: React.MouseEvent) => void;
     children: React.ReactNode;
@@ -18,6 +19,7 @@ export function ProspekActionItems({
   prospek,
   onEdit,
   onViewDetail,
+  onAddFollowUp,
   ActionItem,
 }: ProspekActionItemsProps) {
   return (
@@ -39,6 +41,15 @@ export function ProspekActionItems({
       >
         <Edit className="mr-2 h-4 w-4" />
         Edit Prospek
+      </ActionItem>
+      <ActionItem
+        onClick={(e) => {
+          e.stopPropagation();
+          onAddFollowUp(prospek);
+        }}
+      >
+        <MessageCirclePlus className="mr-2 h-4 w-4" />
+        Tambah Follow-Up
       </ActionItem>
     </>
   );

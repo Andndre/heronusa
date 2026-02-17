@@ -8,6 +8,7 @@ import { DataTable } from "./data-table";
 import { useRightSidebar } from "@/components/sidebar-context";
 import { CreateProspekForm } from "@/components/forms/create-prospek-form";
 import { EditProspekForm } from "@/components/forms/edit-prospek-form";
+import { CreateFollowUpForm } from "@/components/forms/create-followup-form";
 import { Prospek } from "@/server/prospek";
 import RowDetail from "./row-detail";
 import { ProspekActionItems } from "./prospek-action-items";
@@ -34,7 +35,6 @@ export function ProspekClientComponent({
   const searchParams = useSearchParams();
   const { setContent, setTitle, setDescription, setOpen, open, view, setView } = useRightSidebar();
   const [selectedProspek, setSelectedProspek] = useState<Prospek | null>(null);
-
   const [shouldFocusSearch, setShouldFocusSearch] = useState(false);
 
   const handleSelectRow = useCallback((row: Prospek) => {
@@ -100,13 +100,26 @@ export function ProspekClientComponent({
     [dropdownData, setContent, setTitle, setDescription, setView, setOpen]
   );
 
+  const handleAddFollowUp = useCallback(
+    (row: Prospek) => {
+      setSelectedProspek(row);
+      setContent(<CreateFollowUpForm key={row.id} prospekId={row.id} />);
+      setTitle("Tambah Follow-Up");
+      setDescription("Catat aktivitas follow-up untuk prospek ini.");
+      setView("form");
+      setOpen(true);
+    },
+    [setContent, setTitle, setDescription, setView, setOpen]
+  );
+
   const columns = useMemo(
     () =>
       getColumns({
         onEdit: handleEdit,
         onViewDetail: handleShowDetail,
+        onAddFollowUp: handleAddFollowUp,
       }),
-    [handleEdit, handleShowDetail]
+    [handleEdit, handleShowDetail, handleAddFollowUp]
   );
 
   useEffect(() => {
@@ -156,6 +169,7 @@ export function ProspekClientComponent({
           prospek={row}
           onEdit={handleEdit}
           onViewDetail={handleShowDetail}
+          onAddFollowUp={handleAddFollowUp}
           ActionItem={ContextMenuItem}
         />
       )}

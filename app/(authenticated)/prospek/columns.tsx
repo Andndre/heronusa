@@ -22,9 +22,14 @@ import { ProspekActionItems } from "./prospek-action-items";
 interface ColumnActions {
   onEdit: (prospek: Prospek) => void;
   onViewDetail: (prospek: Prospek) => void;
+  onAddFollowUp: (prospek: Prospek) => void;
 }
 
-export const getColumns = ({ onEdit, onViewDetail }: ColumnActions): ColumnDef<Prospek>[] => [
+export const getColumns = ({
+  onEdit,
+  onViewDetail,
+  onAddFollowUp,
+}: ColumnActions): ColumnDef<Prospek>[] => [
   {
     accessorKey: "nama_konsumen",
     header: createSortableHeader<Prospek>("Nama"),
@@ -84,10 +89,10 @@ export const getColumns = ({ onEdit, onViewDetail }: ColumnActions): ColumnDef<P
               prospek={prospek}
               onEdit={onEdit}
               onViewDetail={onViewDetail}
+              onAddFollowUp={onAddFollowUp}
               ActionItem={DropdownMenuItem}
             />
           </DropdownMenuContent>
-          {/* <DropdownMenuSeparator /> */}
         </DropdownMenu>
       );
     },
