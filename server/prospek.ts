@@ -232,6 +232,7 @@ export async function updateProspek(
   });
 
   revalidateTag(`prospek-org-${activeOrganizationId}`, "max");
+  revalidateTag(`prospek-detail-${id}`, "max");
   return result;
 }
 
@@ -263,16 +264,13 @@ export async function deleteProspek(id: string) {
   });
 
   revalidateTag(`prospek-org-${activeOrganizationId}`, "max");
+  revalidateTag(`prospek-detail-${id}`, "max");
   return result;
 }
 
-export async function getProspekDetail(id: string) {
-  const { session } = await getCurrentUser();
-  const activeOrganizationId = session?.activeOrganizationId;
-
-  if (!activeOrganizationId) {
-    throw new Error("No active organization");
-  }
+async function fetchProspekDetailData(id: string) {
+  "use cache";
+  cacheTag(`prospek-detail-${id}`);
 
   const prospek = await prisma.prospek.findUnique({
     where: { id },
@@ -328,13 +326,7 @@ export async function getProspekDetail(id: string) {
     },
   });
 
-  if (!prospek) {
-    throw new Error("Prospek not found");
-  }
-
-  if (prospek.cabangId !== activeOrganizationId) {
-    throw new Error("Not authorized");
-  }
+  if (!prospek) return null;
 
   // Convert Decimal to number
   return {
@@ -363,6 +355,23 @@ export async function getProspekDetail(id: string) {
       jumlah: Number(p.jumlah),
     })),
   };
+}
+
+export async function getProspekDetail(id: string) {
+  const { session } = await getCurrentUser();
+  const activeOrganizationId = session?.activeOrganizationId;
+
+  if (!activeOrganizationId) {
+    throw new Error("No active organization");
+  }
+
+  const prospek = await fetchProspekDetailData(id);
+
+  if (!prospek || prospek.cabangId !== activeOrganizationId) {
+    throw new Error("Prospek not found or not authorized");
+  }
+
+  return prospek;
 }
 
 export type ProspekDetail = Awaited<ReturnType<typeof getProspekDetail>>;

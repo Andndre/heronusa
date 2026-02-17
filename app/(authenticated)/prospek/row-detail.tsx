@@ -100,7 +100,7 @@ export default function RowDetail({ prospekId }: RowDetailProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex flex-1 flex-col items-center justify-center py-12">
         <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
       </div>
     );
