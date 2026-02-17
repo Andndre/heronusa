@@ -21,7 +21,7 @@ import {
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
-import { InfoIcon, Loader2, PlusIcon, Search } from "lucide-react";
+import { Edit, InfoIcon, Loader2, PlusIcon, Search, User } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -38,6 +38,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -63,6 +70,7 @@ export function DataTable<TData, TValue>({
   pageSize,
   onSelectRow,
   onAdd,
+  onEdit,
   onShowDetail,
   shouldFocusSearch,
   initialQuery = "",
@@ -254,18 +262,37 @@ export function DataTable<TData, TValue>({
                   const rowData = row.original;
                   const isSelected = selectedRow === rowData;
                   return (
-                    <TableRow
-                      key={row.id}
-                      data-state={isSelected && "selected"}
-                      className={isSelected ? "bg-muted/50" : "cursor-pointer"}
-                      onClick={() => onSelectRow && handleRowClick(rowData)}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
-                    </TableRow>
+                    <ContextMenu key={row.id}>
+                      <ContextMenuTrigger asChild>
+                        <TableRow
+                          data-state={isSelected && "selected"}
+                          className={isSelected ? "bg-muted/50" : "cursor-pointer"}
+                          onClick={() => onSelectRow && handleRowClick(rowData)}
+                          onContextMenu={() => onSelectRow && handleRowClick(rowData)}
+                        >
+                          {row.getVisibleCells().map((cell) => (
+                            <TableCell key={cell.id}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </ContextMenuTrigger>
+                      <ContextMenuContent className="w-48">
+                        <ContextMenuLabel>Aksi</ContextMenuLabel>
+                        {onShowDetail && (
+                          <ContextMenuItem onClick={() => onShowDetail(rowData)}>
+                            <User className="mr-2 h-4 w-4" />
+                            Lihat Detail
+                          </ContextMenuItem>
+                        )}
+                        {onEdit && (
+                          <ContextMenuItem onClick={() => onEdit(rowData)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Prospek
+                          </ContextMenuItem>
+                        )}
+                      </ContextMenuContent>
+                    </ContextMenu>
                   );
                 })
               ) : (
