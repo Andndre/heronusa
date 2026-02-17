@@ -293,6 +293,7 @@ enum StatusProspek {
   PENGAJUAN_LEASING // Jika DEAL, tapi Tipe pembayarannya kredit, otomatis masuk pengajuan leasing, sebelum DEAL
   DEAL
   SPK
+  FAKTUR
   GUGUR
 }
 
@@ -581,7 +582,7 @@ model LeasingOrder {
 }
 
 enum StatusUnit {
-  // IN_TRANSIT: unit sudah keluar dari pabrik, tapi belum sampai ke dealer. tidak perlu disimpan di database, karena tidak memiliki informasi seperti nomor rangka, nomor mesin, dll 
+  // IN_TRANSIT: unit sudah keluar dari pabrik, tapi belum sampai ke dealer. tidak perlu disimpan di database, karena tidak memiliki informasi seperti nomor rangka, nomor mesin, dll
   GUDANG // Unit sudah sampai di dealer, siap untuk PDC (Pre Delivery Checking)
   PDC // Unit sedang dalam proses PDC
   NRFS // Not Ready For Sale: unit tidak lulus PDC

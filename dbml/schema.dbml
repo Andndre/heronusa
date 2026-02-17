@@ -385,6 +385,7 @@ Enum StatusProspek {
   PENGAJUAN_LEASING
   DEAL
   SPK
+  FAKTUR
   GUGUR
 }
 
