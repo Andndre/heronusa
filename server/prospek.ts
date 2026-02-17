@@ -111,18 +111,37 @@ export async function getDropdownData() {
   };
 }
 
-async function fetchProspekData(activeOrganizationId: string, page: number, pageSize: number) {
+async function fetchProspekData(
+  activeOrganizationId: string,
+  page: number,
+  pageSize: number,
+  query?: string
+) {
   "use cache";
   cacheTag(`prospek-org-${activeOrganizationId}`);
 
   const skip = (page - 1) * pageSize;
 
+  const whereClause: Prisma.ProspekWhereInput = {
+    deletedAt: null,
+    cabangId: activeOrganizationId,
+    ...(query
+      ? {
+          OR: [
+            { nama_konsumen: { contains: query } },
+            { hp1: { contains: query } },
+            { hp2: { contains: query } },
+            { model: { nama_model: { contains: query } } },
+            { kelurahan: { nama_kelurahan: { contains: query } } },
+            { sales: { name: { contains: query } } },
+          ],
+        }
+      : {}),
+  };
+
   const [prospek, totalCount] = await Promise.all([
     prisma.prospek.findMany({
-      where: {
-        deletedAt: null,
-        cabangId: activeOrganizationId,
-      },
+      where: whereClause,
       include: {
         cabang: true,
         subSumber: true,
@@ -137,10 +156,7 @@ async function fetchProspekData(activeOrganizationId: string, page: number, page
       take: pageSize,
     }),
     prisma.prospek.count({
-      where: {
-        deletedAt: null,
-        cabangId: activeOrganizationId,
-      },
+      where: whereClause,
     }),
   ]);
 
@@ -159,7 +175,7 @@ async function fetchProspekData(activeOrganizationId: string, page: number, page
   };
 }
 
-export async function getProspekData(page: number = 1, pageSize: number = 10) {
+export async function getProspekData(page: number = 1, pageSize: number = 10, query?: string) {
   const { session } = await getCurrentUser();
   const activeOrganizationId = session?.activeOrganizationId;
 
@@ -167,7 +183,7 @@ export async function getProspekData(page: number = 1, pageSize: number = 10) {
     return { data: [], totalCount: 0, pageCount: 0 };
   }
 
-  return fetchProspekData(activeOrganizationId, page, pageSize);
+  return fetchProspekData(activeOrganizationId, page, pageSize, query);
 }
 
 export type ProspekResponse = Awaited<ReturnType<typeof getProspekData>>;

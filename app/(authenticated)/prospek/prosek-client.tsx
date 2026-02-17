@@ -18,6 +18,7 @@ export function ProspekClientComponent({
   currentPage,
   pageSize,
   dropdownData,
+  initialQuery,
 }: {
   data: Prospek[];
   totalCount: number;
@@ -25,6 +26,7 @@ export function ProspekClientComponent({
   currentPage: number;
   pageSize: number;
   dropdownData: Awaited<ReturnType<typeof getDropdownData>>;
+  initialQuery?: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -145,6 +147,7 @@ export function ProspekClientComponent({
       onAdd={handleAdd}
       onEdit={handleEdit}
       shouldFocusSearch={shouldFocusSearch}
+      initialQuery={initialQuery}
     />
   );
 }

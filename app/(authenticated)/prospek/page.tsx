@@ -4,14 +4,15 @@ import { ProspekClientComponent } from "./prosek-client";
 export default async function ProspekPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; pageSize?: string }>;
+  searchParams: Promise<{ page?: string; pageSize?: string; q?: string }>;
 }) {
-  const { page, pageSize } = await searchParams;
+  const { page, pageSize, q } = await searchParams;
   const currentPage = Number(page) || 1;
   const currentPageSize = Number(pageSize) || 10;
+  const query = q || "";
 
   const [prospekResponse, dropdownData] = await Promise.all([
-    getProspekData(currentPage, currentPageSize),
+    getProspekData(currentPage, currentPageSize, query),
     getDropdownData(),
   ]);
 
@@ -29,6 +30,7 @@ export default async function ProspekPage({
           currentPage={currentPage}
           pageSize={currentPageSize}
           dropdownData={dropdownData}
+          initialQuery={query}
         />
       </div>
     </div>

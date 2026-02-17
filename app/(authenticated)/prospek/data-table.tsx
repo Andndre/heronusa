@@ -2,10 +2,8 @@
 
 import {
   ColumnDef,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
@@ -20,10 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
-import { InfoIcon, PlusIcon, Search } from "lucide-react";
+import { InfoIcon, Loader2, PlusIcon, Search } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -40,6 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -53,6 +52,7 @@ interface DataTableProps<TData, TValue> {
   onEdit?: (row: TData) => void;
   onShowDetail?: (row: TData) => void;
   shouldFocusSearch?: boolean;
+  initialQuery?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -66,15 +66,17 @@ export function DataTable<TData, TValue>({
   onAdd,
   onShowDetail,
   shouldFocusSearch,
+  initialQuery = "",
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isPending, startTransition] = useTransition();
 
   // State
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [searchValue, setSearchValue] = useState(initialQuery);
   const [selectedRow, setSelectedRow] = useState<TData | null>(null);
 
   // Focus search input when shouldFocusSearch is true
@@ -84,6 +86,32 @@ export function DataTable<TData, TValue>({
     }
   }, [shouldFocusSearch]);
 
+  // Sync state with URL param (handle browser navigation)
+  useEffect(() => {
+    setSearchValue(initialQuery);
+  }, [initialQuery]);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const currentQ = searchParams.get("q") || "";
+      if (currentQ !== searchValue) {
+        const params = new URLSearchParams(searchParams.toString());
+        if (searchValue) {
+          params.set("q", searchValue);
+        } else {
+          params.delete("q");
+        }
+        params.set("page", "1");
+        startTransition(() => {
+          router.push(pathname + "?" + params.toString());
+        });
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchValue, searchParams, pathname, router]);
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
@@ -92,13 +120,10 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
     manualPagination: true,
     pageCount: pageCount,
     state: {
       sorting,
-      columnFilters,
       pagination: {
         pageIndex: currentPage - 1,
         pageSize: pageSize,
@@ -116,14 +141,18 @@ export function DataTable<TData, TValue>({
   );
 
   const handlePageChange = (page: number) => {
-    router.push(pathname + "?" + createQueryString("page", page.toString()));
+    startTransition(() => {
+      router.push(pathname + "?" + createQueryString("page", page.toString()));
+    });
   };
 
   const handlePageSizeChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("pageSize", value);
     params.set("page", "1"); // Reset to page 1 on page size change
-    router.push(pathname + "?" + params.toString());
+    startTransition(() => {
+      router.push(pathname + "?" + params.toString());
+    });
   };
 
   const handleRowClick = useCallback(
@@ -179,11 +208,9 @@ export function DataTable<TData, TValue>({
             </InputGroupAddon>
             <InputGroupInput
               ref={searchInputRef}
-              placeholder="Filter names..."
-              value={(table.getColumn("nama_konsumen")?.getFilterValue() as string) ?? ""}
-              onChange={(event) =>
-                table.getColumn("nama_konsumen")?.setFilterValue(event.target.value)
-              }
+              placeholder="Cari prospek..."
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
             />
           </InputGroup>
           {onShowDetail && (
@@ -204,52 +231,59 @@ export function DataTable<TData, TValue>({
           </Button>
         )}
       </div>
-      <div className="overflow-x-auto rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
+      <div className="relative overflow-hidden rounded-md border">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => {
+                  const rowData = row.original;
+                  const isSelected = selectedRow === rowData;
                   return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
+                    <TableRow
+                      key={row.id}
+                      data-state={isSelected && "selected"}
+                      className={isSelected ? "bg-muted/50" : "cursor-pointer"}
+                      onClick={() => onSelectRow && handleRowClick(rowData)}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
                   );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => {
-                const rowData = row.original;
-                const isSelected = selectedRow === rowData;
-                return (
-                  <TableRow
-                    key={row.id}
-                    data-state={isSelected && "selected"}
-                    className={isSelected ? "bg-muted/50" : "cursor-pointer"}
-                    onClick={() => onSelectRow && handleRowClick(rowData)}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                );
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Tidak ada data
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    Tidak ada data
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        {isPending && (
+          <div className="bg-background/80 absolute inset-0 flex items-center justify-center">
+            <Loader2 className="text-primary h-8 w-8 animate-spin" />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
