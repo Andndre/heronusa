@@ -10,6 +10,8 @@ import { CreateProspekForm } from "@/components/forms/create-prospek-form";
 import { EditProspekForm } from "@/components/forms/edit-prospek-form";
 import { Prospek } from "@/server/prospek";
 import RowDetail from "./row-detail";
+import { ProspekActionItems } from "./prospek-action-items";
+import { ContextMenuItem } from "@/components/ui/context-menu";
 
 export function ProspekClientComponent({
   data,
@@ -145,7 +147,14 @@ export function ProspekClientComponent({
       onSelectRow={handleSelectRow}
       onShowDetail={handleShowDetail}
       onAdd={handleAdd}
-      onEdit={handleEdit}
+      renderRowActions={(row) => (
+        <ProspekActionItems
+          prospek={row}
+          onEdit={handleEdit}
+          onViewDetail={handleShowDetail}
+          ActionItem={ContextMenuItem}
+        />
+      )}
       shouldFocusSearch={shouldFocusSearch}
       initialQuery={initialQuery}
     />

@@ -13,10 +13,11 @@ import { createSortableHeader } from "@/components/table-header-sorted";
 import { StatusProspek } from "@/lib/generated/prisma/enums";
 import { Prospek } from "@/server/prospek";
 import { ColumnDef } from "@tanstack/react-table";
-import { Edit, MoreHorizontal, User } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 
 import { STATUS_PROSPEK_VARIANTS } from "@/lib/prospek-shared";
+import { ProspekActionItems } from "./prospek-action-items";
 
 interface ColumnActions {
   onEdit: (prospek: Prospek) => void;
@@ -79,26 +80,12 @@ export const getColumns = ({ onEdit, onViewDetail }: ColumnActions): ColumnDef<P
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            {onViewDetail && (
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onViewDetail(prospek);
-                }}
-              >
-                <User className="mr-2 h-4 w-4" />
-                Lihat Detail
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(prospek);
-              }}
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Prospek
-            </DropdownMenuItem>
+            <ProspekActionItems
+              prospek={prospek}
+              onEdit={onEdit}
+              onViewDetail={onViewDetail}
+              ActionItem={DropdownMenuItem}
+            />
           </DropdownMenuContent>
           {/* <DropdownMenuSeparator /> */}
         </DropdownMenu>

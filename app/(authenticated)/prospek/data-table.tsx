@@ -21,7 +21,7 @@ import {
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
-import { Edit, InfoIcon, Loader2, PlusIcon, Search, User } from "lucide-react";
+import { InfoIcon, Loader2, PlusIcon, Search } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -41,7 +41,6 @@ import {
 import {
   ContextMenu,
   ContextMenuContent,
-  ContextMenuItem,
   ContextMenuLabel,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
@@ -55,8 +54,8 @@ interface DataTableProps<TData, TValue> {
   pageSize: number;
   onSelectRow?: (row: TData) => void;
   onAdd?: () => void;
-  onEdit?: (row: TData) => void;
   onShowDetail?: (row: TData) => void;
+  renderRowActions?: (row: TData) => React.ReactNode;
   shouldFocusSearch?: boolean;
   initialQuery?: string;
 }
@@ -70,8 +69,8 @@ export function DataTable<TData, TValue>({
   pageSize,
   onSelectRow,
   onAdd,
-  onEdit,
   onShowDetail,
+  renderRowActions,
   shouldFocusSearch,
   initialQuery = "",
 }: DataTableProps<TData, TValue>) {
@@ -279,18 +278,7 @@ export function DataTable<TData, TValue>({
                       </ContextMenuTrigger>
                       <ContextMenuContent className="w-48">
                         <ContextMenuLabel>Aksi</ContextMenuLabel>
-                        {onShowDetail && (
-                          <ContextMenuItem onClick={() => onShowDetail(rowData)}>
-                            <User className="mr-2 h-4 w-4" />
-                            Lihat Detail
-                          </ContextMenuItem>
-                        )}
-                        {onEdit && (
-                          <ContextMenuItem onClick={() => onEdit(rowData)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Prospek
-                          </ContextMenuItem>
-                        )}
+                        {renderRowActions?.(rowData)}
                       </ContextMenuContent>
                     </ContextMenu>
                   );
