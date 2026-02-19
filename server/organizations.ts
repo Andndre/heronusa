@@ -26,57 +26,20 @@ export async function getOrganizations() {
   return organizations as Organization[];
 }
 
-export async function getActiveOrganizationId() {
-  const data = await auth.api.getSession({
-    headers: await headers(),
+export async function getInitialOrganization(userId: string) {
+  const member = await prisma.member.findFirst({
+    where: {
+      userId,
+    },
   });
 
-  if (!data) {
-    return null;
-  }
-
-  return data.session.activeOrganizationId;
-}
-
-export async function getActiveOrganizationData() {
-  const data = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!data) {
-    return null;
-  }
-
-  const organizationId = data.session.activeOrganizationId;
-
-  if (!organizationId) {
-    return null;
-  }
+  if (!member) return null;
 
   const organization = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    include: {
-      members: {
-        include: {
-          user: true,
-        },
-      },
+    where: {
+      id: member.organizationId,
     },
   });
 
-  return organization;
-}
-
-export async function getOrganizationBySlug(slug: string) {
-  const organizations = await prisma.organization.findFirst({
-    where: { slug },
-    include: {
-      members: {
-        include: {
-          user: true,
-        },
-      },
-    },
-  });
-  return organizations;
+  return organization as Organization;
 }
