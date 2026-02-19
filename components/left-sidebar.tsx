@@ -17,6 +17,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui/sidebar";
 import { GlobalCommandDialog, useCommandShortcut } from "@/components/command-dialog";
 
@@ -38,7 +39,7 @@ export function LeftSidebar() {
   ];
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center justify-center gap-2 px-2 py-2">
           <Image
@@ -46,8 +47,9 @@ export function LeftSidebar() {
             alt="Heronusa Logo"
             width={200}
             height={63}
-            className="h-12 w-auto"
+            className="h-10 w-auto object-contain"
             loading="eager"
+            priority
           />
         </div>
       </SidebarHeader>
@@ -56,23 +58,27 @@ export function LeftSidebar() {
           <SidebarGroupLabel>Navigasi</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.url}
-                    aria-current={pathname === item.url}
-                    onMouseEnter={() => {
-                      if (item.url !== "#") router.prefetch(item.url);
-                    }}
-                  >
-                    <Link href={item.url} prefetch={false}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.url}
+                      aria-current={pathname === item.url}
+                      tooltip={item.title}
+                      onMouseEnter={() => {
+                        if (item.url !== "#") router.prefetch(item.url);
+                      }}
+                    >
+                      <Link href={item.url} prefetch={false}>
+                        <Icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -94,6 +100,7 @@ export function LeftSidebar() {
         </Button>
       </SidebarFooter>
       <GlobalCommandDialog open={commandOpen} onOpenChange={setCommandOpen} />
+      <SidebarRail />
     </Sidebar>
   );
 }

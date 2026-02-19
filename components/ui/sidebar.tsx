@@ -26,6 +26,7 @@ const SIDEBAR_WIDTH = "14rem";
 const SIDEBAR_WIDTH_MOBILE = "19rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
+const SIDEBAR_WIDTH_COOKIE_NAME = "sidebar:width";
 
 type SidebarContextProps = {
   state: "expanded" | "collapsed";
@@ -35,6 +36,8 @@ type SidebarContextProps = {
   setOpenMobile: (open: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
+  width: string;
+  setWidth: (width: string) => void;
 };
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
@@ -83,6 +86,17 @@ function SidebarProvider({
     [setOpenProp, open]
   );
 
+  // Width state for resizable sidebar
+  const [width, setWidth] = React.useState(SIDEBAR_WIDTH);
+
+  // Load width from cookie on mount
+  React.useEffect(() => {
+    const match = document.cookie.match(new RegExp(`(^| )${SIDEBAR_WIDTH_COOKIE_NAME}=([^;]+)`));
+    if (match) {
+      setWidth(match[2]);
+    }
+  }, []);
+
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
@@ -114,8 +128,10 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      width,
+      setWidth,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, width]
   );
 
   return (
@@ -125,7 +141,7 @@ function SidebarProvider({
           data-slot="sidebar-wrapper"
           style={
             {
-              "--sidebar-width": SIDEBAR_WIDTH,
+              "--sidebar-width": width,
               "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
               ...style,
             } as React.CSSProperties
@@ -275,16 +291,77 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
   );
 }
 
-function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
-  const { toggleSidebar } = useSidebar();
+function SidebarRail({
+  className,
+  enableDrag = true,
+  ...props
+}: React.ComponentProps<"button"> & { enableDrag?: boolean }) {
+  const { toggleSidebar, width } = useSidebar();
+  const [isDragging, setIsDragging] = React.useState(false);
+  const startXRef = React.useRef(0);
+  const startWidthRef = React.useRef(0);
+  const railRef = React.useRef<HTMLButtonElement>(null);
+
+  const handleMouseDown = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (!enableDrag) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(true);
+      startXRef.current = e.clientX;
+
+      // Parse current width from context
+      const match = width.match(/^([\d.]+)rem$/);
+      if (match) {
+        const fontSize = 16; // base font size
+        startWidthRef.current = parseFloat(match[1]) * fontSize;
+      }
+    },
+    [enableDrag, width]
+  );
+
+  React.useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - startXRef.current;
+      const newWidth = Math.max(224, Math.min(384, startWidthRef.current + deltaX)); // 14rem to 24rem in px
+      const remWidth = `${newWidth / 16}rem`;
+
+      // Update CSS variable for sidebar width
+      const wrapper = railRef.current?.closest("[data-slot='sidebar-wrapper']");
+      if (wrapper) {
+        (wrapper as HTMLDivElement).style.setProperty("--sidebar-width", remWidth);
+      }
+
+      // Save to cookie
+      document.cookie = `sidebar:width=${remWidth}; path=/; max-age=${60 * 60 * 24 * 7}`;
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging]);
 
   return (
     <button
+      ref={railRef}
       data-sidebar="rail"
       data-slot="sidebar-rail"
       aria-label="Toggle Sidebar"
       tabIndex={-1}
-      onClick={toggleSidebar}
+      onClick={() => {
+        if (!isDragging) toggleSidebar();
+      }}
+      onMouseDown={handleMouseDown}
       title="Toggle Sidebar"
       className={cn(
         "hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 sm:flex",
@@ -293,6 +370,7 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
         "hover:group-data-[collapsible=offcanvas]:bg-sidebar group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full",
         "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
         "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
+        isDragging && "cursor-col-resize",
         className
       )}
       {...props}
