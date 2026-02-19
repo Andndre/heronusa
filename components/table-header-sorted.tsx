@@ -5,7 +5,11 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 export function createSortableHeader<TData>(label: string) {
   const SortableHeader = ({ column }: { column: Column<TData, unknown> }) => {
     return (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="w-full justify-start"
+      >
         {label}
         {column.getIsSorted() ? (
           column.getIsSorted() === "desc" ? (
