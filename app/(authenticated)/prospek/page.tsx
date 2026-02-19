@@ -18,21 +18,15 @@ export default async function ProspekPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="mb-1 text-3xl font-bold">Manajemen Prospek</h1>
-        <p className="text-gray-500">Kelola prospek penjualan dan aktivitas tindak lanjut</p>
-      </div>
-      <div>
-        <ProspekClientComponent
-          data={prospekResponse.data}
-          totalCount={prospekResponse.totalCount}
-          pageCount={prospekResponse.pageCount}
-          currentPage={currentPage}
-          pageSize={currentPageSize}
-          dropdownData={dropdownData}
-          initialQuery={query}
-        />
-      </div>
+      <ProspekClientComponent
+        data={prospekResponse.data}
+        totalCount={prospekResponse.totalCount}
+        pageCount={prospekResponse.pageCount}
+        currentPage={currentPage}
+        pageSize={currentPageSize}
+        dropdownData={dropdownData}
+        initialQuery={query}
+      />
     </div>
   );
 }

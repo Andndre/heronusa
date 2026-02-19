@@ -13,6 +13,8 @@ import { Prospek } from "@/server/prospek";
 import RowDetail from "./row-detail";
 import { ProspekActionItems } from "./prospek-action-items";
 import { ContextMenuItem } from "@/components/ui/context-menu";
+import { Button } from "@/components/ui/button";
+import { InfoIcon, PlusIcon } from "lucide-react";
 
 export function ProspekClientComponent({
   data,
@@ -153,28 +155,52 @@ export function ProspekClientComponent({
   }, [setContent, setOpen]);
 
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      totalCount={totalCount}
-      pageCount={pageCount}
-      currentPage={currentPage}
-      pageSize={pageSize}
-      selectedRow={selectedProspek}
-      onSelectRow={handleSelectRow}
-      onShowDetail={handleShowDetail}
-      onAdd={handleAdd}
-      renderRowActions={(row) => (
-        <ProspekActionItems
-          prospek={row}
-          onEdit={handleEdit}
-          onViewDetail={handleShowDetail}
-          onAddFollowUp={handleAddFollowUp}
-          ActionItem={ContextMenuItem}
-        />
-      )}
-      shouldFocusSearch={shouldFocusSearch}
-      initialQuery={initialQuery}
-    />
+    <div className="space-y-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex-1">
+          <h1 className="text-xl font-bold sm:text-2xl">Manajemen Prospek</h1>
+          <p className="text-sm text-gray-500">
+            Kelola prospek penjualan dan aktivitas tindak lanjut
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={!handleShowDetail || !selectedProspek}
+            onClick={() => selectedProspek && handleShowDetail(selectedProspek)}
+            title="Lihat Detail"
+            className="size-10 shrink-0"
+          >
+            <InfoIcon className="size-5" />
+          </Button>
+          <Button onClick={handleAdd} className="shrink-0">
+            <PlusIcon className="size-5 sm:mr-2" />
+            <span className="hidden sm:inline">Tambah</span>
+          </Button>
+        </div>
+      </div>
+      <DataTable
+        columns={columns}
+        data={data}
+        totalCount={totalCount}
+        pageCount={pageCount}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        selectedRow={selectedProspek}
+        onSelectRow={handleSelectRow}
+        renderRowActions={(row) => (
+          <ProspekActionItems
+            prospek={row}
+            onEdit={handleEdit}
+            onViewDetail={handleShowDetail}
+            onAddFollowUp={handleAddFollowUp}
+            ActionItem={ContextMenuItem}
+          />
+        )}
+        shouldFocusSearch={shouldFocusSearch}
+        initialQuery={initialQuery}
+      />
+    </div>
   );
 }

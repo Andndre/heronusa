@@ -20,8 +20,7 @@ import {
 } from "@/components/ui/table";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Button } from "@/components/ui/button";
-import { InfoIcon, Loader2, PlusIcon, Search } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -54,8 +53,6 @@ interface DataTableProps<TData, TValue> {
   pageSize: number;
   selectedRow?: TData | null;
   onSelectRow: (row: TData) => void;
-  onAdd: () => void;
-  onShowDetail: (row: TData) => void;
   renderRowActions: (row: TData) => React.ReactNode;
   shouldFocusSearch?: boolean;
   initialQuery?: string;
@@ -70,8 +67,6 @@ export function DataTable<TData, TValue>({
   pageSize,
   selectedRow: propSelectedRow,
   onSelectRow,
-  onAdd,
-  onShowDetail,
   renderRowActions,
   shouldFocusSearch,
   initialQuery = "",
@@ -211,33 +206,34 @@ export function DataTable<TData, TValue>({
   }, [selectedRow, table, handleRowClick]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 items-center gap-2">
-          <InputGroup className="w-full sm:max-w-sm">
-            <InputGroupAddon>
-              <Search />
-            </InputGroupAddon>
-            <InputGroupInput
-              ref={searchInputRef}
-              placeholder="Cari prospek..."
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-            />
-          </InputGroup>
-          <Button
-            variant="outline"
-            size="icon"
-            disabled={!selectedRow}
-            onClick={() => selectedRow && onShowDetail(selectedRow)}
-            title="Lihat Detail"
-          >
-            <InfoIcon className="h-4 w-4" />
-          </Button>
+        <InputGroup className="w-full sm:max-w-2xs">
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+          <InputGroupInput
+            ref={searchInputRef}
+            placeholder="Cari prospek..."
+            value={searchValue}
+            onChange={(event) => setSearchValue(event.target.value)}
+          />
+        </InputGroup>
+        <div className="flex items-center justify-end gap-2">
+          <span className="text-muted-foreground text-sm">Baris:</span>
+          <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+            <SelectTrigger className="h-8 w-[70px]" aria-label="Pilih jumlah baris per halaman">
+              <SelectValue placeholder={pageSize.toString()} />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {[10, 20, 30, 40, 50].map((size) => (
+                <SelectItem key={size} value={size.toString()}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <Button variant={"outline"} onClick={onAdd} className="w-full sm:w-auto">
-          <PlusIcon /> Tambah
-        </Button>
       </div>
       <div className="relative overflow-hidden rounded-md border">
         <div className="overflow-x-auto">
@@ -301,27 +297,11 @@ export function DataTable<TData, TValue>({
           </div>
         )}
       </div>
-
-      <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-        <div className="text-muted-foreground flex flex-col items-center gap-4 text-sm sm:flex-row">
-          <span>Total {totalCount} data</span>
-          <div className="flex items-center gap-2">
-            <span>Baris per halaman:</span>
-            <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
-              <SelectTrigger className="h-8 w-17.5" aria-label="Pilih jumlah baris per halaman">
-                <SelectValue placeholder={pageSize.toString()} />
-              </SelectTrigger>
-              <SelectContent side="top">
-                {[10, 20, 30, 40, 50].map((size) => (
-                  <SelectItem key={size} value={size.toString()}>
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
+      <div className="text-muted-foreground flex flex-col items-center justify-between gap-4 text-sm sm:flex-row">
+        {/* <span>Total {totalCount} data</span> */}
+        <span>
+          Menampilkan {table.getRowModel().rows.length} dari {totalCount} data
+        </span>
         <Pagination className="mx-0 w-full justify-center sm:w-auto sm:justify-end">
           <PaginationContent>
             <PaginationItem>
