@@ -1,16 +1,9 @@
 "use client";
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { authClient } from "@/lib/auth-client";
 import { Organization } from "@/lib/generated/prisma/browser";
 import { useRouter } from "next/navigation";
+import { SearchableSelect } from "./ui/searchable-select";
 
 interface CabangSwitcherProps {
   organizations: Organization[];
@@ -28,19 +21,17 @@ export function CabangSwitcher({ organizations }: CabangSwitcherProps) {
   };
 
   return (
-    <Select onValueChange={handleChangeCabang} value={activeOrganization?.id ?? ""}>
-      <SelectTrigger className="w-full max-w-48" aria-label="Pilih Cabang">
-        <SelectValue placeholder="Pilih Cabang" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          {organizations.map((org) => (
-            <SelectItem key={org.id} value={org.id}>
-              {org.name}
-            </SelectItem>
-          ))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
+    <SearchableSelect
+      value={activeOrganization?.id ?? ""}
+      className="max-w-56"
+      onValueChange={handleChangeCabang}
+      emptyText="Cabang Tidak Ditemukan"
+      options={organizations.map((v) => {
+        return {
+          label: v.name,
+          value: v.id,
+        };
+      })}
+    />
   );
 }
