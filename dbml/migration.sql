@@ -219,7 +219,7 @@ CREATE TABLE `prospek` (
     `hp1` VARCHAR(191) NOT NULL,
     `hp2` VARCHAR(191) NULL,
     `kategori_prospek` ENUM('HOT', 'WARM', 'COLD') NOT NULL,
-    `status` ENUM('BARU', 'FOLLOW_UP', 'PENGAJUAN_LEASING', 'DEAL', 'SPK', 'GUGUR') NOT NULL DEFAULT 'BARU',
+    `status` ENUM('BARU', 'FOLLOW_UP', 'PENGAJUAN_LEASING', 'DEAL', 'SPK', 'FAKTUR', 'GUGUR') NOT NULL DEFAULT 'BARU',
     `tipe_pembayaran` ENUM('CASH', 'CREDIT') NOT NULL,
     `tgl_perkiraan_beli` DATETIME(3) NULL,
     `salesId` VARCHAR(191) NOT NULL,
@@ -286,7 +286,7 @@ CREATE TABLE `follow_up` (
     `tanggal` DATETIME(3) NOT NULL,
     `catatan` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `status` ENUM('BARU', 'FOLLOW_UP', 'PENGAJUAN_LEASING', 'DEAL', 'SPK', 'GUGUR') NOT NULL,
+    `status` ENUM('BARU', 'FOLLOW_UP', 'PENGAJUAN_LEASING', 'DEAL', 'SPK', 'FAKTUR', 'GUGUR') NOT NULL,
 
     INDEX `follow_up_prospekId_idx`(`prospekId`),
     INDEX `follow_up_salesId_idx`(`salesId`),
@@ -493,6 +493,9 @@ CREATE TABLE `pembayaran` (
     `cabangId` VARCHAR(191) NOT NULL,
     `spkId` VARCHAR(36) NULL,
 
+    INDEX `pembayaran_cabangId_idx`(`cabangId`),
+    INDEX `pembayaran_spkId_idx`(`spkId`),
+    INDEX `pembayaran_leasingId_idx`(`leasingId`),
     INDEX `pembayaran_deletedAt_idx`(`deletedAt`),
     INDEX `pembayaran_prospekId_idx`(`prospekId`),
     INDEX `pembayaran_fakturId_idx`(`fakturId`),
