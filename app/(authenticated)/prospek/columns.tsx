@@ -1,35 +1,19 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { createSortableHeader } from "@/components/table-header-sorted";
 import { StatusProspek } from "@/lib/generated/prisma/enums";
 import { Prospek } from "@/server/prospek";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 
-import { STATUS_PROSPEK_VARIANTS, STATUS_FILTER_OPTIONS } from "@/lib/prospek-shared";
-import { ProspekActionItems } from "./prospek-action-items";
+import {
+  STATUS_PROSPEK_VARIANTS,
+  STATUS_FILTER_OPTIONS,
+  STICKY_ACTIONS_COLUMN_ID,
+} from "@/lib/prospek-shared";
 
-interface ColumnActions {
-  onEdit: (prospek: Prospek) => void;
-  onViewDetail: (prospek: Prospek) => void;
-  onAddFollowUp: (prospek: Prospek) => void;
-}
-
-export const getColumns = ({
-  onEdit,
-  onViewDetail,
-  onAddFollowUp,
-}: ColumnActions): ColumnDef<Prospek>[] => [
+export const getColumns = (): ColumnDef<Prospek>[] => [
   {
     accessorKey: "nama_konsumen",
     header: createSortableHeader<Prospek>("Nama"),
@@ -95,34 +79,13 @@ export const getColumns = ({
     },
   },
   {
-    id: "actions",
-    header: "Aksi",
+    id: STICKY_ACTIONS_COLUMN_ID,
+    header: "",
     meta: {
       filterable: false,
     },
-    cell: ({ row }) => {
-      const prospek = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <ProspekActionItems
-              prospek={prospek}
-              onEdit={onEdit}
-              onViewDetail={onViewDetail}
-              onAddFollowUp={onAddFollowUp}
-              ActionItem={DropdownMenuItem}
-            />
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    enableSorting: false,
+    size: 120, // Width tetap untuk actions column
+    cell: () => null, // Placeholder - akan di-override di data-table
   },
 ];

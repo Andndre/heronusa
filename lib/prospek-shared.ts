@@ -38,3 +38,6 @@ export const STATUS_FILTER_OPTIONS = [
 export const VALID_STATUS_VALUES = STATUS_FILTER_OPTIONS.map((opt) => opt.value).filter(
   (v) => v !== "ALL"
 ) as StatusProspek[];
+
+// Table constants
+export const STICKY_ACTIONS_COLUMN_ID = "sticky-actions";

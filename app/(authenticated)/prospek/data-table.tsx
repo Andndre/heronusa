@@ -45,7 +45,8 @@ import {
   ContextMenuLabel,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { ColumnFilterMeta } from "@/lib/prospek-shared";
+import { ColumnFilterMeta, STICKY_ACTIONS_COLUMN_ID } from "@/lib/prospek-shared";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -57,6 +58,7 @@ interface DataTableProps<TData, TValue> {
   selectedRow?: TData | null;
   onSelectRow: (row: TData) => void;
   renderRowActions: (row: TData) => React.ReactNode;
+  renderContextMenuActions?: (row: TData) => React.ReactNode;
   shouldFocusSearch?: boolean;
   initialQuery?: string;
 }
@@ -71,6 +73,7 @@ export function DataTable<TData, TValue>({
   selectedRow: propSelectedRow,
   onSelectRow,
   renderRowActions,
+  renderContextMenuActions,
   shouldFocusSearch,
   initialQuery = "",
 }: DataTableProps<TData, TValue>) {
@@ -376,25 +379,47 @@ export function DataTable<TData, TValue>({
                 table.getRowModel().rows.map((row) => {
                   const rowData = row.original;
                   const isSelected = selectedRow === rowData;
+                  const visibleCells = row.getVisibleCells();
+
                   return (
                     <ContextMenu key={row.id}>
                       <ContextMenuTrigger asChild>
                         <TableRow
                           data-state={isSelected && "selected"}
-                          className={isSelected ? "bg-muted/50" : "cursor-pointer"}
+                          className={cn("group", isSelected ? "bg-muted/50" : "cursor-pointer")}
                           onClick={() => handleRowClick(rowData)}
                           onContextMenu={() => handleRowClick(rowData)}
                         >
-                          {row.getVisibleCells().map((cell) => (
-                            <TableCell key={cell.id}>
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
-                          ))}
+                          {visibleCells.map((cell) => {
+                            const isStickyActions = cell.column.id === STICKY_ACTIONS_COLUMN_ID;
+                            return (
+                              <TableCell
+                                key={cell.id}
+                                className={cn(isStickyActions && "sticky right-0 z-10 p-0")}
+                              >
+                                {isStickyActions ? (
+                                  // Overlay Actions - muncul saat hover di kolom sticky
+                                  <div className="relative flex h-full w-full items-center justify-end px-3">
+                                    {/* Background gradien fade ke kiri - extend penuh vertikal */}
+                                    <div className="from-muted via-muted pointer-events-none absolute -top-[0.375rem] right-0 -bottom-[0.375rem] -left-26 bg-linear-to-l to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+                                    {/* Action icons - render di atas gradien */}
+                                    <div className="relative flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                      {renderRowActions(rowData)}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  flexRender(cell.column.columnDef.cell, cell.getContext())
+                                )}
+                              </TableCell>
+                            );
+                          })}
                         </TableRow>
                       </ContextMenuTrigger>
                       <ContextMenuContent className="w-48">
                         <ContextMenuLabel>Aksi</ContextMenuLabel>
-                        {renderRowActions(rowData)}
+                        {renderContextMenuActions
+                          ? renderContextMenuActions(rowData)
+                          : renderRowActions(rowData)}
                       </ContextMenuContent>
                     </ContextMenu>
                   );

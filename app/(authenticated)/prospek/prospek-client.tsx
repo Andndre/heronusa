@@ -114,15 +114,7 @@ export function ProspekClientComponent({
     [setContent, setTitle, setDescription, setView, setOpen]
   );
 
-  const columns = useMemo(
-    () =>
-      getColumns({
-        onEdit: handleEdit,
-        onViewDetail: handleShowDetail,
-        onAddFollowUp: handleAddFollowUp,
-      }),
-    [handleEdit, handleShowDetail, handleAddFollowUp]
-  );
+  const columns = useMemo(() => getColumns(), []);
 
   useEffect(() => {
     const action = searchParams.get("action");
@@ -190,6 +182,15 @@ export function ProspekClientComponent({
         selectedRow={selectedProspek}
         onSelectRow={handleSelectRow}
         renderRowActions={(row) => (
+          <ProspekActionItems
+            prospek={row}
+            onEdit={handleEdit}
+            onViewDetail={handleShowDetail}
+            onAddFollowUp={handleAddFollowUp}
+            asIconButtons
+          />
+        )}
+        renderContextMenuActions={(row) => (
           <ProspekActionItems
             prospek={row}
             onEdit={handleEdit}
