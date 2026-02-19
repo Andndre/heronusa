@@ -4,15 +4,30 @@ import { ProspekClientComponent } from "./prospek-client";
 export default async function ProspekPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; pageSize?: string; q?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    pageSize?: string;
+    q?: string;
+    [key: string]: string | string[] | undefined;
+  }>;
 }) {
-  const { page, pageSize, q } = await searchParams;
+  const params = await searchParams;
+  const { page, pageSize, q } = params;
   const currentPage = Number(page) || 1;
   const currentPageSize = Number(pageSize) || 10;
   const query = q || "";
 
+  // Extract column filters from URL params
+  const columnFilters: Record<string, string> = {};
+  Object.entries(params).forEach(([key, value]) => {
+    const match = key.match(/^filter\[(.*)\]$/);
+    if (match && typeof value === "string") {
+      columnFilters[match[1]] = value;
+    }
+  });
+
   const [prospekResponse, dropdownData] = await Promise.all([
-    getProspekData(currentPage, currentPageSize, query),
+    getProspekData(currentPage, currentPageSize, query, columnFilters),
     getDropdownData(),
   ]);
 

@@ -16,7 +16,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 
-import { STATUS_PROSPEK_VARIANTS } from "@/lib/prospek-shared";
+import { STATUS_PROSPEK_VARIANTS, STATUS_FILTER_OPTIONS } from "@/lib/prospek-shared";
 import { ProspekActionItems } from "./prospek-action-items";
 
 interface ColumnActions {
@@ -33,25 +33,47 @@ export const getColumns = ({
   {
     accessorKey: "nama_konsumen",
     header: createSortableHeader<Prospek>("Nama"),
+    meta: {
+      filterPlaceholder: "Cari nama...",
+      filterable: true,
+    },
   },
   {
     id: "hp1",
     header: createSortableHeader<Prospek>("No. HP"),
     accessorFn: (row) => `${row.hp1}${row.hp2 ? ", " + row.hp2 : ""}`,
+    meta: {
+      filterPlaceholder: "Cari no. HP...",
+      filterable: true,
+    },
   },
   {
     id: "kelurahan",
     accessorFn: (row) => row.kelurahan.nama_kelurahan,
     header: createSortableHeader<Prospek>("Kelurahan"),
+    meta: {
+      filterPlaceholder: "Cari kelurahan...",
+      filterable: true,
+    },
   },
   {
     id: "model",
     accessorFn: (row) => row.model.nama_model,
     header: createSortableHeader<Prospek>("Model"),
+    meta: {
+      filterPlaceholder: "Cari model...",
+      filterable: true,
+    },
   },
   {
     id: "status",
     header: createSortableHeader<Prospek>("Status"),
+    meta: {
+      filterPlaceholder: "Semua Status",
+      filterable: true,
+      filterType: "select",
+      filterOptions: STATUS_FILTER_OPTIONS,
+    },
     cell: ({ row }) => {
       const status = row.original.status as StatusProspek;
       return (
@@ -64,6 +86,9 @@ export const getColumns = ({
   {
     accessorKey: "createdAt",
     header: createSortableHeader<Prospek>("Tanggal Dibuat"),
+    meta: {
+      filterable: false,
+    },
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
       return format(date, "d/M/yyyy, HH:mm");
@@ -72,6 +97,9 @@ export const getColumns = ({
   {
     id: "actions",
     header: "Aksi",
+    meta: {
+      filterable: false,
+    },
     cell: ({ row }) => {
       const prospek = row.original;
 

@@ -2,8 +2,9 @@
 
 import prisma from "@/lib/db";
 import { getCurrentUser } from "./user";
-import { Prisma } from "@/lib/generated/prisma/client";
+import { Prisma, StatusProspek } from "@/lib/generated/prisma/client";
 import { cacheTag, revalidateTag } from "next/cache";
+import { VALID_STATUS_VALUES } from "@/lib/prospek-shared";
 
 export async function searchModels(query?: string) {
   "use cache";
@@ -115,16 +116,49 @@ async function fetchProspekData(
   activeOrganizationId: string,
   page: number,
   pageSize: number,
-  query?: string
+  query?: string,
+  columnFilters?: Record<string, string>
 ) {
   "use cache";
   cacheTag(`prospek-org-${activeOrganizationId}`);
 
   const skip = (page - 1) * pageSize;
 
+  // Build where clause from column filters
+  const filterClause: Prisma.ProspekWhereInput = {};
+
+  if (columnFilters) {
+    Object.entries(columnFilters).forEach(([key, value]) => {
+      if (!value || value === "ALL") return;
+
+      switch (key) {
+        case "nama_konsumen":
+          filterClause.nama_konsumen = { contains: value };
+          break;
+        case "hp1":
+          filterClause.OR = [{ hp1: { contains: value } }, { hp2: { contains: value } }];
+          break;
+        case "kelurahan":
+          filterClause.kelurahan = { nama_kelurahan: { contains: value } };
+          break;
+        case "model":
+          filterClause.model = { nama_model: { contains: value } };
+          break;
+        case "status": {
+          // For enum, exact match with validation
+          if (VALID_STATUS_VALUES.includes(value as StatusProspek)) {
+            filterClause.status = value as StatusProspek;
+          }
+          break;
+        }
+      }
+    });
+  }
+
   const whereClause: Prisma.ProspekWhereInput = {
     deletedAt: null,
     cabangId: activeOrganizationId,
+    ...filterClause,
     ...(query
       ? {
           OR: [
@@ -175,7 +209,12 @@ async function fetchProspekData(
   };
 }
 
-export async function getProspekData(page: number = 1, pageSize: number = 10, query?: string) {
+export async function getProspekData(
+  page: number = 1,
+  pageSize: number = 10,
+  query?: string,
+  columnFilters?: Record<string, string>
+) {
   const { session } = await getCurrentUser();
   const activeOrganizationId = session?.activeOrganizationId;
 
@@ -183,7 +222,7 @@ export async function getProspekData(page: number = 1, pageSize: number = 10, qu
     return { data: [], totalCount: 0, pageCount: 0 };
   }
 
-  return fetchProspekData(activeOrganizationId, page, pageSize, query);
+  return fetchProspekData(activeOrganizationId, page, pageSize, query, columnFilters);
 }
 
 export type ProspekResponse = Awaited<ReturnType<typeof getProspekData>>;

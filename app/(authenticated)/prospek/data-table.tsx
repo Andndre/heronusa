@@ -8,6 +8,7 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
+  ColumnFiltersState,
 } from "@tanstack/react-table";
 
 import {
@@ -18,7 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { Input } from "@/components/ui/input";
+import { Fragment, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Loader2, Search } from "lucide-react";
 import {
@@ -43,6 +45,7 @@ import {
   ContextMenuLabel,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { ColumnFilterMeta } from "@/lib/prospek-shared";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -79,6 +82,7 @@ export function DataTable<TData, TValue>({
 
   // State
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [searchValue, setSearchValue] = useState(initialQuery);
   const [internalSelectedRow, setInternalSelectedRow] = useState<TData | null>(null);
 
@@ -95,6 +99,66 @@ export function DataTable<TData, TValue>({
   useEffect(() => {
     setSearchValue(initialQuery);
   }, [initialQuery]);
+
+  // Initialize column filters from URL params
+  useEffect(() => {
+    const filters: ColumnFiltersState = [];
+    searchParams.forEach((value, key) => {
+      const match = key.match(/filter\[(.*)\]/);
+      if (match) {
+        filters.push({
+          id: match[1],
+          value: value,
+        });
+      }
+    });
+    setColumnFilters(filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
+
+  // Sync column filters with URL params (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      const filters: Record<string, string> = {};
+
+      columnFilters.forEach((filter) => {
+        if (filter.value) {
+          filters[filter.id] = filter.value as string;
+        }
+      });
+
+      // Update URL with column filters
+      Object.entries(filters).forEach(([key, value]) => {
+        params.set(`filter[${key}]`, value);
+      });
+
+      // Remove filters that no longer exist or are empty
+      Array.from(params.keys())
+        .filter((key) => key.startsWith("filter["))
+        .forEach((key) => {
+          const filterKey = key.match(/filter\[(.*)\]/)?.[1];
+          if (filterKey) {
+            const filter = columnFilters.find((f) => f.id === filterKey);
+            if (!filter || !filter.value) {
+              params.delete(key);
+            }
+          }
+        });
+
+      // Only update if changed
+      const newQueryString = params.toString();
+      const currentQueryString = searchParams.toString();
+      if (newQueryString !== currentQueryString) {
+        params.set("page", "1");
+        startTransition(() => {
+          router.push(pathname + "?" + params.toString());
+        });
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
+  }, [columnFilters, searchParams, pathname, router]);
 
   // Debounced search
   useEffect(() => {
@@ -117,7 +181,6 @@ export function DataTable<TData, TValue>({
     return () => clearTimeout(timer);
   }, [searchValue, searchParams, pathname, router]);
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
@@ -125,10 +188,12 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange: setColumnFilters,
     manualPagination: true,
     pageCount: pageCount,
     state: {
       sorting,
+      columnFilters,
       pagination: {
         pageIndex: currentPage - 1,
         pageSize: pageSize,
@@ -240,17 +305,70 @@ export function DataTable<TData, TValue>({
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
+                <Fragment key={headerGroup.id}>
+                  {/* First row: Header with sorting */}
+                  <TableRow>
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                  {/* Second row: Filter inputs */}
+                  <TableRow>
+                    {headerGroup.headers.map((header) => {
+                      const meta = header.column.columnDef.meta as ColumnFilterMeta | undefined;
+                      const showFilter = meta?.filterable !== false;
+                      const filterType = meta?.filterType || "text";
+                      const placeholder = meta?.filterPlaceholder || `Cari ${header.id}...`;
+                      const filterValue = (header.column.getFilterValue() as string) ?? "";
+
+                      return (
+                        <TableHead key={`${header.id}-filter`}>
+                          {showFilter ? (
+                            filterType === "select" ? (
+                              <Select
+                                value={filterValue || "ALL"}
+                                onValueChange={(value) => {
+                                  header.column.setFilterValue(value === "ALL" ? undefined : value);
+                                }}
+                              >
+                                <SelectTrigger
+                                  size="sm"
+                                  className="w-full"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <SelectValue placeholder={placeholder} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {meta?.filterOptions?.map((option) => (
+                                    <SelectItem key={option.value} value={option.value}>
+                                      {option.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Input
+                                placeholder={placeholder}
+                                value={filterValue}
+                                onChange={(e) => {
+                                  header.column.setFilterValue(e.target.value || undefined);
+                                }}
+                                className="h-8"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            )
+                          ) : null}
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                </Fragment>
               ))}
             </TableHeader>
             <TableBody>
