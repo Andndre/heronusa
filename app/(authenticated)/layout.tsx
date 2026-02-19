@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { getOrganizations } from "@/server/organizations";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { RightSidebarAwareInset } from "@/components/right-sidebar-inset";
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -37,7 +38,11 @@ async function AuthenticatedContent({ children }: { children: React.ReactNode })
     <AppSidebar>
       <SidebarInset>
         <AppNavbar user={user} organizations={organizations} />
-        <div className="bg-background flex-1 overflow-x-hidden overflow-y-auto p-4">{children}</div>
+        <div className="flex flex-1 overflow-hidden">
+          <RightSidebarAwareInset className="bg-background flex-1 overflow-x-hidden overflow-y-auto p-4">
+            {children}
+          </RightSidebarAwareInset>
+        </div>
       </SidebarInset>
     </AppSidebar>
   );

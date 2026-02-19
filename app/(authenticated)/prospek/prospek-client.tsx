@@ -156,6 +156,10 @@ export function ProspekClientComponent({
           </p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={handleAdd} className="shrink-0">
+            <PlusIcon className="size-5" />
+            <span className="hidden sm:inline">Tambah</span>
+          </Button>
           <Button
             variant="outline"
             size="icon"
@@ -165,10 +169,6 @@ export function ProspekClientComponent({
             className="size-10 shrink-0"
           >
             <InfoIcon className="size-5" />
-          </Button>
-          <Button onClick={handleAdd} className="shrink-0">
-            <PlusIcon className="size-5" />
-            <span className="hidden sm:inline">Tambah</span>
           </Button>
         </div>
       </div>
