@@ -175,7 +175,7 @@ export function ProspekClientComponent({
             <InfoIcon className="size-5" />
           </Button>
           <Button onClick={handleAdd} className="shrink-0">
-            <PlusIcon className="size-5 sm:mr-2" />
+            <PlusIcon className="size-5" />
             <span className="hidden sm:inline">Tambah</span>
           </Button>
         </div>
