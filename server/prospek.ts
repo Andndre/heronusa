@@ -6,6 +6,16 @@ import { Prisma, StatusProspek } from "@/lib/generated/prisma/client";
 import { cacheTag, revalidateTag } from "next/cache";
 import { VALID_STATUS_VALUES } from "@/lib/prospek-shared";
 
+// Helper for testing slow server response
+// Set env var TEST_DELAY=5000 to simulate 5 second delay
+async function testDelay() {
+  const delay = Number(process.env.TEST_DELAY || "0");
+  if (delay > 0) {
+    console.log(`[TEST] Simulating server delay: ${delay}ms`);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+}
+
 export async function searchModels(query?: string) {
   "use cache";
   cacheTag("master-data");
@@ -178,10 +188,61 @@ async function fetchProspekData(
       where: whereClause,
       include: {
         cabang: true,
-        subSumber: true,
+        sales: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        subSumber: {
+          include: {
+            sumberProspek: true,
+          },
+        },
         model: true,
         warna: true,
-        kelurahan: true,
+        kelurahan: {
+          include: {
+            kecamatan: {
+              include: {
+                kabupaten: true,
+              },
+            },
+          },
+        },
+        pelanggan: true,
+        followUps: {
+          orderBy: { tanggal: "desc" },
+          include: {
+            sales: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        pembayarans: {
+          orderBy: { createdAt: "desc" },
+        },
+        spk: {
+          include: {
+            pelanggan: true,
+            unit: {
+              include: {
+                model: true,
+                warna: true,
+              },
+            },
+          },
+        },
+        leasingOrder: {
+          include: {
+            leasing: true,
+            pembayaran: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -200,6 +261,25 @@ async function fetchProspekData(
       ...item.model,
       harga_otr: Number(item.model.harga_otr),
     },
+    spk: item.spk
+      ? {
+          ...item.spk,
+          totalTagihan: Number(item.spk.totalTagihan),
+          totalDibayar: Number(item.spk.totalDibayar),
+          diskonPengajuan: item.spk.diskonPengajuan ? Number(item.spk.diskonPengajuan) : null,
+          diskonDisetujui: item.spk.diskonDisetujui ? Number(item.spk.diskonDisetujui) : null,
+        }
+      : null,
+    leasingOrder: item.leasingOrder
+      ? {
+          ...item.leasingOrder,
+          jumlahPiutang: Number(item.leasingOrder.jumlahPiutang),
+        }
+      : null,
+    pembayarans: item.pembayarans.map((p) => ({
+      ...p,
+      jumlah: Number(p.jumlah),
+    })),
   }));
 
   return {
@@ -225,12 +305,17 @@ export async function getProspekData(
   return fetchProspekData(activeOrganizationId, page, pageSize, query, columnFilters);
 }
 
+// ProspekResponse is the response from getProspekData - returns full ProspekDetail items
 export type ProspekResponse = Awaited<ReturnType<typeof getProspekData>>;
+
+// Prospek is now the same as ProspekDetail - used in datatable and client components
 export type Prospek = ProspekResponse["data"][number];
 
 export async function createProspek(
   data: Omit<Prisma.ProspekCreateInput, "cabang" | "sales" | "id">
 ) {
+  await testDelay(); // Simulate slow server for testing
+
   const { currentUser, session } = await getCurrentUser();
   const activeOrganizationId = session?.activeOrganizationId;
 
@@ -260,8 +345,10 @@ export async function createProspek(
 
 export async function updateProspek(
   id: string,
-  data: Omit<Prisma.ProspekUpdateInput, "cabang" | "sales" | "id">
+  data: Omit<Prisma.ProspekUpdateInput, "cabang" | "sales">
 ) {
+  await testDelay(); // Simulate slow server for testing
+
   const { session } = await getCurrentUser();
   const activeOrganizationId = session?.activeOrganizationId;
 

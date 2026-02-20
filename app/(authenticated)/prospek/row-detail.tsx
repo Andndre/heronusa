@@ -26,6 +26,8 @@ import { STATUS_PROSPEK_VARIANTS, KATEGORI_PROSPEK_VARIANTS } from "@/lib/prospe
 
 interface RowDetailProps {
   prospekId: string;
+  // Optional: pass full prospek detail data directly to avoid refetching
+  prospekData?: ProspekDetail;
 }
 
 // Sub-components for better organization
@@ -96,12 +98,18 @@ const LEASING_STATUS_CONFIG: Record<
   DITOLAK: { icon: XCircle, label: "Ditolak", variant: "destructive" },
 };
 
-export default function RowDetail({ prospekId }: RowDetailProps) {
-  const [prospek, setProspek] = useState<ProspekDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function RowDetail({ prospekId, prospekData }: RowDetailProps) {
+  const [prospek, setProspek] = useState<ProspekDetail | null>(prospekData || null);
+  const [loading, setLoading] = useState(!prospekData);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Only fetch if prospekData is not provided
+    if (prospekData) {
+      setProspek(prospekData);
+      return;
+    }
+
     async function fetchData() {
       try {
         setLoading(true);
@@ -115,7 +123,7 @@ export default function RowDetail({ prospekId }: RowDetailProps) {
       }
     }
     fetchData();
-  }, [prospekId]);
+  }, [prospekId, prospekData]);
 
   if (loading) {
     return (
