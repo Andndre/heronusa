@@ -18,10 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
+import { DatePicker } from "@/components/ui/date-picker";
 import { useRightSidebar } from "@/components/sidebar-context";
 
 const formSchema = z.object({
@@ -86,10 +83,10 @@ export function CreateFollowUpForm({ prospekId }: CreateFollowUpFormProps) {
     <form
       id="create-followup-form"
       onSubmit={form.handleSubmit(onSubmit)}
-      className={cn("flex min-h-full flex-col")}
+      className={cn("flex h-full flex-col")}
     >
-      <div className="flex-1 space-y-4">
-        <FieldGroup>
+      <div className="flex-1 space-y-4 overflow-y-auto">
+        <FieldGroup className="px-4 pt-4 pb-6">
           <div className="space-y-3">
             <Controller
               name="status"
@@ -134,36 +131,11 @@ export function CreateFollowUpForm({ prospekId }: CreateFollowUpFormProps) {
                 return (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="tanggal">Tanggal</FieldLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {selectedDate
-                            ? format(selectedDate, "dd MMM yyyy", { locale: id })
-                            : "Pilih Tanggal"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={(date) => {
-                            if (!date) {
-                              field.onChange(undefined);
-                              return;
-                            }
-                            field.onChange(date);
-                          }}
-                          defaultMonth={selectedDate}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <DatePicker
+                      value={selectedDate}
+                      onChange={(date) => field.onChange(date)}
+                      placeholder="Pilih Tanggal"
+                    />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 );
@@ -189,7 +161,7 @@ export function CreateFollowUpForm({ prospekId }: CreateFollowUpFormProps) {
         </FieldGroup>
       </div>
 
-      <div className="bg-background sticky bottom-0 z-10 -mx-4 mt-6 border-t px-4 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+      <div className="bg-background shrink-0 border-t px-4 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? <Loader className="mr-2 animate-spin" /> : null}
           {loading ? "Memproses..." : "Simpan Follow-Up"}

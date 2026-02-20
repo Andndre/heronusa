@@ -143,9 +143,9 @@ export function EditProspekForm({
       onSubmit={form.handleSubmit(handleSubmit)}
       className={cn("flex h-full flex-col", className)}
     >
-      <div className="-mx-4 flex-1 space-y-4 overflow-y-auto px-4">
-        <FieldGroup>
-          <div className="space-y-3 pb-6">
+      <div className="flex-1 space-y-4 overflow-y-auto">
+        <FieldGroup className="px-4 pt-4 pb-6">
+          <div className="space-y-3">
             <Controller
               name="nama_konsumen"
               control={form.control}

@@ -143,223 +143,225 @@ export default function RowDetail({ prospekId, prospekData }: RowDetailProps) {
   }
 
   return (
-    <div className="space-y-6 px-1 pb-3">
-      {/* HEADER */}
-      <div className="space-y-3">
-        <h2 className="text-2xl font-bold">{prospek.nama_konsumen}</h2>
-        <div className="flex flex-wrap gap-2">
-          <Badge variant={STATUS_PROSPEK_VARIANTS[prospek.status] || "outline"}>
-            {prospek.status}
-          </Badge>
-          <Badge variant={KATEGORI_PROSPEK_VARIANTS[prospek.kategori_prospek] || "outline"}>
-            {prospek.kategori_prospek}
-          </Badge>
-          <Badge variant="outline">{prospek.tipe_pembayaran}</Badge>
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* DATA KONSUMEN */}
-      <Section title="Informasi Konsumen" icon={User}>
-        <div className="flex items-start gap-3">
-          <Phone className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
-          <div>
-            <p className="font-medium">{prospek.hp1}</p>
-            {prospek.hp2 && <p className="text-muted-foreground">{prospek.hp2}</p>}
+    <div className="flex h-full flex-col">
+      <div className="flex-1 space-y-6 overflow-y-auto px-4 pt-4 pb-6">
+        {/* HEADER */}
+        <div className="space-y-3">
+          <h2 className="text-2xl font-bold">{prospek.nama_konsumen}</h2>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant={STATUS_PROSPEK_VARIANTS[prospek.status] || "outline"}>
+              {prospek.status}
+            </Badge>
+            <Badge variant={KATEGORI_PROSPEK_VARIANTS[prospek.kategori_prospek] || "outline"}>
+              {prospek.kategori_prospek}
+            </Badge>
+            <Badge variant="outline">{prospek.tipe_pembayaran}</Badge>
           </div>
         </div>
-        {prospek.alamat_konsumen && (
+
+        <Separator />
+
+        {/* DATA KONSUMEN */}
+        <Section title="Informasi Konsumen" icon={User}>
           <div className="flex items-start gap-3">
-            <MapPin className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
-            <p className="whitespace-pre-line">{prospek.alamat_konsumen}</p>
+            <Phone className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
+            <div>
+              <p className="font-medium">{prospek.hp1}</p>
+              {prospek.hp2 && <p className="text-muted-foreground">{prospek.hp2}</p>}
+            </div>
           </div>
-        )}
-      </Section>
+          {prospek.alamat_konsumen && (
+            <div className="flex items-start gap-3">
+              <MapPin className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
+              <p className="whitespace-pre-line">{prospek.alamat_konsumen}</p>
+            </div>
+          )}
+        </Section>
 
-      {/* PRODUK YANG DIMINATI */}
-      <Section title="Produk yang Diminati">
-        <InfoRow label="Model" value={prospek.model.nama_model} />
-        <InfoRow label="Warna" value={prospek.warna.warna} />
-        <InfoRow label="CC / Series" value={`${prospek.model.cc} CC / ${prospek.model.series}`} />
-        <Separator className="my-2" />
-        <InfoRow
-          label="Harga OTR"
-          value={formatCurrency(prospek.model.harga_otr)}
-          valueClassName="text-lg font-semibold"
-        />
-      </Section>
-
-      {/* LOKASI */}
-      <Section title="Lokasi" icon={MapPin}>
-        <InfoRow label="Kelurahan" value={prospek.kelurahan.nama_kelurahan} />
-        <InfoRow label="Kecamatan" value={prospek.kelurahan.kecamatan.nama_kecamatan} />
-        <InfoRow label="Kabupaten" value={prospek.kelurahan.kecamatan.kabupaten.nama_kabupaten} />
-      </Section>
-
-      {/* SALES & CABANG */}
-      <Section title="Informasi Sales" icon={Building2}>
-        <InfoRow label="Sales" value={prospek.sales.name} />
-        <InfoRow label="Cabang" value={prospek.cabang.name} />
-      </Section>
-
-      {/* INFORMASI WAKTU */}
-      <Section title="Informasi Waktu" icon={Calendar}>
-        <InfoRow
-          label="Dibuat pada"
-          value={format(new Date(prospek.createdAt), "dd MMM yyyy, HH:mm", { locale: id })}
-        />
-        {prospek.tgl_perkiraan_beli && (
+        {/* PRODUK YANG DIMINATI */}
+        <Section title="Produk yang Diminati">
+          <InfoRow label="Model" value={prospek.model.nama_model} />
+          <InfoRow label="Warna" value={prospek.warna.warna} />
+          <InfoRow label="CC / Series" value={`${prospek.model.cc} CC / ${prospek.model.series}`} />
+          <Separator className="my-2" />
           <InfoRow
-            label="Perkiraan Beli"
-            value={format(new Date(prospek.tgl_perkiraan_beli), "dd MMM yyyy", { locale: id })}
+            label="Harga OTR"
+            value={formatCurrency(prospek.model.harga_otr)}
+            valueClassName="text-lg font-semibold"
           />
-        )}
-      </Section>
+        </Section>
 
-      {/* FOLLOW-UP HISTORY */}
-      {prospek.followUps.length > 0 && (
-        <Section title={`Riwayat Follow-Up (${prospek.followUps.length})`} icon={Clock}>
-          <div className="space-y-6 pt-1">
-            {prospek.followUps.map((followUp, index) => (
-              <div key={followUp.id} className="flex gap-3">
-                {/* Sales Avatar */}
-                <div className="flex shrink-0 flex-col items-center">
-                  <Avatar size="sm" className="bg-primary text-primary-foreground text-xs">
-                    <AvatarFallback>{getInitials(followUp.sales.name)}</AvatarFallback>
-                  </Avatar>
-                  {/* Vertical line connector (not for last item) */}
-                  {index < prospek.followUps.length - 1 && (
-                    <div className="bg-border mt-2 w-px flex-1" />
-                  )}
-                </div>
+        {/* LOKASI */}
+        <Section title="Lokasi" icon={MapPin}>
+          <InfoRow label="Kelurahan" value={prospek.kelurahan.nama_kelurahan} />
+          <InfoRow label="Kecamatan" value={prospek.kelurahan.kecamatan.nama_kecamatan} />
+          <InfoRow label="Kabupaten" value={prospek.kelurahan.kecamatan.kabupaten.nama_kabupaten} />
+        </Section>
 
-                {/* Timeline Content */}
-                <div className="flex-1 space-y-1 pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">
-                      {formatFollowUpDate(followUp.tanggal)}
-                    </span>
-                    <Badge
-                      variant={STATUS_PROSPEK_VARIANTS[followUp.status] || "outline"}
-                      className="text-xs"
-                    >
-                      {followUp.status}
-                    </Badge>
+        {/* SALES & CABANG */}
+        <Section title="Informasi Sales" icon={Building2}>
+          <InfoRow label="Sales" value={prospek.sales.name} />
+          <InfoRow label="Cabang" value={prospek.cabang.name} />
+        </Section>
+
+        {/* INFORMASI WAKTU */}
+        <Section title="Informasi Waktu" icon={Calendar}>
+          <InfoRow
+            label="Dibuat pada"
+            value={format(new Date(prospek.createdAt), "dd MMM yyyy, HH:mm", { locale: id })}
+          />
+          {prospek.tgl_perkiraan_beli && (
+            <InfoRow
+              label="Perkiraan Beli"
+              value={format(new Date(prospek.tgl_perkiraan_beli), "dd MMM yyyy", { locale: id })}
+            />
+          )}
+        </Section>
+
+        {/* FOLLOW-UP HISTORY */}
+        {prospek.followUps.length > 0 && (
+          <Section title={`Riwayat Follow-Up (${prospek.followUps.length})`} icon={Clock}>
+            <div className="space-y-6 pt-1">
+              {prospek.followUps.map((followUp, index) => (
+                <div key={followUp.id} className="flex gap-3">
+                  {/* Sales Avatar */}
+                  <div className="flex shrink-0 flex-col items-center">
+                    <Avatar size="sm" className="bg-primary text-primary-foreground text-xs">
+                      <AvatarFallback>{getInitials(followUp.sales.name)}</AvatarFallback>
+                    </Avatar>
+                    {/* Vertical line connector (not for last item) */}
+                    {index < prospek.followUps.length - 1 && (
+                      <div className="bg-border mt-2 w-px flex-1" />
+                    )}
                   </div>
-                  {followUp.catatan && (
-                    <p className="text-muted-foreground text-sm">{followUp.catatan}</p>
-                  )}
-                  <p className="text-muted-foreground mt-1 text-xs">oleh {followUp.sales.name}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Section>
-      )}
 
-      {/* UANG TITIPAN */}
-      {prospek.pembayarans.length > 0 && (
-        <Section title={`Uang Titipan (${prospek.pembayarans.length})`} icon={CreditCard}>
-          <div className="bg-muted mb-4 rounded-lg p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-sm">Total Titipan</span>
-              <span className="text-lg font-bold">
-                {formatCurrency(prospek.pembayarans.reduce((sum, p) => sum + p.jumlah, 0))}
-              </span>
-            </div>
-          </div>
-          <div className="space-y-3">
-            {prospek.pembayarans.map((pembayaran) => (
-              <div
-                key={pembayaran.id}
-                className="flex items-start justify-between border-b pb-3 text-sm last:border-0 last:pb-0"
-              >
-                <div>
-                  <p className="font-medium">{formatCurrency(pembayaran.jumlah)}</p>
-                  <p className="text-muted-foreground text-xs">
-                    {format(new Date(pembayaran.createdAt), "dd MMM yyyy", { locale: id })}
-                  </p>
+                  {/* Timeline Content */}
+                  <div className="flex-1 space-y-1 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">
+                        {formatFollowUpDate(followUp.tanggal)}
+                      </span>
+                      <Badge
+                        variant={STATUS_PROSPEK_VARIANTS[followUp.status] || "outline"}
+                        className="text-xs"
+                      >
+                        {followUp.status}
+                      </Badge>
+                    </div>
+                    {followUp.catatan && (
+                      <p className="text-muted-foreground text-sm">{followUp.catatan}</p>
+                    )}
+                    <p className="text-muted-foreground mt-1 text-xs">oleh {followUp.sales.name}</p>
+                  </div>
                 </div>
-                <div className="text-right">
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* UANG TITIPAN */}
+        {prospek.pembayarans.length > 0 && (
+          <Section title={`Uang Titipan (${prospek.pembayarans.length})`} icon={CreditCard}>
+            <div className="bg-muted mb-4 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-sm">Total Titipan</span>
+                <span className="text-lg font-bold">
+                  {formatCurrency(prospek.pembayarans.reduce((sum, p) => sum + p.jumlah, 0))}
+                </span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {prospek.pembayarans.map((pembayaran) => (
+                <div
+                  key={pembayaran.id}
+                  className="flex items-start justify-between border-b pb-3 text-sm last:border-0 last:pb-0"
+                >
+                  <div>
+                    <p className="font-medium">{formatCurrency(pembayaran.jumlah)}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {format(new Date(pembayaran.createdAt), "dd MMM yyyy", { locale: id })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant="outline" className="text-xs">
+                      {pembayaran.jenis}
+                    </Badge>
+                    <p className="text-muted-foreground mt-1 text-xs">{pembayaran.metode}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* SPK */}
+        {prospek.spk && (
+          <Section
+            title={`SPK: ${prospek.spk.nomorSPK}`}
+            className="bg-muted/50 border-primary/20 rounded-lg border p-4"
+          >
+            <InfoRow
+              label="Tanggal"
+              value={format(new Date(prospek.spk.tanggal), "dd MMM yyyy", { locale: id })}
+            />
+            <InfoRow
+              label="Total Tagihan"
+              value={formatCurrency(prospek.spk.totalTagihan)}
+              valueClassName="font-bold"
+            />
+            <InfoRow label="Total Dibayar" value={formatCurrency(prospek.spk.totalDibayar)} />
+            {prospek.spk.diskonDisetujui && (
+              <InfoRow
+                label="Diskon"
+                value={formatCurrency(prospek.spk.diskonDisetujui)}
+                valueClassName="text-green-600"
+              />
+            )}
+            <Separator className="my-2" />
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-muted-foreground">Approval</span>
+              <div className="flex gap-2">
+                {prospek.spk.spv_approval_status && (
                   <Badge variant="outline" className="text-xs">
-                    {pembayaran.jenis}
+                    SPV: {prospek.spk.spv_approval_status}
                   </Badge>
-                  <p className="text-muted-foreground mt-1 text-xs">{pembayaran.metode}</p>
-                </div>
+                )}
+                {prospek.spk.manager_approval_status && (
+                  <Badge variant="outline" className="text-xs">
+                    MGR: {prospek.spk.manager_approval_status}
+                  </Badge>
+                )}
               </div>
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* SPK */}
-      {prospek.spk && (
-        <Section
-          title={`SPK: ${prospek.spk.nomorSPK}`}
-          className="bg-muted/50 border-primary/20 rounded-lg border p-4"
-        >
-          <InfoRow
-            label="Tanggal"
-            value={format(new Date(prospek.spk.tanggal), "dd MMM yyyy", { locale: id })}
-          />
-          <InfoRow
-            label="Total Tagihan"
-            value={formatCurrency(prospek.spk.totalTagihan)}
-            valueClassName="font-bold"
-          />
-          <InfoRow label="Total Dibayar" value={formatCurrency(prospek.spk.totalDibayar)} />
-          {prospek.spk.diskonDisetujui && (
-            <InfoRow
-              label="Diskon"
-              value={formatCurrency(prospek.spk.diskonDisetujui)}
-              valueClassName="text-green-600"
-            />
-          )}
-          <Separator className="my-2" />
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-muted-foreground">Approval</span>
-            <div className="flex gap-2">
-              {prospek.spk.spv_approval_status && (
-                <Badge variant="outline" className="text-xs">
-                  SPV: {prospek.spk.spv_approval_status}
-                </Badge>
-              )}
-              {prospek.spk.manager_approval_status && (
-                <Badge variant="outline" className="text-xs">
-                  MGR: {prospek.spk.manager_approval_status}
-                </Badge>
-              )}
             </div>
-          </div>
-        </Section>
-      )}
+          </Section>
+        )}
 
-      {/* LEASING */}
-      {prospek.leasingOrder && (
-        <Section title="Pengajuan Leasing" icon={CreditCard}>
-          <InfoRow label="Leasing" value={prospek.leasingOrder.leasing.nama} />
-          <InfoRow
-            label="Jumlah Piutang"
-            value={formatCurrency(prospek.leasingOrder.jumlahPiutang)}
-            valueClassName="font-bold"
-          />
-          <InfoRow label="Nomor PO" value={prospek.leasingOrder.nomorPO} />
-          <Separator className="my-2" />
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Status</span>
-            <LeasingStatusBadge status={prospek.leasingOrder.statusCair} />
-          </div>
-          {prospek.leasingOrder.tanggalCair && (
+        {/* LEASING */}
+        {prospek.leasingOrder && (
+          <Section title="Pengajuan Leasing" icon={CreditCard}>
+            <InfoRow label="Leasing" value={prospek.leasingOrder.leasing.nama} />
             <InfoRow
-              label="Tanggal Cair"
-              value={format(new Date(prospek.leasingOrder.tanggalCair), "dd MMM yyyy", {
-                locale: id,
-              })}
+              label="Jumlah Piutang"
+              value={formatCurrency(prospek.leasingOrder.jumlahPiutang)}
+              valueClassName="font-bold"
             />
-          )}
-        </Section>
-      )}
+            <InfoRow label="Nomor PO" value={prospek.leasingOrder.nomorPO} />
+            <Separator className="my-2" />
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Status</span>
+              <LeasingStatusBadge status={prospek.leasingOrder.statusCair} />
+            </div>
+            {prospek.leasingOrder.tanggalCair && (
+              <InfoRow
+                label="Tanggal Cair"
+                value={format(new Date(prospek.leasingOrder.tanggalCair), "dd MMM yyyy", {
+                  locale: id,
+                })}
+              />
+            )}
+          </Section>
+        )}
+      </div>
     </div>
   );
 }

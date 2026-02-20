@@ -80,7 +80,7 @@ function RightSidebarDesktop({ sidebarStack, onClose }: RightSidebarProps) {
               </div>
 
               {/* Content */}
-              <div className="flex-1 overflow-y-auto p-4">{item.content}</div>
+              <div className="flex-1 overflow-y-auto">{item.content}</div>
             </div>
           </div>
         );
@@ -111,7 +111,7 @@ function NestedSheets({ items, onClose }: { items: SidebarItem[]; onClose: (id: 
               </div>
             </div>
           </SheetHeader>
-          <div className="flex-1 overflow-y-auto p-4">{current.content}</div>
+          <div className="flex-1 overflow-y-auto">{current.content}</div>
         </div>
 
         {/* Nested sheet for rest of stack */}
