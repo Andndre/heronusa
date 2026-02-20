@@ -215,18 +215,32 @@ export function ProspekClientComponent({
       if (sidebarStack.length > 0 && !hasPendingSubmissions) {
         replaceTopSidebar({
           title: "Tambah Follow-Up",
-          description: "Catat aktivitas follow-up untuk prospek ini.",
-          content: <CreateFollowUpForm key={row.id} prospekId={row.id} />,
+          description: `Catat aktivitas follow-up untuk ${row.nama_konsumen}`,
+          content: (
+            <CreateFollowUpForm
+              key={row.id}
+              prospekId={row.id}
+              prospekName={row.nama_konsumen}
+              onSuccess={() => router.refresh()}
+            />
+          ),
         });
       } else {
         pushSidebar({
           title: "Tambah Follow-Up",
-          description: "Catat aktivitas follow-up untuk prospek ini.",
-          content: <CreateFollowUpForm key={row.id} prospekId={row.id} />,
+          description: `Catat aktivitas follow-up untuk ${row.nama_konsumen}`,
+          content: (
+            <CreateFollowUpForm
+              key={row.id}
+              prospekId={row.id}
+              prospekName={row.nama_konsumen}
+              onSuccess={() => router.refresh()}
+            />
+          ),
         });
       }
     },
-    [pushSidebar, replaceTopSidebar, sidebarStack.length, hasPendingSubmissions]
+    [pushSidebar, replaceTopSidebar, sidebarStack.length, hasPendingSubmissions, router]
   );
 
   const columns = useMemo(() => getColumns(), []);

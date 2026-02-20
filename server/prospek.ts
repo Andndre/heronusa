@@ -576,26 +576,37 @@ export async function createFollowUp(data: {
     throw new Error("Not authorized");
   }
 
-  const result = await prisma.followUp.create({
-    data: {
-      prospek: {
-        connect: { id: data.prospekId },
+  const result = await prisma.$transaction(async (tx) => {
+    // Create follow-up
+    const followUp = await tx.followUp.create({
+      data: {
+        prospek: {
+          connect: { id: data.prospekId },
+        },
+        sales: {
+          connect: { id: currentUser.id },
+        },
+        tanggal: data.tanggal,
+        catatan: data.catatan,
+        status: data.status,
       },
-      sales: {
-        connect: { id: currentUser.id },
-      },
-      tanggal: data.tanggal,
-      catatan: data.catatan,
-      status: data.status,
-    },
-    include: {
-      sales: {
-        select: {
-          id: true,
-          name: true,
+      include: {
+        sales: {
+          select: {
+            id: true,
+            name: true,
+          },
         },
       },
-    },
+    });
+
+    // Update prospek status to match follow-up status
+    await tx.prospek.update({
+      where: { id: data.prospekId },
+      data: { status: data.status },
+    });
+
+    return followUp;
   });
 
   revalidateTag(`prospek-detail-${data.prospekId}`, "max");

@@ -8,8 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
+import z from "zod";
 import { createFollowUp } from "@/server/prospek";
 import {
   Select,
@@ -19,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
-import { useRightSidebar } from "@/components/sidebar-context";
+import { useFormSubmission } from "@/hooks/use-form-submission";
 
 const formSchema = z.object({
   tanggal: z.date({
@@ -33,11 +32,17 @@ const formSchema = z.object({
 
 export type CreateFollowUpFormProps = {
   prospekId: string;
+  prospekName?: string; // Optional: for better UX in sidebar title
+  onSuccess?: () => void; // Callback for data refresh
 };
 
-export function CreateFollowUpForm({ prospekId }: CreateFollowUpFormProps) {
-  const [loading, setLoading] = useState(false);
-  const { setOpen } = useRightSidebar();
+export function CreateFollowUpForm({
+  className,
+  prospekId,
+  prospekName,
+  onSuccess,
+  ...props
+}: React.ComponentProps<"form"> & CreateFollowUpFormProps) {
   const [firstFocusableEl, setFirstFocusableEl] = useState<HTMLButtonElement | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -49,6 +54,22 @@ export function CreateFollowUpForm({ prospekId }: CreateFollowUpFormProps) {
     },
   });
 
+  const { submit, isLoading } = useFormSubmission<z.infer<typeof formSchema>>({
+    onSubmit: async (data) => {
+      await createFollowUp({
+        prospekId,
+        tanggal: data.tanggal,
+        catatan: data.catatan || undefined,
+        status: data.status,
+      });
+    },
+    onSuccess: () => {
+      form.reset();
+      onSuccess?.(); // Call parent's success callback for data refresh
+    },
+    successMessage: "Follow-up berhasil dicatat!",
+  });
+
   // Auto focus to first element when form mounts
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -58,32 +79,29 @@ export function CreateFollowUpForm({ prospekId }: CreateFollowUpFormProps) {
     return () => clearTimeout(timer);
   }, [firstFocusableEl]);
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    setLoading(true);
-
-    try {
-      await createFollowUp({
-        prospekId,
-        tanggal: data.tanggal,
-        catatan: data.catatan || undefined,
-        status: data.status,
-      });
-
-      toast.success("Follow-up berhasil dicatat!");
-      form.reset();
-      setOpen(false);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Terjadi kesalahan");
-    } finally {
-      setLoading(false);
-    }
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+    await submit(
+      data,
+      <CreateFollowUpForm
+        className={className}
+        prospekId={prospekId}
+        prospekName={prospekName}
+        onSuccess={onSuccess}
+        {...props}
+      />,
+      "Tambah Follow-Up",
+      prospekName
+        ? `Catat aktivitas follow-up untuk ${prospekName}`
+        : "Catat aktivitas follow-up untuk prospek ini."
+    );
   };
 
   return (
     <form
       id="create-followup-form"
-      onSubmit={form.handleSubmit(onSubmit)}
-      className={cn("flex h-full flex-col")}
+      {...props}
+      onSubmit={form.handleSubmit(handleSubmit)}
+      className={cn("flex h-full flex-col", className)}
     >
       <div className="flex-1 space-y-4 overflow-y-auto">
         <FieldGroup className="px-4 pt-4 pb-6">
@@ -162,9 +180,9 @@ export function CreateFollowUpForm({ prospekId }: CreateFollowUpFormProps) {
       </div>
 
       <div className="bg-background shrink-0 border-t px-4 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? <Loader className="mr-2 animate-spin" /> : null}
-          {loading ? "Memproses..." : "Simpan Follow-Up"}
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? <Loader className="mr-2 animate-spin" /> : null}
+          {isLoading ? "Memproses..." : "Simpan Follow-Up"}
         </Button>
       </div>
     </form>
