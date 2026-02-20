@@ -25,9 +25,7 @@ import {
 } from "@/components/ui/select";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { KategoriProspek, TipePembayaran } from "@/lib/generated/prisma/enums";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+import { DatePicker } from "@/components/ui/date-picker";
 import { createSearchHandler, toOptions } from "@/lib/search-utils";
 import { useFormSubmission } from "@/hooks/use-form-submission";
 
@@ -356,35 +354,11 @@ export function EditProspekForm({
                       Tanggal Perkiraan Beli (Opsional)
                     </FieldLabel>
 
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {selectedDate ? format(selectedDate, "PPP") : <span>Pilih Tanggal</span>}
-                        </Button>
-                      </PopoverTrigger>
-
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={(date) => {
-                            if (!date) {
-                              field.onChange(undefined);
-                              return;
-                            }
-                            field.onChange(date);
-                          }}
-                          defaultMonth={selectedDate}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <DatePicker
+                      value={selectedDate}
+                      onChange={(date) => field.onChange(date)}
+                      placeholder="Pilih Tanggal"
+                    />
 
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
