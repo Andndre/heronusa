@@ -161,6 +161,30 @@ async function fetchProspekData(
           }
           break;
         }
+        case "createdAt": {
+          console.log("Filtering by createdAt with value:", JSON.stringify(value));
+          // Date range filter: format "from,to" (ISO dates)
+          const [fromStr, toStr] = value.split(",");
+          if (fromStr && toStr) {
+            const fromDate = new Date(fromStr);
+            const toDate = new Date(toStr);
+            // Set end date to end of day
+            toDate.setHours(23, 59, 59, 999);
+
+            if (!isNaN(fromDate.getTime()) && !isNaN(toDate.getTime())) {
+              filterClause.createdAt = {
+                gte: fromDate,
+                lte: toDate,
+              };
+            }
+          } else if (fromStr) {
+            const fromDate = new Date(fromStr);
+            if (!isNaN(fromDate.getTime())) {
+              filterClause.createdAt = { gte: fromDate };
+            }
+          }
+          break;
+        }
       }
     });
   }

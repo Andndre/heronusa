@@ -71,7 +71,9 @@ export const getColumns = (): ColumnDef<Prospek>[] => [
     accessorKey: "createdAt",
     header: createSortableHeader<Prospek>("Tanggal Dibuat"),
     meta: {
-      filterable: false,
+      filterPlaceholder: "Pilih rentang tanggal",
+      filterable: true,
+      filterType: "date-range",
     },
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));

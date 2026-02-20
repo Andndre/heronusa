@@ -18,7 +18,7 @@ export const KATEGORI_PROSPEK_VARIANTS: Record<string, BadgeProps["variant"]> = 
 export type ColumnFilterMeta = {
   filterPlaceholder?: string;
   filterable?: boolean;
-  filterType?: "text" | "select";
+  filterType?: "text" | "select" | "date-range";
   filterOptions?: Array<{ label: string; value: string }>;
 };
 

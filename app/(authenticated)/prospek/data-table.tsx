@@ -20,6 +20,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { DateRangeFilter } from "@/components/date-range-filter";
+import { type DateRange } from "react-day-picker";
 import { Fragment, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Loader2, Search } from "lucide-react";
@@ -109,8 +111,12 @@ export function DataTable<TData, TValue>({
     searchParams.forEach((value, key) => {
       const match = key.match(/filter\[(.*)\]/);
       if (match) {
+        const filterId = match[1];
+
+        // For date-range filter, keep the ISO string format
+        // For other filters, keep the value as-is
         filters.push({
-          id: match[1],
+          id: filterId,
           value: value,
         });
       }
@@ -127,6 +133,7 @@ export function DataTable<TData, TValue>({
 
       columnFilters.forEach((filter) => {
         if (filter.value) {
+          // DateRange is already stored as ISO string "from,to" from onChange
           filters[filter.id] = filter.value as string;
         }
       });
@@ -330,6 +337,18 @@ export function DataTable<TData, TValue>({
                       const placeholder = meta?.filterPlaceholder || `Cari ${header.id}...`;
                       const filterValue = (header.column.getFilterValue() as string) ?? "";
 
+                      // For date-range, parse the ISO string back to DateRange object
+                      let dateRangeValue: DateRange | undefined = undefined;
+                      if (filterType === "date-range" && filterValue) {
+                        const [fromStr, toStr] = filterValue.split(",");
+                        if (fromStr) {
+                          dateRangeValue = {
+                            from: new Date(fromStr),
+                            to: toStr ? new Date(toStr) : undefined,
+                          };
+                        }
+                      }
+
                       return (
                         <TableHead key={`${header.id}-filter`}>
                           {showFilter ? (
@@ -355,6 +374,21 @@ export function DataTable<TData, TValue>({
                                   ))}
                                 </SelectContent>
                               </Select>
+                            ) : filterType === "date-range" ? (
+                              <DateRangeFilter
+                                value={dateRangeValue}
+                                onChange={(range) => {
+                                  // Convert DateRange to string format "from,to" for URL
+                                  if (range && range.from) {
+                                    const fromStr = range.from.toISOString();
+                                    const toStr = range.to ? range.to.toISOString() : "";
+                                    header.column.setFilterValue(`${fromStr},${toStr}`);
+                                  } else {
+                                    header.column.setFilterValue(undefined);
+                                  }
+                                }}
+                                placeholder={placeholder}
+                              />
                             ) : (
                               <Input
                                 placeholder={placeholder}
