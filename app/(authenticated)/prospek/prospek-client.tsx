@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useDeferredValue } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getDropdownData } from "@/server/prospek";
@@ -39,14 +39,9 @@ export function ProspekClientComponent({
   const { pushSidebar, popSidebar, sidebarStack, replaceTopSidebar, hasPendingSubmissions } =
     useRightSidebar();
   const [selectedProspek, setSelectedProspek] = useState<Prospek | null>(null);
-  // Defer the selected prospek to prevent rapid updates during spam clicks
-  // React will batch updates and only use the deferred value when it's stable
-  const deferredSelectedProspek = useDeferredValue(selectedProspek);
   const [shouldFocusSearch, setShouldFocusSearch] = useState(false);
 
   const handleSelectRow = useCallback((row: Prospek) => {
-    // Debounce row selection to prevent rate limiting
-    // Only update if different row
     setSelectedProspek((prev) => {
       if (prev?.id === row.id) {
         return prev; // Same row, don't update
@@ -90,8 +85,7 @@ export function ProspekClientComponent({
 
   // Sync sidebar content when selectedProspek changes and the top sidebar is showing detail
   useEffect(() => {
-    // Use deferred value to prevent rapid updates during spam clicks
-    const prospekToUpdate = deferredSelectedProspek;
+    const prospekToUpdate = selectedProspek;
     if (!prospekToUpdate) return;
 
     const topSidebar = sidebarStack[sidebarStack.length - 1];
@@ -124,7 +118,7 @@ export function ProspekClientComponent({
         }
       }
     }
-  }, [deferredSelectedProspek, sidebarStack, hasPendingSubmissions, replaceTopSidebar]);
+  }, [selectedProspek, sidebarStack, hasPendingSubmissions, replaceTopSidebar]);
 
   const handleAdd = useCallback(() => {
     // If there's already a sidebar open, replace it (unless there's a pending submission)
