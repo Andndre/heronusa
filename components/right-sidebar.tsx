@@ -59,7 +59,7 @@ function RightSidebarDesktop({ sidebarStack, onClose }: RightSidebarProps) {
           >
             <div className="flex h-full flex-col">
               {/* Header */}
-              <div className="h-16 shrink-0 border-b px-4">
+              <div className="h-20 shrink-0 border-b px-4">
                 <div className="flex h-full items-center justify-between py-2">
                   <div className="min-w-0 flex-1">
                     <h2 className="truncate text-lg leading-none font-semibold">{item.title}</h2>
