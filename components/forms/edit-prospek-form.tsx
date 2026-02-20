@@ -6,9 +6,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
 import z from "zod";
 import {
   updateProspek,
@@ -31,6 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { createSearchHandler, toOptions } from "@/lib/search-utils";
+import { useFormSubmission } from "@/hooks/use-form-submission";
 
 const formSchema = z.object({
   nama_konsumen: z.string().min(3, "Nama minimal 3 karakter"),
@@ -56,6 +55,7 @@ export type EditProspekFormProps = {
   warnas?: Array<{ id: string; warna: string }>;
   subSumberProspek?: Array<{ id: string; nama_subsumber: string }>;
   kelurahans?: Array<{ id: string; nama_kelurahan: string }>;
+  onSuccess?: () => void; // Callback for data refresh
 };
 
 export function EditProspekForm({
@@ -65,10 +65,9 @@ export function EditProspekForm({
   warnas: initialWarnas = [],
   subSumberProspek: initialSubSumbers = [],
   kelurahans: initialKelurahans = [],
+  onSuccess,
   ...props
 }: React.ComponentProps<"form"> & EditProspekFormProps) {
-  const [loading, setLoading] = useState(false);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -88,10 +87,8 @@ export function EditProspekForm({
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    setLoading(true);
-
-    try {
+  const { submit, isLoading } = useFormSubmission({
+    onSubmit: async (data) => {
       const result = await updateProspek(prospek.id, {
         nama_konsumen: data.nama_konsumen,
         hp1: data.hp1,
@@ -115,26 +112,40 @@ export function EditProspekForm({
       });
 
       if (!result) {
-        toast.error("Gagal memperbarui prospek");
-        return;
+        throw new Error("Gagal memperbarui prospek");
       }
+    },
+    onSuccess: () => {
+      onSuccess?.(); // Call parent's success callback for data refresh
+    },
+    successMessage: "Prospek berhasil diperbarui!",
+  });
 
-      toast.success("Prospek berhasil diperbarui!");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Terjadi kesalahan");
-    } finally {
-      setLoading(false);
-    }
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+    await submit(
+      data,
+      <EditProspekForm
+        className={className}
+        prospek={prospek}
+        models={initialModels}
+        warnas={initialWarnas}
+        subSumberProspek={initialSubSumbers}
+        kelurahans={initialKelurahans}
+        {...props}
+      />,
+      `Edit Prospek: ${prospek.nama_konsumen}`,
+      "Perbarui informasi prospek."
+    );
   };
 
   return (
     <form
       id="edit-prospek-form"
       {...props}
-      onSubmit={form.handleSubmit(onSubmit)}
-      className={cn("flex min-h-full flex-col", className)}
+      onSubmit={form.handleSubmit(handleSubmit)}
+      className={cn("flex h-full flex-col", className)}
     >
-      <div className="flex-1 space-y-4">
+      <div className="-mx-4 flex-1 space-y-4 overflow-y-auto px-4">
         <FieldGroup>
           <div className="space-y-3">
             <Controller
@@ -384,10 +395,10 @@ export function EditProspekForm({
         </FieldGroup>
       </div>
 
-      <div className="bg-background sticky bottom-0 z-10 -mx-4 mt-6 border-t px-4 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? <Loader className="mr-2 animate-spin" /> : null}
-          {loading ? "Memproses..." : "Simpan Perubahan"}
+      <div className="bg-background shrink-0 border-t px-4 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? <Loader className="mr-2 animate-spin" /> : null}
+          {isLoading ? "Memproses..." : "Simpan Perubahan"}
         </Button>
       </div>
     </form>

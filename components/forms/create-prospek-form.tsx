@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
 import z from "zod";
 import {
   createProspek,
@@ -30,6 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { createSearchHandler, toOptions } from "@/lib/search-utils";
+import { useFormSubmission } from "@/hooks/use-form-submission";
 
 const formSchema = z.object({
   nama_konsumen: z.string().min(3, "Nama minimal 3 karakter"),
@@ -55,6 +55,7 @@ export type CreateProspekFormProps = {
   warnas?: Array<{ id: string; warna: string }>;
   subSumberProspek?: Array<{ id: string; nama_subsumber: string }>;
   kelurahans?: Array<{ id: string; nama_kelurahan: string }>;
+  onSuccess?: () => void; // Callback for data refresh
 };
 
 export function CreateProspekForm({
@@ -64,9 +65,9 @@ export function CreateProspekForm({
   warnas: initialWarnas = [],
   subSumberProspek: initialSubSumbers = [],
   kelurahans: initialKelurahans = [],
+  onSuccess,
   ...props
 }: React.ComponentProps<"form"> & CreateProspekFormProps) {
-  const [loading, setLoading] = useState(false);
   const [firstInputEl, setFirstInputEl] = useState<HTMLInputElement | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -86,20 +87,8 @@ export function CreateProspekForm({
     },
   });
 
-  // Auto focus to first input when form mounts
-  useEffect(() => {
-    // Small delay to ensure the sidebar animation is complete
-    const timer = setTimeout(() => {
-      firstInputEl?.focus();
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [firstInputEl]);
-
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    setLoading(true);
-
-    try {
+  const { submit, isLoading } = useFormSubmission({
+    onSubmit: async (data) => {
       const result = await createProspek({
         nama_konsumen: data.nama_konsumen,
         hp1: data.hp1,
@@ -123,27 +112,51 @@ export function CreateProspekForm({
       });
 
       if (!result) {
-        toast.error("Gagal membuat prospek");
-        return;
+        throw new Error("Gagal membuat prospek");
       }
-
-      toast.success("Prospek berhasil dibuat!");
+    },
+    onSuccess: () => {
       form.reset();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Terjadi kesalahan");
-    } finally {
-      setLoading(false);
-    }
+      onSuccess?.(); // Call parent's success callback for data refresh
+    },
+    successMessage: "Prospek berhasil dibuat!",
+  });
+
+  // Auto focus to first input when form mounts
+  useEffect(() => {
+    // Small delay to ensure the sidebar animation is complete
+    const timer = setTimeout(() => {
+      firstInputEl?.focus();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [firstInputEl]);
+
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+    await submit(
+      data,
+      <CreateProspekForm
+        className={className}
+        initialData={initialData}
+        models={initialModels}
+        warnas={initialWarnas}
+        subSumberProspek={initialSubSumbers}
+        kelurahans={initialKelurahans}
+        {...props}
+      />,
+      "Tambah Prospek",
+      "Isi form untuk menambahkan prospek baru."
+    );
   };
 
   return (
     <form
       id="create-prospek-form"
       {...props}
-      onSubmit={form.handleSubmit(onSubmit)}
-      className={cn("flex min-h-full flex-col", className)}
+      onSubmit={form.handleSubmit(handleSubmit)}
+      className={cn("flex h-full flex-col", className)}
     >
-      <div className="flex-1 space-y-4">
+      <div className="-mx-4 flex-1 space-y-4 overflow-y-auto px-4">
         <FieldGroup>
           <div className="space-y-3">
             <Controller
@@ -397,10 +410,10 @@ export function CreateProspekForm({
         </FieldGroup>
       </div>
 
-      <div className="bg-background sticky bottom-0 z-10 -mx-4 mt-6 border-t px-4 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? <Loader className="mr-2 animate-spin" /> : null}
-          {loading ? "Memproses..." : "Buat Prospek"}
+      <div className="bg-background shrink-0 border-t px-4 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? <Loader className="mr-2 animate-spin" /> : null}
+          {isLoading ? "Memproses..." : "Buat Prospek"}
         </Button>
       </div>
     </form>
