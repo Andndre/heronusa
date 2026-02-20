@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useDeferredValue } from "react";
+import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getDropdownData } from "@/server/prospek";
 import { getColumns } from "./columns";
@@ -35,83 +36,203 @@ export function ProspekClientComponent({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setContent, setTitle, setDescription, setOpen, open, view, setView } = useRightSidebar();
+  const { pushSidebar, popSidebar, sidebarStack, replaceTopSidebar, hasPendingSubmissions } =
+    useRightSidebar();
   const [selectedProspek, setSelectedProspek] = useState<Prospek | null>(null);
+  // Defer the selected prospek to prevent rapid updates during spam clicks
+  // React will batch updates and only use the deferred value when it's stable
+  const deferredSelectedProspek = useDeferredValue(selectedProspek);
   const [shouldFocusSearch, setShouldFocusSearch] = useState(false);
 
   const handleSelectRow = useCallback((row: Prospek) => {
-    setSelectedProspek(row);
+    // Debounce row selection to prevent rate limiting
+    // Only update if different row
+    setSelectedProspek((prev) => {
+      if (prev?.id === row.id) {
+        return prev; // Same row, don't update
+      }
+      return row;
+    });
   }, []);
 
   const handleShowDetail = useCallback(
     (row: Prospek) => {
-      if (open && view === "detail" && row.id === selectedProspek?.id) {
-        setOpen(false);
+      // Check if the top sidebar is already showing this prospek's detail
+      // We use the key prop to identify
+      const topSidebar = sidebarStack[sidebarStack.length - 1];
+      const isAlreadyShowing =
+        React.isValidElement(topSidebar?.content) && topSidebar.content.key === row.id;
+
+      if (isAlreadyShowing) {
+        // Close the topmost sidebar
+        popSidebar();
         return;
       }
 
       setSelectedProspek(row);
-      setTitle("Detail Prospek");
-      setDescription("Informasi lengkap tentang prospek yang dipilih.");
-      setView("detail");
-      setOpen(true);
+      // If there's already a sidebar open, replace it (unless there's a pending submission)
+      if (sidebarStack.length > 0 && !hasPendingSubmissions) {
+        replaceTopSidebar({
+          title: "Detail Prospek",
+          description: "Informasi lengkap tentang prospek yang dipilih.",
+          content: <RowDetail key={row.id} prospekId={row.id} prospekData={row} />,
+        });
+      } else {
+        pushSidebar({
+          title: "Detail Prospek",
+          description: "Informasi lengkap tentang prospek yang dipilih.",
+          content: <RowDetail key={row.id} prospekId={row.id} prospekData={row} />,
+        });
+      }
     },
-    [open, view, setOpen, setTitle, setDescription, setView, selectedProspek?.id]
+    [sidebarStack, popSidebar, pushSidebar, replaceTopSidebar, hasPendingSubmissions]
   );
 
-  // Sync sidebar content when selectedProspek changes and view is detail
+  // Sync sidebar content when selectedProspek changes and the top sidebar is showing detail
   useEffect(() => {
-    if (open && view === "detail" && selectedProspek) {
-      setContent(<RowDetail key={selectedProspek.id} prospekId={selectedProspek.id} />);
+    // Use deferred value to prevent rapid updates during spam clicks
+    const prospekToUpdate = deferredSelectedProspek;
+    if (!prospekToUpdate) return;
+
+    const topSidebar = sidebarStack[sidebarStack.length - 1];
+    if (!topSidebar) return;
+
+    // Check if top sidebar is a detail sidebar by checking the title
+    const isDetailSidebar = topSidebar.title === "Detail Prospek";
+
+    // Only update if the top sidebar is detail AND it's showing a different prospek
+    if (isDetailSidebar && !hasPendingSubmissions) {
+      // Try to extract prospekId from the content element
+      if (React.isValidElement(topSidebar.content)) {
+        const content = topSidebar.content;
+        const props = content.props as { prospekId?: string } | undefined;
+        const currentProspekId = props?.prospekId;
+
+        if (currentProspekId && currentProspekId !== prospekToUpdate.id) {
+          // Replace with new prospek detail (pass full data to avoid refetch)
+          replaceTopSidebar({
+            title: "Detail Prospek",
+            description: "Informasi lengkap tentang prospek yang dipilih.",
+            content: (
+              <RowDetail
+                key={prospekToUpdate.id}
+                prospekId={prospekToUpdate.id}
+                prospekData={prospekToUpdate}
+              />
+            ),
+          });
+        }
+      }
     }
-  }, [selectedProspek?.id, open, view, setContent, selectedProspek]);
+  }, [deferredSelectedProspek, sidebarStack, hasPendingSubmissions, replaceTopSidebar]);
 
   const handleAdd = useCallback(() => {
-    setContent(
-      <CreateProspekForm
-        models={dropdownData.models}
-        warnas={dropdownData.warnas}
-        subSumberProspek={dropdownData.subSumberProspek}
-        kelurahans={dropdownData.kelurahans}
-      />
-    );
-    setTitle("Tambah Prospek");
-    setDescription("Isi form untuk menambahkan prospek baru.");
-    setView("form");
-    setOpen(true);
-  }, [dropdownData, setContent, setTitle, setDescription, setView, setOpen]);
+    // If there's already a sidebar open, replace it (unless there's a pending submission)
+    if (sidebarStack.length > 0 && !hasPendingSubmissions) {
+      replaceTopSidebar({
+        title: "Tambah Prospek",
+        description: "Isi form untuk menambahkan prospek baru.",
+        content: (
+          <CreateProspekForm
+            models={dropdownData.models}
+            warnas={dropdownData.warnas}
+            subSumberProspek={dropdownData.subSumberProspek}
+            kelurahans={dropdownData.kelurahans}
+            onSuccess={() => router.refresh()}
+          />
+        ),
+      });
+    } else {
+      pushSidebar({
+        title: "Tambah Prospek",
+        description: "Isi form untuk menambahkan prospek baru.",
+        content: (
+          <CreateProspekForm
+            models={dropdownData.models}
+            warnas={dropdownData.warnas}
+            subSumberProspek={dropdownData.subSumberProspek}
+            kelurahans={dropdownData.kelurahans}
+            onSuccess={() => router.refresh()}
+          />
+        ),
+      });
+    }
+  }, [
+    dropdownData,
+    pushSidebar,
+    replaceTopSidebar,
+    router,
+    sidebarStack.length,
+    hasPendingSubmissions,
+  ]);
 
   const handleEdit = useCallback(
     (row: Prospek) => {
       setSelectedProspek(row);
-      setContent(
-        <EditProspekForm
-          key={row.id}
-          prospek={row}
-          models={dropdownData.models}
-          warnas={dropdownData.warnas}
-          subSumberProspek={dropdownData.subSumberProspek}
-          kelurahans={dropdownData.kelurahans}
-        />
-      );
-      setTitle(`Edit Prospek: ${row.nama_konsumen}`);
-      setDescription("Perbarui informasi prospek.");
-      setView("form");
-      setOpen(true);
+      // If there's already a sidebar open, replace it (unless there's a pending submission)
+      if (sidebarStack.length > 0 && !hasPendingSubmissions) {
+        replaceTopSidebar({
+          title: `Edit Prospek: ${row.nama_konsumen}`,
+          description: "Perbarui informasi prospek.",
+          content: (
+            <EditProspekForm
+              key={row.id}
+              prospek={row}
+              models={dropdownData.models}
+              warnas={dropdownData.warnas}
+              subSumberProspek={dropdownData.subSumberProspek}
+              kelurahans={dropdownData.kelurahans}
+              onSuccess={() => router.refresh()}
+            />
+          ),
+        });
+      } else {
+        pushSidebar({
+          title: `Edit Prospek: ${row.nama_konsumen}`,
+          description: "Perbarui informasi prospek.",
+          content: (
+            <EditProspekForm
+              key={row.id}
+              prospek={row}
+              models={dropdownData.models}
+              warnas={dropdownData.warnas}
+              subSumberProspek={dropdownData.subSumberProspek}
+              kelurahans={dropdownData.kelurahans}
+              onSuccess={() => router.refresh()}
+            />
+          ),
+        });
+      }
     },
-    [dropdownData, setContent, setTitle, setDescription, setView, setOpen]
+    [
+      dropdownData,
+      pushSidebar,
+      replaceTopSidebar,
+      router,
+      sidebarStack.length,
+      hasPendingSubmissions,
+    ]
   );
 
   const handleAddFollowUp = useCallback(
     (row: Prospek) => {
       setSelectedProspek(row);
-      setContent(<CreateFollowUpForm key={row.id} prospekId={row.id} />);
-      setTitle("Tambah Follow-Up");
-      setDescription("Catat aktivitas follow-up untuk prospek ini.");
-      setView("form");
-      setOpen(true);
+      // If there's already a sidebar open, replace it (unless there's a pending submission)
+      if (sidebarStack.length > 0 && !hasPendingSubmissions) {
+        replaceTopSidebar({
+          title: "Tambah Follow-Up",
+          description: "Catat aktivitas follow-up untuk prospek ini.",
+          content: <CreateFollowUpForm key={row.id} prospekId={row.id} />,
+        });
+      } else {
+        pushSidebar({
+          title: "Tambah Follow-Up",
+          description: "Catat aktivitas follow-up untuk prospek ini.",
+          content: <CreateFollowUpForm key={row.id} prospekId={row.id} />,
+        });
+      }
     },
-    [setContent, setTitle, setDescription, setView, setOpen]
+    [pushSidebar, replaceTopSidebar, sidebarStack.length, hasPendingSubmissions]
   );
 
   const columns = useMemo(() => getColumns(), []);
@@ -137,14 +258,6 @@ export function ProspekClientComponent({
       return () => clearTimeout(timer);
     }
   }, [shouldFocusSearch]);
-
-  // Reset sidebar when unmounting/navigating away
-  useEffect(() => {
-    return () => {
-      setContent(null);
-      setOpen(false);
-    };
-  }, [setContent, setOpen]);
 
   return (
     <div className="space-y-4">
