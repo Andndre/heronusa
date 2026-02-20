@@ -87,7 +87,7 @@ export function CreateProspekForm({
     },
   });
 
-  const { submit, isLoading } = useFormSubmission({
+  const { submit, isLoading } = useFormSubmission<z.infer<typeof formSchema>>({
     onSubmit: async (data) => {
       const result = await createProspek({
         nama_konsumen: data.nama_konsumen,

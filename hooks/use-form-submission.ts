@@ -4,7 +4,7 @@ import { useState, useCallback, ReactNode } from "react";
 import { toast } from "sonner";
 import { useRightSidebar } from "@/components/sidebar-context";
 
-export interface UseFormSubmissionOptions<T> {
+export interface UseFormSubmissionOptions<T = object> {
   onSubmit: (data: T) => Promise<void>;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
@@ -12,7 +12,7 @@ export interface UseFormSubmissionOptions<T> {
   successMessage?: string; // Custom success message, set to empty string to disable toast
 }
 
-export function useFormSubmission<T extends Record<string, unknown>>({
+export function useFormSubmission<T = object>({
   onSubmit,
   onSuccess,
   onError,
