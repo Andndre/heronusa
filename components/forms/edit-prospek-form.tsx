@@ -147,7 +147,7 @@ export function EditProspekForm({
     >
       <div className="-mx-4 flex-1 space-y-4 overflow-y-auto px-4">
         <FieldGroup>
-          <div className="space-y-3">
+          <div className="space-y-3 pb-6">
             <Controller
               name="nama_konsumen"
               control={form.control}
