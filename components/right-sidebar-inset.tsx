@@ -14,7 +14,8 @@ export function RightSidebarAwareInset({ children, className = "" }: RightSideba
   const isMobile = useIsMobile();
 
   // Hanya beri margin di desktop, mobile full width tidak perlu margin
-  const marginClass = isMobile ? "mr-0" : open ? "mr-[18rem]" : "mr-0";
+  // Sidebar width is 20rem (2xs)
+  const marginClass = isMobile ? "mr-0" : open ? "mr-[20rem]" : "mr-0";
 
   return (
     <div className={`transition-all duration-200 ease-in-out ${marginClass} ${className}`}>

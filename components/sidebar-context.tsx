@@ -2,16 +2,38 @@
 
 import { createContext, useContext, ReactNode } from "react";
 
-interface RightSidebarContextProps {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  content: ReactNode | null;
-  setContent: (content: ReactNode | null) => void;
+interface SidebarItem {
+  id: string;
   title: string;
-  setTitle: (title: string) => void;
   description: string;
-  setDescription: (description: string) => void;
+  content: ReactNode | null;
+}
+
+interface RightSidebarContextProps {
+  // Stack-based state
+  sidebarStack: SidebarItem[];
+
+  // Stack operations
+  pushSidebar: (item: Omit<SidebarItem, "id">) => string; // Returns ID
+  popSidebar: () => void;
+  closeSidebar: (id: string) => void;
+  replaceTopSidebar: (item: Omit<SidebarItem, "id">) => void; // Replace top of stack
+
+  // Pending submission tracking
+  hasPendingSubmissions: boolean;
+  markPendingSubmission: (id: string) => void;
+  clearPendingSubmission: (id: string) => void;
+
+  // Convenience (for backward compatibility)
+  open: boolean;
+  content: ReactNode | null;
+  title: string;
+  description: string;
   view: string;
+  setOpen: (open: boolean) => void;
+  setContent: (content: ReactNode | null) => void;
+  setTitle: (title: string) => void;
+  setDescription: (description: string) => void;
   setView: (view: string) => void;
 }
 
